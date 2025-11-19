@@ -1,35 +1,49 @@
-import {useState} from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import Cell from "./Cell.tsx";
+import { useRef, useState } from "react";
+import { initialBoard } from "./constants/board.ts";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [board, setBoard] = useState(initialBoard);
+  const locationRef = useRef<[number, number][]>([]);
+
+  const move = (row: number, col: number) => {
+    locationRef.current = [...locationRef.current, [row, col]];
+
+    if (locationRef.current.length !== 2) return;
+
+    const [prevRow, prevCol] = locationRef.current[0];
+    const [nextRow, nextCol] = locationRef.current[1];
+    const newBoard = [...board];
+
+    // TODO: 위치 바꾸는 유틸 함수 제작하자
+    [newBoard[prevRow][prevCol], newBoard[nextRow][nextCol]] = [
+      newBoard[nextRow][nextCol],
+      newBoard[prevRow][prevCol],
+    ];
+    setBoard(newBoard);
+
+    locationRef.current = [];
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo"/>
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo"/>
-        </a>
+    <div>
+      <div className="m-auto w-fit border border-blue-200">
+        {board.map((row, rowIndex) => (
+          <div className="flex" key={rowIndex}>
+            {row.map((square, colIndex) => (
+              <Cell
+                move={move}
+                square={square}
+                rowIndex={rowIndex}
+                colIndex={colIndex}
+                key={colIndex}
+              />
+            ))}
+          </div>
+        ))}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;
