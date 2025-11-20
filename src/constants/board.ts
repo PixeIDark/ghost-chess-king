@@ -1,5 +1,5 @@
-type PieceType = "pawn" | "rook" | "knight" | "bishop" | "queen" | "king";
-type Color = "white" | "black";
+export type PieceType = "pawn" | "rook" | "knight" | "bishop" | "queen" | "king";
+export type Color = "white" | "black";
 
 export interface Piece {
   type: PieceType;

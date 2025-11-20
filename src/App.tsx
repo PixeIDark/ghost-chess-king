@@ -1,48 +1,24 @@
-import Cell from "./Cell.tsx";
-import { useRef, useState } from "react";
-import { initialBoard } from "./constants/board.ts";
+import { useState } from "react";
+import { type Board, initialBoard } from "./constants/board.ts";
+import ColorSelector from "./components/ColorSelector.tsx";
+import { ChessBoard } from "./components/ChessBoard";
+import { useAIMove } from "./hooks/useAiMove.ts";
 
 function App() {
-  const [board, setBoard] = useState(initialBoard);
-  const locationRef = useRef<[number, number][]>([]);
-
-  const move = (row: number, col: number) => {
-    locationRef.current = [...locationRef.current, [row, col]];
-
-    if (locationRef.current.length !== 2) return;
-
-    const [prevRow, prevCol] = locationRef.current[0];
-    const [nextRow, nextCol] = locationRef.current[1];
-    const newBoard = [...board];
-
-    // TODO: 위치 바꾸는 유틸 함수 제작하자
-    [newBoard[prevRow][prevCol], newBoard[nextRow][nextCol]] = [
-      newBoard[nextRow][nextCol],
-      newBoard[prevRow][prevCol],
-    ];
+  const [playerColor, setPlayerColor] = useState<"white" | "black" | null>(null);
+  const [board, setBoard] = useState<Board>(initialBoard);
+  const [currentTurn, setCurrentTurn] = useState<"white" | "black">("white");
+  const handleBoardChange = (newBoard: Board) => {
     setBoard(newBoard);
-
-    locationRef.current = [];
+    setCurrentTurn(currentTurn === "white" ? "black" : "white");
   };
 
+  useAIMove(board, currentTurn, playerColor, handleBoardChange);
+
+  if (playerColor === null) return <ColorSelector onColorSelect={setPlayerColor} />;
+
   return (
-    <div>
-      <div className="m-auto w-fit border border-blue-200">
-        {board.map((row, rowIndex) => (
-          <div className="flex" key={rowIndex}>
-            {row.map((square, colIndex) => (
-              <Cell
-                move={move}
-                square={square}
-                rowIndex={rowIndex}
-                colIndex={colIndex}
-                key={colIndex}
-              />
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
+    <ChessBoard board={board} onBoardChange={handleBoardChange} playerColor={playerColor} currentTurn={currentTurn} />
   );
 }
 
