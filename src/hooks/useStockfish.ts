@@ -6,7 +6,7 @@ export const useStockfish = () => {
   const promiseRef = useRef<{
     resolve?: (move: string) => void;
     reject?: (error: Error) => void;
-    timeout?: NodeJS.Timeout;
+    timeout?: ReturnType<typeof setTimeout>;
   }>({});
 
   useEffect(() => {
