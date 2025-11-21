@@ -28,5 +28,5 @@ export const useAIMove = (
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [currentTurn, board, playerColor, isReady, getBestMove, onBoardChange]);
+  }, [currentTurn, isReady, playerColor]);
 };
