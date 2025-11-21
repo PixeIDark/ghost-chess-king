@@ -1,19 +1,14 @@
 import type { Board } from "../../constants/board.ts";
+import { isKingInCheck } from "../../utils/gameState.ts";
 
-type MoveAdder = (
-  board: Board,
-  row: number,
-  col: number,
-  color: "white" | "black",
-  moves: Array<[number, number]>
-) => void;
+type MoveAdder = (board: Board, row: number, col: number, color: "white" | "black", moves: [number, number][]) => void;
 
 const addLinearMoves = (
   board: Board,
   row: number,
   col: number,
   color: "white" | "black",
-  moves: Array<[number, number]>,
+  moves: [number, number][],
   directions: [number, number][],
   maxDistance = 8
 ) => {
@@ -131,7 +126,22 @@ const moveAdders: Record<string, MoveAdder> = {
   king: addKingMoves,
 };
 
-export const getValidMoves = (board: Board, row: number, col: number): Array<[number, number]> => {
+const wouldBeInCheck = (
+  board: Board,
+  fromRow: number,
+  fromCol: number,
+  toRow: number,
+  toCol: number,
+  color: "white" | "black"
+): boolean => {
+  const testBoard = board.map((r) => [...r]);
+  testBoard[toRow][toCol] = testBoard[fromRow][fromCol];
+  testBoard[fromRow][fromCol] = null;
+
+  return isKingInCheck(testBoard, color);
+};
+
+export const getValidMoves = (board: Board, row: number, col: number): [number, number][] => {
   const piece = board[row][col];
   if (!piece) return [];
 
@@ -140,5 +150,5 @@ export const getValidMoves = (board: Board, row: number, col: number): Array<[nu
 
   if (typeof adder === "function") adder(board, row, col, piece.color, validMoves);
 
-  return validMoves;
+  return validMoves.filter(([toRow, toCol]) => !wouldBeInCheck(board, row, col, toRow, toCol, piece.color));
 };
