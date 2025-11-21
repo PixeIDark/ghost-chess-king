@@ -1,24 +1,32 @@
 import { useState } from "react";
-import { type Board, initialBoard } from "./constants/board.ts";
 import ColorSelector from "./components/ColorSelector.tsx";
 import { ChessBoard } from "./components/ChessBoard";
 import { useAIMove } from "./hooks/useAiMove.ts";
+import Timer from "./components/Timer.tsx";
+import { useGameState } from "./hooks/useGameState.ts";
 
 function App() {
   const [playerColor, setPlayerColor] = useState<"white" | "black" | null>(null);
-  const [board, setBoard] = useState<Board>(initialBoard);
-  const [currentTurn, setCurrentTurn] = useState<"white" | "black">("white");
-  const handleBoardChange = (newBoard: Board) => {
-    setBoard(newBoard);
-    setCurrentTurn(currentTurn === "white" ? "black" : "white");
-  };
-
-  useAIMove(board, currentTurn, playerColor, handleBoardChange);
+  const { board, currentTurn, winner, status, whiteTime, blackTime, updateGameState } = useGameState();
+  useAIMove(board, currentTurn, playerColor, updateGameState);
 
   if (playerColor === null) return <ColorSelector onColorSelect={setPlayerColor} />;
 
+  const opponentColor = playerColor === "white" ? "black" : "white";
+  const opponentTime = opponentColor === "white" ? whiteTime : blackTime;
+  const playerTime = playerColor === "white" ? whiteTime : blackTime;
+
   return (
-    <ChessBoard board={board} onBoardChange={handleBoardChange} playerColor={playerColor} currentTurn={currentTurn} />
+    <div className="flex flex-col items-center">
+      <Timer time={opponentTime} player={opponentColor} playerColor={playerColor} />
+      <ChessBoard board={board} updateGameState={updateGameState} playerColor={playerColor} currentTurn={currentTurn} />
+      <Timer time={playerTime} player={playerColor} playerColor={playerColor} />
+      {winner && (
+        <p>
+          승자는... {winner}! {status}!
+        </p>
+      )}
+    </div>
   );
 }
 
