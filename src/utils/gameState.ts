@@ -1,7 +1,7 @@
 import type { Board, Color, Piece } from "../constants/board.ts";
 
 export type GameResult = "white" | "black" | "draw" | null;
-export type GameStatus = "checkmate" | "stalemate" | "check" | "in_progress" | "insufficient_material";
+export type GameStatus = "checkmate" | "stalemate" | "check" | "in_progress" | "insufficient_material" | "timeout";
 
 interface GameState {
   winner: GameResult;
@@ -120,7 +120,7 @@ const isSquareUnderAttack = (board: Board, row: number, col: number, byColor: Co
   return false;
 };
 
-const isKingInCheck = (board: Board, color: Color): boolean => {
+export const isKingInCheck = (board: Board, color: Color): boolean => {
   const kingPos = findKing(board, color);
   if (!kingPos) return false;
 
