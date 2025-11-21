@@ -15,6 +15,8 @@ export const useGameState = () => {
   const { whiteTime, blackTime, addTime } = useGameTimer(currentTurn, onTimeOut);
 
   const updateGameState = (newBoard: Board) => {
+    if (winner !== null) return;
+
     const nextTurn = currentTurn === "white" ? "black" : "white";
     const { winner: nextWinner, status: nextStatus } = getGameState(newBoard, nextTurn);
 
