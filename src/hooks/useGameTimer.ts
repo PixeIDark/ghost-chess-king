@@ -9,7 +9,7 @@ export const useGameTimer = (currentTurn: "white" | "black", onTimeout: (losingC
       if (currentTurn === "white") {
         setWhiteTime((prev) => {
           if (prev - 1 <= 0) {
-            onTimeout("white");
+            onTimeout("black");
             return 0;
           }
           return prev - 1;
@@ -17,7 +17,7 @@ export const useGameTimer = (currentTurn: "white" | "black", onTimeout: (losingC
       } else {
         setBlackTime((prev) => {
           if (prev - 1 <= 0) {
-            onTimeout("black");
+            onTimeout("white");
             return 0;
           }
           return prev - 1;
