@@ -1,5 +1,5 @@
-import type { Board } from "../../constants/board.ts";
-import { isKingInCheck } from "../../utils/gameState.ts";
+import type { Board } from "../../../constants/board.ts";
+import { isKingInCheck } from "../../../utils/gameState.ts";
 
 type MoveAdder = (board: Board, row: number, col: number, color: "white" | "black", moves: [number, number][]) => void;
 

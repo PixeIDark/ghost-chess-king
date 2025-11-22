@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { type Board } from "../constants/board.ts";
 import { useStockfish } from "./useStockfish.ts";
 import { boardToFen } from "../utils/fen.ts";
-import { movePiece } from "../components/ChessBoard/move.ts";
+import { movePiece } from "../components/ChessBoard/utils/move.ts";
 import { parseMove } from "../utils/coordinate.ts";
 
 export const useAIMove = (

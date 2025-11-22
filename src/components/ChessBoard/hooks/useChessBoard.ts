@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { type Board } from "../../constants/board.ts";
-import { getValidMoves } from "./pieceRule.ts";
-import { isSameColor } from "./same.ts";
-import { movePiece } from "./move.ts";
-import { getActualCoords } from "./helper.ts";
+import { type Board } from "../../../constants/board.ts";
+import { getValidMoves } from "../utils/moveRule.ts";
+import { isSameColor } from "../utils/team.ts";
+import { movePiece } from "../utils/move.ts";
+import { getActualCoords } from "../utils/boardView.ts";
 
 export type SelectedSquare = { row: number; col: number } | null;
 

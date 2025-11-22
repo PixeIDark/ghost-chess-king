@@ -1,12 +1,11 @@
-import type { Piece } from "../../constants/board.ts";
+import type { Piece } from "../../../constants/board.ts";
 
 interface SquareProps {
   square: Piece | null;
   onSquareClick: (row: number, col: number) => void;
   rowIndex: number;
   colIndex: number;
-  isSelected: boolean;
-  canMoveSquare: boolean;
+  borderState: "selected" | "movable" | "check" | "none";
 }
 
 const pieceImages = {
@@ -36,15 +35,20 @@ const pieceImages = {
   },
 } as const;
 
-function Square({ square, onSquareClick, rowIndex, colIndex, isSelected, canMoveSquare }: SquareProps) {
+const borderClasses: Record<SquareProps["borderState"], string> = {
+  selected: "border-4 border-blue-500",
+  movable: "border-4 border-green-500",
+  check: "border-4 border-red-500",
+  none: "",
+} as const;
+
+function Square({ square, onSquareClick, rowIndex, colIndex, borderState }: SquareProps) {
   const floorColor = (rowIndex + colIndex) % 2 === 0 ? "bg-amber-800" : "bg-amber-100";
   const piece = square ? pieceImages[square.type][square.color] : null;
-  const selectedSquareBorder = isSelected ? "border-4 border-blue-500" : "";
-  const moveSquareBorder = canMoveSquare ? "border-4 border-green-500" : "";
 
   return (
     <button
-      className={`flex h-14 w-14 cursor-pointer flex-col items-center justify-center text-3xl ${floorColor} ${selectedSquareBorder} ${moveSquareBorder}`}
+      className={`flex h-14 w-14 cursor-pointer flex-col items-center justify-center text-3xl ${floorColor} ${borderClasses[borderState]}`}
       type="button"
       onClick={() => onSquareClick(rowIndex, colIndex)}
     >
