@@ -45,31 +45,35 @@ function App() {
   const isCheck = isKingInCheck(board, currentTurn);
 
   return (
-    <div className="flex flex-col items-center">
-      <Timer time={opponentTime} player={opponentColor} playerColor={playerColor} />
-      <ChessBoard
-        board={board}
-        onUpdateGameState={handleUpdateGameState}
-        playerColor={playerColor}
-        currentTurn={currentTurn}
-        gameMode={gameMode}
-        advice={advice}
-      />
-      <Timer time={playerTime} player={playerColor} playerColor={playerColor} />
-      <RetractButton onLoadBoard={loadPreviousBoard} />
-      {gameMode === "ai" && <Advisor advisors={advisors} onRequestAdvice={handleRequestAdvice} />}
-      {isCheck && (
-        <p>{currentTurn}님이 체크상태입니다! 킹을 움직이거나 다른 기물로 킹을 보호하세요! 또는 위협을 제거하세요!</p>
-      )}
-      {winner && (
-        <div>
-          <p>
-            승자는... {winner}! {status}!
-          </p>
-          <button onClick={resetGame}>다시하기!</button>
-        </div>
-      )}
-      {promotionSquare && <PromotionModal onPromote={handleCompletePromotion} color={currentTurn} />}
+    <div className="flex justify-center gap-8">
+      <div className="flex flex-col items-center">
+        <Timer time={opponentTime} player={opponentColor} playerColor={playerColor} />
+        <ChessBoard
+          board={board}
+          onUpdateGameState={handleUpdateGameState}
+          playerColor={playerColor}
+          currentTurn={currentTurn}
+          gameMode={gameMode}
+          advice={advice}
+        />
+        <Timer time={playerTime} player={playerColor} playerColor={playerColor} />
+        {isCheck && (
+          <p>{currentTurn}님이 체크상태입니다! 킹을 움직이거나 다른 기물로 킹을 보호하세요! 또는 위협을 제거하세요!</p>
+        )}
+        {winner && (
+          <div>
+            <p>
+              승자는... {winner}! {status}!
+            </p>
+            <button onClick={resetGame}>다시하기!</button>
+          </div>
+        )}
+        {promotionSquare && <PromotionModal onPromote={handleCompletePromotion} color={currentTurn} />}
+      </div>
+      <div className="flex flex-col items-center justify-center gap-4">
+        <RetractButton onLoadBoard={loadPreviousBoard} />
+        {gameMode === "ai" && <Advisor advisors={advisors} onRequestAdvice={handleRequestAdvice} />}
+      </div>
     </div>
   );
 }

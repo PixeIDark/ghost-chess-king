@@ -20,16 +20,16 @@ function Advisor({ advisors, onRequestAdvice }: AdvisorProps) {
 
   return (
     <div className="flex flex-col items-center">
-      <p>조언 받기</p>
-      <div className="flex gap-4">
+      <p>조언</p>
+      <div className="flex flex-col gap-4">
         {advisorsArray.map((advisorsItem) => (
           <button
             onClick={() => onRequestAdvice(advisorsItem)}
             name={advisorsItem}
             key={advisorsItem}
-            className="w-20 cursor-pointer bg-amber-100"
+            className="w-30 cursor-pointer bg-gray-600 p-2 text-white"
           >
-            {advisorsText[advisorsItem]}
+            {advisorsText[advisorsItem] + " 1회 남음"}
           </button>
         ))}
       </div>
