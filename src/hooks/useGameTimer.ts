@@ -1,17 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-const LIMITED_SECONDS = 600;
+const PLAYER_TIME_LIMIT = 600;
 
 export const useGameTimer = (currentTurn: "white" | "black", onTimeout: (losingColor: "white" | "black") => void) => {
-  const [whiteTime, setWhiteTime] = useState(LIMITED_SECONDS);
-  const [blackTime, setBlackTime] = useState(LIMITED_SECONDS);
+  const [whiteTime, setWhiteTime] = useState(PLAYER_TIME_LIMIT);
+  const [blackTime, setBlackTime] = useState(PLAYER_TIME_LIMIT);
+  const intervalRef = useRef<number | null>(null);
+
+  const clearExistingInterval = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  };
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    clearExistingInterval();
+
+    intervalRef.current = setInterval(() => {
       if (currentTurn === "white") {
         setWhiteTime((prev) => {
           if (prev - 1 <= 0) {
-            onTimeout("black");
+            clearExistingInterval();
+            onTimeout("white");
             return 0;
           }
           return prev - 1;
@@ -19,7 +27,8 @@ export const useGameTimer = (currentTurn: "white" | "black", onTimeout: (losingC
       } else {
         setBlackTime((prev) => {
           if (prev - 1 <= 0) {
-            onTimeout("white");
+            clearExistingInterval();
+            onTimeout("black");
             return 0;
           }
           return prev - 1;
@@ -27,7 +36,7 @@ export const useGameTimer = (currentTurn: "white" | "black", onTimeout: (losingC
       }
     }, 1000);
 
-    return () => clearInterval(interval);
+    return clearExistingInterval;
   }, [currentTurn, onTimeout]);
 
   const addTime = (color: "white" | "black") => {
@@ -36,8 +45,9 @@ export const useGameTimer = (currentTurn: "white" | "black", onTimeout: (losingC
   };
 
   const resetTime = () => {
-    setWhiteTime(LIMITED_SECONDS);
-    setBlackTime(LIMITED_SECONDS);
+    clearExistingInterval();
+    setWhiteTime(PLAYER_TIME_LIMIT);
+    setBlackTime(PLAYER_TIME_LIMIT);
   };
 
   return { whiteTime, blackTime, addTime, resetTime };
