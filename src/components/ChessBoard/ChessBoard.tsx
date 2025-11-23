@@ -1,25 +1,26 @@
 import { type Board, type Color } from "../../constants/board.ts";
 import { type SelectedSquare, useChessBoard } from "./hooks/useChessBoard.ts";
-import { getDisplayBoard, isSelectedSquare, isValidMoveSquare } from "./utils/boardView.ts";
+import { getDisplayBoard, isCheckedSquare, isSelectedSquare, isValidMoveSquare } from "./utils/boardView.ts";
 import { Square } from "./Square";
 
 interface ChessBoardProps {
   board: Board;
-  updateGameState: (newBoard: Board) => void;
+  onUpdateGameState: (newBoard: Board) => void;
   playerColor: "white" | "black";
   currentTurn: "white" | "black";
+  gameMode: null | "ai" | "solo";
 }
 
-function ChessBoard({ board, updateGameState, playerColor, currentTurn }: ChessBoardProps) {
+function ChessBoard({ board, onUpdateGameState, playerColor, currentTurn, gameMode }: ChessBoardProps) {
   const { selectedSquare, validMoves, handleSquareClick } = useChessBoard(
     board,
     playerColor,
     currentTurn,
-    updateGameState
+    onUpdateGameState,
+    gameMode
   );
   const displayBoard = getDisplayBoard(board, playerColor);
 
-  // 타입을 최하위 계층에 저장해야함 순환참조
   const getBorderState = (
     row: number,
     col: number,
@@ -29,6 +30,7 @@ function ChessBoard({ board, updateGameState, playerColor, currentTurn }: ChessB
   ) => {
     if (isSelectedSquare(selectedSquare, row, col, playerColor)) return "selected";
     if (isValidMoveSquare(validMoves, row, col, playerColor)) return "movable";
+    if (isCheckedSquare(board, row, col, playerColor)) return "checked";
 
     return "none";
   };

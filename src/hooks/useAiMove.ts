@@ -1,32 +1,44 @@
 import { useEffect } from "react";
-import { type Board } from "../constants/board.ts";
+import { type Board, type PieceType } from "../constants/board.ts";
 import { useStockfish } from "./useStockfish.ts";
 import { boardToFen } from "../utils/fen.ts";
-import { movePiece } from "../components/ChessBoard/utils/move.ts";
+import { movePiece } from "../components/ChessBoard/utils/movePiece.ts";
 import { parseMove } from "../utils/coordinate.ts";
+
+const promotedPieces: Record<string, PieceType> = {
+  q: "queen",
+  r: "rook",
+  b: "bishop",
+  n: "knight",
+};
 
 export const useAIMove = (
   board: Board,
   currentTurn: "white" | "black",
   playerColor: "white" | "black" | null,
+  gameMode: "solo" | "ai" | null,
   onBoardChange: (newBoard: Board) => void
 ) => {
   const { isReady, getBestMove } = useStockfish();
 
   useEffect(() => {
-    if (!isReady || playerColor === null || currentTurn === playerColor) return;
+    if (gameMode !== "ai" || !isReady || playerColor === null || currentTurn === playerColor) return;
 
     const timer = setTimeout(async () => {
       const fen = boardToFen(board, currentTurn);
-      const bestMove = await getBestMove(fen, 15);
+      const bestMove = await getBestMove(fen, 20);
 
-      if (bestMove?.length !== 4) return;
+      if (bestMove.length < 4) return;
 
-      const { fromRow, fromCol, toRow, toCol } = parseMove(bestMove);
+      const moveStr = bestMove.substring(0, 4);
+      const { fromRow, fromCol, toRow, toCol } = parseMove(moveStr);
       const newBoard = movePiece(board, fromRow, fromCol, toRow, toCol);
+
+      if (bestMove.length === 5 && newBoard[toRow][toCol]) newBoard[toRow][toCol]!.type = promotedPieces[bestMove[4]];
+
       onBoardChange(newBoard);
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [currentTurn, isReady, playerColor]);
+  }, [currentTurn, isReady, playerColor, gameMode, board]);
 };

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { type Board } from "../../../constants/board.ts";
-import { getValidMoves } from "../utils/moveRule.ts";
-import { isSameColor } from "../utils/team.ts";
-import { movePiece } from "../utils/move.ts";
+import { movePiece } from "../utils/movePiece.ts";
 import { getActualCoords } from "../utils/boardView.ts";
+import { getValidMoves } from "../../../utils/legalityChecker.ts";
+import { hasFriendlyPiece } from "../../../utils/squareValidator.ts";
 
 export type SelectedSquare = { row: number; col: number } | null;
 
@@ -11,39 +11,59 @@ export const useChessBoard = (
   board: Board,
   playerColor: "white" | "black",
   currentTurn: "white" | "black",
-  updateGameState: (newBoard: Board) => void
+  onUpdateGameState: (newBoard: Board) => void,
+  gameMode: "solo" | "ai" | null
 ) => {
   const [selectedSquare, setSelectedSquare] = useState<SelectedSquare>(null);
   const [validMoves, setValidMoves] = useState<[number, number][]>([]);
 
   const handleSquareClick = (displayRow: number, displayCol: number) => {
-    if (currentTurn !== playerColor) return;
+    if (gameMode === "ai" && currentTurn !== playerColor) return;
 
-    const [actualRow, actualCol] = getActualCoords(displayRow, displayCol, playerColor);
+    const [row, col] = getActualCoords(displayRow, displayCol, playerColor);
 
-    if (selectedSquare === null && board[actualRow][actualCol]?.color === playerColor) {
-      setSelectedSquare({ row: actualRow, col: actualCol });
-      setValidMoves(getValidMoves(board, actualRow, actualCol));
+    const clickedPiece = board[row][col];
+
+    if (!selectedSquare && clickedPiece?.color === currentTurn) {
+      setSelectedSquare({ row, col });
+      setValidMoves(getValidMoves(board, row, col, currentTurn));
       return;
     }
 
-    if (selectedSquare === null) return;
+    if (!selectedSquare) return;
 
     const { row: fromRow, col: fromCol } = selectedSquare;
-    const isValidMove = validMoves.some(([r, c]) => r === actualRow && c === actualCol);
-    const clickedPiece = board[actualRow][actualCol];
     const selectedPiece = board[fromRow][fromCol];
+    const isValidMove = validMoves.some(([r, c]) => r === row && c === col);
+    const isCastling =
+      (selectedPiece?.type === "king" && clickedPiece?.type === "rook") ||
+      (selectedPiece?.type === "rook" && clickedPiece?.type === "king");
 
-    if (isSameColor(clickedPiece, selectedPiece) || !isValidMove) {
+    if (isCastling && isValidMove) {
+      let finalToCol = col;
+
+      if (selectedPiece?.type === "king" && clickedPiece?.type === "rook") {
+        if (col === 7) finalToCol = 6;
+        if (col === 0) finalToCol = 2;
+      }
+
+      const newBoard = movePiece(board, fromRow, fromCol, row, finalToCol);
+      setSelectedSquare(null);
+      setValidMoves([]);
+      onUpdateGameState(newBoard);
+      return;
+    }
+
+    if (hasFriendlyPiece(board, row, col, currentTurn) || !isValidMove) {
       setSelectedSquare(null);
       setValidMoves([]);
       return;
     }
 
-    const newBoard = movePiece(board, fromRow, fromCol, actualRow, actualCol);
+    const newBoard = movePiece(board, fromRow, fromCol, row, col);
     setSelectedSquare(null);
     setValidMoves([]);
-    updateGameState(newBoard);
+    onUpdateGameState(newBoard);
   };
 
   return { selectedSquare, validMoves, handleSquareClick };
