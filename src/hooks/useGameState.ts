@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { type Board, initialBoard } from "../constants/board.ts";
+import {type Board, initialBoard, UNDO_COUNT} from "../constants/board.ts";
 import { type GameResult, type GameStatus, getGameState } from "../utils/gameState.ts";
 import { useGameTimer } from "./useGameTimer.ts";
 
@@ -8,10 +8,12 @@ export const useGameState = () => {
   const [currentTurn, setCurrentTurn] = useState<"white" | "black">("white");
   const [winner, setWinner] = useState<GameResult>(null);
   const [status, setStatus] = useState<GameStatus>("in_progress");
+  const [undoCount, setUndoCount] = useState(UNDO_COUNT);
   const [chessHistory, setChessHistory] = useState<Board[]>([initialBoard]);
 
   const onTimeOut = (losingColor: "white" | "black") => {
-    setWinner(losingColor);
+    const winnerColor = losingColor === "white" ? "black" : "white";
+    setWinner(winnerColor);
     setStatus("timeout");
   };
 
@@ -19,7 +21,7 @@ export const useGameState = () => {
 
   const proceedToNextTurn = (newBoard: Board) => {
     const nextTurn = currentTurn === "white" ? "black" : "white";
-    const { winner: nextWinner, status: nextStatus } = getGameState(newBoard, nextTurn, whiteTime, blackTime);
+    const { winner: nextWinner, status: nextStatus } = getGameState(newBoard, nextTurn);
 
     addTime(currentTurn);
     setChessHistory((prev) => [...prev, newBoard]);
@@ -35,6 +37,7 @@ export const useGameState = () => {
 
     setBoard(chessHistory[previousIndex]);
     setChessHistory(chessHistory.slice(0, -2));
+    setUndoCount((prev) => prev - 1)
   };
 
   const resetGame = (): void => {
@@ -53,6 +56,7 @@ export const useGameState = () => {
     status,
     whiteTime,
     blackTime,
+    undoCount,
     proceedToNextTurn,
     loadPreviousBoard,
     resetGame,

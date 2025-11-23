@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { ADVICE_LIMIT, type Board, type Color } from "../constants/board.ts";
+import {
+  type Board,
+  type Color,
+  HIGH_ADVICE_COUNT,
+  LOW_ADVICE_COUNT,
+  MID_ADVICE_COUNT
+} from "../constants/board.ts";
 import { parseMove } from "../utils/coordinate.ts";
 import { boardToFen } from "../utils/fen.ts";
 import { useStockfish } from "./useStockfish.ts";
@@ -13,8 +19,9 @@ export type Advice = {
 } | null;
 
 export const useAdvice = (playerColor: Color | null, currentTurn: Color, board: Board) => {
-  const [advisors, setAdvisors] = useState({ lowAdvisor: 0, midAdvisor: 0, highAdvisor: 0 });
+  const [advisors, setAdvisors] = useState({ lowAdvisor: LOW_ADVICE_COUNT, midAdvisor: MID_ADVICE_COUNT, highAdvisor: HIGH_ADVICE_COUNT });
   const [advice, setAdvice] = useState<Advice>(null);
+  const [hasReceivedAdvice, setHasReceivedAdvice] = useState(false);
   const { isReady, getBestMove } = useStockfish();
 
   const adviceMap = {
@@ -31,15 +38,16 @@ export const useAdvice = (playerColor: Color | null, currentTurn: Color, board: 
   };
 
   const handleRequestAdvice = async (advisor: keyof typeof adviceMap) => {
-    if (playerColor !== currentTurn) return;
+    if (playerColor !== currentTurn || hasReceivedAdvice) return;
 
     const advisorCount = advisors[advisor];
-    if (advisorCount >= ADVICE_LIMIT) return;
+    if (advisorCount < 1) return;
 
     const moveStr = await adviceMap[advisor]();
     if (!moveStr || moveStr.length < 4) return;
 
-    setAdvisors({ ...advisors, [advisor]: advisorCount + 1 });
+    setAdvisors({ ...advisors, [advisor]: advisorCount - 1 });
+    setHasReceivedAdvice(true);
 
     let { fromRow, fromCol, toRow, toCol } = parseMove(moveStr);
 
@@ -57,6 +65,7 @@ export const useAdvice = (playerColor: Color | null, currentTurn: Color, board: 
 
   const resetAdvice = () => {
     setAdvice(null);
+    setHasReceivedAdvice(false)
   };
 
   return { advice, advisors, handleRequestAdvice, resetAdvice };

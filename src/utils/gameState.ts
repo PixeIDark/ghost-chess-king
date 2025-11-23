@@ -11,17 +11,14 @@ interface GameState {
   reason: string;
 }
 
-export const getGameState = (board: Board, currentTurn: Color, whiteTime: number, blackTime: number): GameState => {
+export const getGameState = (board: Board, currentTurn: Color): GameState => {
   const whiteKingExists = findPiece(board, "white", "king") !== null;
   const blackKingExists = findPiece(board, "black", "king") !== null;
   const isCheck = isKingInCheck(board, currentTurn);
   const hasMove = canPieceMove(board, currentTurn);
-  const currentTime = currentTurn === "white" ? whiteTime : blackTime;
-  const isTimeout = currentTime <= 0;
   let state: GameStatus = "in_progress";
 
-  if (isTimeout) state = "timeout";
-  else if (!whiteKingExists || !blackKingExists) state = "checkmate";
+  if (!whiteKingExists || !blackKingExists) state = "checkmate";
   else if (isCheck && !hasMove) state = "checkmate";
   else if (!isCheck && !hasMove) state = "stalemate";
   else if (isCheck) state = "check";

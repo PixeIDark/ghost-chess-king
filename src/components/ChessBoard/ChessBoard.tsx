@@ -42,7 +42,7 @@ function ChessBoard({ board, onUpdateGameState, playerColor, currentTurn, gameMo
   };
 
   return (
-    <div>
+    <div className="rounded-lg bg-gradient-to-br from-gray-900 to-black p-2">
       <div className="m-auto w-fit">
         {displayBoard.map((row, displayRowIndex) => (
           <div className="flex" key={displayRowIndex}>

@@ -12,12 +12,23 @@ import { type Color, type PieceType } from "./constants/board.ts";
 import Advisor from "./components/Advisor.tsx";
 
 import { useAdvice } from "./hooks/useAdvice.ts";
+import GameResultModal from "./components/GameResultModal.tsx";
 
 function App() {
   const [gameMode, setGameMode] = useState<"solo" | "ai" | null>(null);
   const [playerColor, setPlayerColor] = useState<Color | null>(null);
-  const { board, currentTurn, winner, status, whiteTime, blackTime, proceedToNextTurn, loadPreviousBoard, resetGame } =
-    useGameState();
+  const {
+    board,
+    currentTurn,
+    winner,
+    status,
+    whiteTime,
+    blackTime,
+    undoCount,
+    proceedToNextTurn,
+    loadPreviousBoard,
+    resetGame,
+  } = useGameState();
   const { promotionSquare, checkAndSetPromotion, completePromotion, clearPromotion } = usePromotion();
   const { advice, advisors, handleRequestAdvice, resetAdvice } = useAdvice(playerColor, currentTurn, board);
   useAIMove(board, currentTurn, playerColor, gameMode, proceedToNextTurn);
@@ -45,35 +56,57 @@ function App() {
   const isCheck = isKingInCheck(board, currentTurn);
 
   return (
-    <div className="flex justify-center gap-8">
-      <div className="flex flex-col items-center">
-        <Timer time={opponentTime} player={opponentColor} playerColor={playerColor} />
-        <ChessBoard
-          board={board}
-          onUpdateGameState={handleUpdateGameState}
-          playerColor={playerColor}
-          currentTurn={currentTurn}
-          gameMode={gameMode}
-          advice={advice}
-        />
-        <Timer time={playerTime} player={playerColor} playerColor={playerColor} />
-        {isCheck && (
-          <p>{currentTurn}님이 체크상태입니다! 킹을 움직이거나 다른 기물로 킹을 보호하세요! 또는 위협을 제거하세요!</p>
-        )}
-        {winner && (
-          <div>
-            <p>
-              승자는... {winner}! {status}!
-            </p>
-            <button onClick={resetGame}>다시하기!</button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
+      <div className="mx-auto max-w-7xl">
+        <div className="flex gap-12">
+          <div className="flex flex-1 flex-col items-center">
+            <div className="w-fit rounded-lg border border-gray-700 bg-gray-800 p-6 shadow-2xl">
+              <div className="mb-6">
+                <Timer time={opponentTime} player={opponentColor} playerColor={playerColor} />
+              </div>
+              <ChessBoard
+                board={board}
+                onUpdateGameState={handleUpdateGameState}
+                playerColor={playerColor}
+                currentTurn={currentTurn}
+                gameMode={gameMode}
+                advice={advice}
+              />
+              <div className="mt-6">
+                <Timer time={playerTime} player={playerColor} playerColor={playerColor} />
+              </div>
+              {isCheck && (
+                <div className="mt-6 rounded-lg border border-red-500 bg-red-500/10 p-4 text-center">
+                  <p className="text-sm font-semibold text-red-300">
+                    ⚠️ {currentTurn === "white" ? "화이트" : "블랙"}팀이 체크 상태입니다!
+                  </p>
+                  <p className="mt-1 text-xs text-red-200">킹을 안전한 곳으로 이동하거나 위협을 제거하세요</p>
+                </div>
+              )}
+            </div>
           </div>
-        )}
-        {promotionSquare && <PromotionModal onPromote={handleCompletePromotion} color={currentTurn} />}
+          <div className="flex w-64 flex-col gap-6">
+            <RetractButton undoCount={undoCount} onLoadBoard={loadPreviousBoard} />
+            {gameMode === "ai" && <Advisor advisors={advisors} onRequestAdvice={handleRequestAdvice} />}
+          </div>
+        </div>
       </div>
-      <div className="flex flex-col items-center justify-center gap-4">
-        <RetractButton onLoadBoard={loadPreviousBoard} />
-        {gameMode === "ai" && <Advisor advisors={advisors} onRequestAdvice={handleRequestAdvice} />}
-      </div>
+      {isCheck && (
+        <div className="mt-6 rounded-lg border border-red-500 bg-red-500/10 p-4 text-center">
+          <p className="text-sm font-semibold text-red-300">
+            체크 상태입니다!
+          </p>
+        </div>
+      )}
+      {winner && (
+        <GameResultModal
+          winner={winner}
+          playerColor={playerColor}
+          status={status}
+          onResetGame={resetGame}
+        />
+      )}
+      {promotionSquare && <PromotionModal onPromote={handleCompletePromotion} color={currentTurn} />}
     </div>
   );
 }

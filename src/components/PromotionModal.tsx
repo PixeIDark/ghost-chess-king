@@ -5,22 +5,41 @@ interface PromotionModalProps {
   color: "white" | "black";
 }
 
+const promotablePieces = {
+  queen: "퀸",
+  rook: "룩",
+  bishop: "비숍",
+  knight: "나이트",
+} as const ;
+
 function PromotionModal({ onPromote, color }: PromotionModalProps) {
-  const pieces: PieceType[] = ["queen", "rook", "bishop", "knight"];
+  const pieces = Object.keys(promotablePieces) as (keyof typeof promotablePieces)[];
 
   return (
-    <div className="bg-opacity-50 fixed inset-0 flex items-center justify-center bg-black">
-      <div className="flex flex-col gap-4 rounded-lg bg-white p-6">
-        <p className="text-lg font-bold">폰 승격 선택</p>
-        <div className="flex gap-3">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="rounded-2xl border border-amber-500 bg-gradient-to-br from-gray-800 to-gray-900 p-8 shadow-2xl">
+        <h1 className="mb-6 text-center text-2xl font-bold text-gray-100">
+          어떤 기물로 승격할까요?
+        </h1>
+        <div className="grid grid-cols-2 gap-4">
           {pieces.map((piece) => (
             <button
               key={piece}
               onClick={() => onPromote(piece)}
-              className="flex flex-col items-center gap-2 rounded bg-blue-500 px-4 py-2 transition hover:bg-blue-600"
+              className="group relative overflow-hidden rounded-xl border border-transparent bg-gradient-to-br from-slate-600 to-slate-700 p-6 transition hover:border-amber-400 hover:from-slate-500 hover:to-slate-600"
             >
-              <img src={pieceImages[piece][color]} alt={`${color} ${piece}`} className="h-12 w-12" />
-              <span className="text-sm font-semibold text-white">{piece.charAt(0).toUpperCase() + piece.slice(1)}</span>
+              <div className="flex flex-col items-center gap-3">
+                <div className="relative">
+                  <img
+                    src={pieceImages[piece][color]}
+                    alt={`${color} ${piece}`}
+                    className="h-16 w-16 transition group-hover:scale-110"
+                  />
+                </div>
+                <p className="font-semibold text-gray-200 group-hover:text-amber-300">
+                  {promotablePieces[piece]}
+                </p>
+              </div>
             </button>
           ))}
         </div>
