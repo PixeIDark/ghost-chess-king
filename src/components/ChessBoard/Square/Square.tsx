@@ -6,7 +6,7 @@ interface SquareProps {
   onSquareClick: (row: number, col: number) => void;
   rowIndex: number;
   colIndex: number;
-  borderState: "selected" | "movable" | "checked" | "none";
+  borderState: "advisedFrom" | "advisedTo" | "selected" | "movable" | "checked" | "none";
 }
 
 function Square({ square, onSquareClick, rowIndex, colIndex, borderState }: SquareProps) {
