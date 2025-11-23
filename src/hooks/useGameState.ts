@@ -15,7 +15,7 @@ export const useGameState = () => {
     setStatus("timeout");
   };
 
-  const { whiteTime, blackTime, addTime } = useGameTimer(currentTurn, onTimeOut);
+  const { whiteTime, blackTime, addTime, resetTime } = useGameTimer(currentTurn, onTimeOut);
 
   const proceedToNextTurn = (newBoard: Board) => {
     const nextTurn = currentTurn === "white" ? "black" : "white";
@@ -43,6 +43,7 @@ export const useGameState = () => {
     setWinner(null);
     setStatus("in_progress");
     setChessHistory([initialBoard]);
+    resetTime();
   };
 
   return {

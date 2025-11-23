@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 
+const LIMITED_SECONDS = 600;
+
 export const useGameTimer = (currentTurn: "white" | "black", onTimeout: (losingColor: "white" | "black") => void) => {
-  const [whiteTime, setWhiteTime] = useState(600);
-  const [blackTime, setBlackTime] = useState(600);
+  const [whiteTime, setWhiteTime] = useState(LIMITED_SECONDS);
+  const [blackTime, setBlackTime] = useState(LIMITED_SECONDS);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -33,5 +35,10 @@ export const useGameTimer = (currentTurn: "white" | "black", onTimeout: (losingC
     else setBlackTime((prev) => prev + 2);
   };
 
-  return { whiteTime, blackTime, addTime };
+  const resetTime = () => {
+    setWhiteTime(LIMITED_SECONDS);
+    setBlackTime(LIMITED_SECONDS);
+  };
+
+  return { whiteTime, blackTime, addTime, resetTime };
 };
