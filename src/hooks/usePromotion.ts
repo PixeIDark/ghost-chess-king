@@ -23,9 +23,7 @@ export const usePromotion = () => {
     const [row, col] = promotionSquare;
     const promotedBoard = structuredClone(board);
 
-    if (promotedBoard[row][col]) {
-      promotedBoard[row][col]!.type = promotionType;
-    }
+    if (promotedBoard[row][col]) promotedBoard[row][col]!.type = promotionType;
 
     setPromotionSquare(null);
     return promotedBoard;
