@@ -1,7 +1,9 @@
 import { type Board, type Color } from "../../constants/board.ts";
 import { type SelectedSquare, useChessBoard } from "./hooks/useChessBoard.ts";
-import { getDisplayBoard, isCheckedSquare, isSelectedSquare, isValidMoveSquare } from "./utils/boardView.ts";
+import { isCheckedSquare, isSelectedSquare, isValidMoveSquare } from "./utils/boardView.ts";
 import { Square } from "./Square";
+import { getDisplayBoard } from "../../utils/boardUtils.ts";
+import type { Advice } from "../../hooks/useAdvice.ts";
 
 interface ChessBoardProps {
   board: Board;
@@ -9,9 +11,10 @@ interface ChessBoardProps {
   playerColor: "white" | "black";
   currentTurn: "white" | "black";
   gameMode: null | "ai" | "solo";
+  advice: Advice;
 }
 
-function ChessBoard({ board, onUpdateGameState, playerColor, currentTurn, gameMode }: ChessBoardProps) {
+function ChessBoard({ board, onUpdateGameState, playerColor, currentTurn, gameMode, advice }: ChessBoardProps) {
   const { selectedSquare, validMoves, handleSquareClick } = useChessBoard(
     board,
     playerColor,
@@ -25,10 +28,13 @@ function ChessBoard({ board, onUpdateGameState, playerColor, currentTurn, gameMo
     row: number,
     col: number,
     playerColor: Color,
+    advice: Advice,
     selectedSquare: SelectedSquare,
     validMoves: [number, number][]
   ) => {
     if (isSelectedSquare(selectedSquare, row, col, playerColor)) return "selected";
+    if (advice && advice.fromRow === row && advice.fromCol === col) return "advisedFrom";
+    if (advice && advice.toRow === row && advice.toCol === col) return "advisedTo";
     if (isValidMoveSquare(validMoves, row, col, playerColor)) return "movable";
     if (isCheckedSquare(board, row, col, playerColor)) return "checked";
 
@@ -46,7 +52,14 @@ function ChessBoard({ board, onUpdateGameState, playerColor, currentTurn, gameMo
                 square={square}
                 rowIndex={displayRowIndex}
                 colIndex={displayColIndex}
-                borderState={getBorderState(displayRowIndex, displayColIndex, playerColor, selectedSquare, validMoves)}
+                borderState={getBorderState(
+                  displayRowIndex,
+                  displayColIndex,
+                  playerColor,
+                  advice,
+                  selectedSquare,
+                  validMoves
+                )}
                 key={displayColIndex}
               />
             ))}

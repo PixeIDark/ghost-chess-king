@@ -8,21 +8,29 @@ import { usePromotion } from "./hooks/usePromotion.ts";
 import RetractButton from "./components/RetractButton.tsx";
 import { isKingInCheck } from "./utils/legalityChecker.ts";
 import PromotionModal from "./components/PromotionModal.tsx";
-import type { PieceType } from "./constants/board.ts";
+import { type Color, type PieceType } from "./constants/board.ts";
+import Advisor from "./components/Advisor.tsx";
+
+import { useAdvice } from "./hooks/useAdvice.ts";
 
 function App() {
   const [gameMode, setGameMode] = useState<"solo" | "ai" | null>(null);
-  const [playerColor, setPlayerColor] = useState<"white" | "black" | null>(null);
+  const [playerColor, setPlayerColor] = useState<Color | null>(null);
   const { board, currentTurn, winner, status, whiteTime, blackTime, proceedToNextTurn, loadPreviousBoard, resetGame } =
     useGameState();
   const { promotionSquare, checkAndSetPromotion, completePromotion, clearPromotion } = usePromotion();
+  const { advice, advisors, handleRequestAdvice, resetAdvice } = useAdvice(playerColor, currentTurn, board);
   useAIMove(board, currentTurn, playerColor, gameMode, proceedToNextTurn);
+
+  if (gameMode === null || playerColor === null)
+    return <SettingSelector onSelectMode={setGameMode} onSelectColor={setPlayerColor} />;
 
   const handleUpdateGameState = (newBoard: typeof board) => {
     if (winner !== null) return;
     if (checkAndSetPromotion(newBoard, currentTurn)) return;
 
     proceedToNextTurn(newBoard);
+    resetAdvice();
   };
 
   const handleCompletePromotion = (promotionType: PieceType) => {
@@ -30,9 +38,6 @@ function App() {
     proceedToNextTurn(promotedBoard);
     clearPromotion();
   };
-
-  if (gameMode === null || playerColor === null)
-    return <SettingSelector onSelectMode={setGameMode} onSelectColor={setPlayerColor} />;
 
   const opponentColor = playerColor === "white" ? "black" : "white";
   const opponentTime = opponentColor === "white" ? whiteTime : blackTime;
@@ -48,9 +53,11 @@ function App() {
         playerColor={playerColor}
         currentTurn={currentTurn}
         gameMode={gameMode}
+        advice={advice}
       />
       <Timer time={playerTime} player={playerColor} playerColor={playerColor} />
       <RetractButton onLoadBoard={loadPreviousBoard} />
+      {gameMode === "ai" && <Advisor advisors={advisors} onRequestAdvice={handleRequestAdvice} />}
       {isCheck && (
         <p>{currentTurn}님이 체크상태입니다! 킹을 움직이거나 다른 기물로 킹을 보호하세요! 또는 위협을 제거하세요!</p>
       )}

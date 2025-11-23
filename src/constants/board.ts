@@ -47,7 +47,7 @@ export const initialBoard: Board = [
     { type: "pawn", color: "black", hasEnPassant: false },
     { type: "pawn", color: "black", hasEnPassant: false },
     { type: "pawn", color: "black", hasEnPassant: false },
-    null,
+    { type: "pawn", color: "black", hasEnPassant: false },
     { type: "pawn", color: "black", hasEnPassant: false },
   ],
   [null, null, null, null, null, null, null, null],
@@ -61,7 +61,7 @@ export const initialBoard: Board = [
     { type: "pawn", color: "white", hasEnPassant: false },
     { type: "pawn", color: "white", hasEnPassant: false },
     { type: "pawn", color: "white", hasEnPassant: false },
-    { type: "pawn", color: "black", hasEnPassant: false },
+    { type: "pawn", color: "white", hasEnPassant: false },
     { type: "pawn", color: "white", hasEnPassant: false },
   ],
   [
@@ -80,6 +80,7 @@ export const MIN_ROW = 0;
 export const MAX_ROW = 7;
 export const MIN_COL = 0;
 export const MAX_COL = 7;
+export const ADVICE_LIMIT = 100;
 
 export const pieceDirections: Record<string, [number, number][]> = {
   pawn: [[1, 0]],
