@@ -79,7 +79,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
       <div className="mx-auto max-w-7xl">
-        <div className="flex gap-12">
+        <div className="flex items-center gap-12">
           <div className="flex flex-1 flex-col items-center">
             <div className="w-fit rounded-lg border border-gray-700 bg-gray-800 p-6 shadow-2xl">
               <div className="mb-6">
