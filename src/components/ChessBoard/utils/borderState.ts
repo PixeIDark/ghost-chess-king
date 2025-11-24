@@ -1,7 +1,7 @@
-import type { Board, Color } from "../../../constants/board.ts";
 import type { Advice } from "../../../hooks/useAdvice.ts";
 import type { SelectedSquare } from "../hooks/useChessBoard.ts";
 import { isCheckedSquare, isSelectedSquare, isValidMoveSquare } from "./boardView.ts";
+import type { Board, Color } from "../../../types/chess.ts";
 
 export const getBorderState = (
   board: Board,

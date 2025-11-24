@@ -1,6 +1,6 @@
-import type { Piece, PieceType } from "../constants/board.ts";
+import type { Board, PieceType } from "../types/chess.ts";
 
-const calculateCastlingRights = (board: (Piece | null)[][]): string => {
+const calculateCastlingRights = (board: Board): string => {
   let rights = "";
   const whiteKing = board[7][4];
   const whiteRookKingside = board[7][7];
@@ -48,7 +48,7 @@ const calculateCastlingRights = (board: (Piece | null)[][]): string => {
   return rights || "-";
 };
 
-export const boardToFen = (board: (Piece | null)[][], currentTurn: "white" | "black" = "white"): string => {
+export const boardToFen = (board: Board, currentTurn: "white" | "black" = "white"): string => {
   const pieceToChar: { [key in PieceType]: string } = {
     pawn: "p",
     rook: "r",

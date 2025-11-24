@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { type Board } from "../constants/board.ts";
-import type { PieceType } from "../constants/board.ts";
 import { getPromotablePawn } from "../utils/legalityChecker.ts";
+import type { Board, PieceType } from "../types/chess.ts";
 
 export const usePromotion = () => {
   const [promotionSquare, setPromotionSquare] = useState<[number, number] | null>(null);

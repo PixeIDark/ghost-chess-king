@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { type Board, initialBoard, UNDO_COUNT } from "../constants/board.ts";
 import { type GameResult, type GameStatus, getGameState } from "../utils/gameState.ts";
 import { useGameTimer } from "./useGameTimer.ts";
+import { initialBoard } from "../constants/board.ts";
+import type { Board } from "../types/chess.ts";
+import { UNDO_COUNT } from "../constants/game.ts";
 
 export const useGameState = (isReadyToPlay: boolean) => {
   const [board, setBoard] = useState<Board>(initialBoard);

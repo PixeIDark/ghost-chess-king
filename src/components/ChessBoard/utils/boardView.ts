@@ -1,6 +1,6 @@
-import type { Board, Color } from "../../../constants/board.ts";
 import { isKingInCheck } from "../../../utils/legalityChecker.ts";
 import { getActualCoords } from "../../../utils/boardUtils.ts";
+import type { Board, Color } from "../../../types/chess.ts";
 
 export const isValidMoveSquare = (
   validMoves: [number, number][],

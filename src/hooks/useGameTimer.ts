@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { PLAYER_TIME_LIMIT } from "../constants/board.ts";
+import { PLAYER_TIME_LIMIT } from "../constants/game.ts";
 
 export const useGameTimer = (
   currentTurn: "white" | "black",

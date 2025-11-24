@@ -1,7 +1,7 @@
-import type { Color } from "../../constants/board.ts";
 import { useState } from "react";
 import { ModeSelector } from "./ModeSelector";
 import { ColorSelector } from "./ColorSelector";
+import type { Color } from "../../types/chess.ts";
 
 interface SettingSelectorProps {
   onSelectMode: (mode: "solo" | "ai") => void;

@@ -1,4 +1,5 @@
-import { type Board, type Color, MAX_COL, MAX_ROW, MIN_COL, MIN_ROW } from "../constants/board.ts";
+import { MAX_COL, MAX_ROW, MIN_COL, MIN_ROW } from "../constants/board.ts";
+import type { Board, Color } from "../types/chess.ts";
 
 export const isInsideBoard = (row: number, col: number): boolean => {
   return row >= MIN_ROW && row <= MAX_ROW && col >= MIN_COL && col <= MAX_COL;

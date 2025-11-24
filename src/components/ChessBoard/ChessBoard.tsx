@@ -1,16 +1,16 @@
-import { type Board } from "../../constants/board.ts";
 import { useChessBoard } from "./hooks/useChessBoard.ts";
-import { Square } from "./Square";
 import { getDisplayBoard } from "../../utils/boardUtils.ts";
 import type { Advice } from "../../hooks/useAdvice.ts";
 import { getBorderState } from "./utils/borderState.ts";
+import type { Board, Color, GameMode } from "../../types/chess.ts";
+import { Square } from "./Square";
 
 interface ChessBoardProps {
   board: Board;
   onUpdateGameState: (newBoard: Board) => void;
-  playerColor: "white" | "black";
-  currentTurn: "white" | "black";
-  gameMode: null | "ai" | "solo";
+  playerColor: Color;
+  currentTurn: Color;
+  gameMode: GameMode;
   advice: Advice;
 }
 

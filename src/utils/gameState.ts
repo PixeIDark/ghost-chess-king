@@ -1,6 +1,6 @@
-import type { Board, Color } from "../constants/board.ts";
 import { findPiece } from "./pieceUtils.ts";
 import { canPieceMove, isKingInCheck } from "./legalityChecker.ts";
+import type { Board, Color } from "../types/chess.ts";
 
 export type GameResult = "white" | "black" | "draw" | null;
 export type GameStatus = "checkmate" | "stalemate" | "check" | "in_progress" | "insufficient_material" | "timeout";

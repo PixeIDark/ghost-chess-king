@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { type Board, type Color, HIGH_ADVICE_COUNT, LOW_ADVICE_COUNT, MID_ADVICE_COUNT } from "../constants/board.ts";
 import { parseMove } from "../utils/coordinate.ts";
 import { boardToFen } from "../utils/fen.ts";
 import { useStockfish } from "./useStockfish.ts";
 import { getActualCoords } from "../utils/boardUtils.ts";
+import { HIGH_ADVICE_COUNT, LOW_ADVICE_COUNT, MID_ADVICE_COUNT } from "../constants/game.ts";
+import type { Board, Color } from "../types/chess.ts";
 
 export type Advice = {
   fromRow: number;

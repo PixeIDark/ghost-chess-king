@@ -1,4 +1,4 @@
-import type { Board, Color } from "../constants/board.ts";
+import type { Board, Color } from "../types/chess.ts";
 
 export const getDisplayBoard = (board: Board, playerColor: Color): Board => {
   if (playerColor === "black") return board.map((row) => [...row].reverse()).reverse();

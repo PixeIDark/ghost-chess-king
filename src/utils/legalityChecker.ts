@@ -1,6 +1,6 @@
-import type { Board, Color } from "../constants/board.ts";
 import { findPiece, isSquareUnderAttack } from "./pieceUtils.ts";
 import { getPieceMoves } from "./pieceMoves.ts";
+import type { Board, Color } from "../types/chess.ts";
 
 export const getPromotablePawn = (board: Board, color: Color): [number, number] | null => {
   const promotionRow = color === "white" ? 0 : 7;

@@ -1,4 +1,5 @@
-import { pieceImages, type PieceType } from "../constants/board.ts";
+import type { PieceType } from "../types/chess.ts";
+import { pieceImages } from "../constants/images.ts";
 
 interface PromotionModalProps {
   onPromote: (type: PieceType) => void;
@@ -10,7 +11,7 @@ const promotablePieces = {
   rook: "룩",
   bishop: "비숍",
   knight: "나이트",
-} as const ;
+} as const;
 
 function PromotionModal({ onPromote, color }: PromotionModalProps) {
   const pieces = Object.keys(promotablePieces) as (keyof typeof promotablePieces)[];
@@ -18,9 +19,7 @@ function PromotionModal({ onPromote, color }: PromotionModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="rounded-2xl border border-amber-500 bg-gradient-to-br from-gray-800 to-gray-900 p-8 shadow-2xl">
-        <h1 className="mb-6 text-center text-2xl font-bold text-gray-100">
-          어떤 기물로 승격할까요?
-        </h1>
+        <h1 className="mb-6 text-center text-2xl font-bold text-gray-100">어떤 기물로 승격할까요?</h1>
         <div className="grid grid-cols-2 gap-4">
           {pieces.map((piece) => (
             <button
@@ -36,9 +35,7 @@ function PromotionModal({ onPromote, color }: PromotionModalProps) {
                     className="h-16 w-16 transition group-hover:scale-110"
                   />
                 </div>
-                <p className="font-semibold text-gray-200 group-hover:text-amber-300">
-                  {promotablePieces[piece]}
-                </p>
+                <p className="font-semibold text-gray-200 group-hover:text-amber-300">{promotablePieces[piece]}</p>
               </div>
             </button>
           ))}

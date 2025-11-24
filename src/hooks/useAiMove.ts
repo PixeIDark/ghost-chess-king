@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import { type Board, type PieceType } from "../constants/board.ts";
 import { useStockfish } from "./useStockfish.ts";
 import { boardToFen } from "../utils/fen.ts";
 import { movePiece } from "../components/ChessBoard/utils/movePiece.ts";
 import { parseMove } from "../utils/coordinate.ts";
+import type { Board, Color, GameMode, PieceType, PlayerColor } from "../types/chess.ts";
 
 const promotedPieces: Record<string, PieceType> = {
   q: "queen",
@@ -14,9 +14,9 @@ const promotedPieces: Record<string, PieceType> = {
 
 export const useAIMove = (
   board: Board,
-  currentTurn: "white" | "black",
-  playerColor: "white" | "black" | null,
-  gameMode: "solo" | "ai" | null,
+  currentTurn: Color,
+  playerColor: PlayerColor,
+  gameMode: GameMode,
   onBoardChange: (newBoard: Board) => void
 ) => {
   const { isReady, getBestMove } = useStockfish();

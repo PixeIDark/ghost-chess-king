@@ -7,7 +7,6 @@ import { usePromotion } from "./hooks/usePromotion.ts";
 import RetractButton from "./components/RetractButton.tsx";
 import { isKingInCheck } from "./utils/legalityChecker.ts";
 import PromotionModal from "./components/PromotionModal.tsx";
-import { type PieceType } from "./constants/board.ts";
 import Advisor from "./components/Advisor.tsx";
 import { useAdvice } from "./hooks/useAdvice.ts";
 import GameResultModal from "./components/GameResultModal.tsx";
@@ -16,6 +15,7 @@ import { useSocket } from "./hooks/useSocket.ts";
 import PanelController from "./components/PanelController.tsx";
 import { SettingSelector } from "./components/SettingSelector";
 import { useGameSetting } from "./hooks/useGameSetting.ts";
+import type { PieceType } from "./types/chess.ts";
 
 function App() {
   const { gameMode, playerColor, isReadyToPlay, setGameMode, setPlayerColor } = useGameSetting();

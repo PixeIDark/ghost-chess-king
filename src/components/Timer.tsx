@@ -1,4 +1,4 @@
-import { PLAYER_TIME_LIMIT } from "../constants/board.ts";
+import { PLAYER_TIME_LIMIT } from "../constants/game.ts";
 
 interface TimerProps {
   time: number;

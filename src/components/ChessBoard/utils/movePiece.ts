@@ -1,4 +1,4 @@
-import type { Board, King, Piece, Rook } from "../../../constants/board.ts";
+import type { Board, King, Piece, Rook } from "../../../types/chess.ts";
 
 const markPieceMoved = (piece: King | Rook): void => {
   piece.hasMoved = true;

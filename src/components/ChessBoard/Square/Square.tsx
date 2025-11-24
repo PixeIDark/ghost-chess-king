@@ -1,8 +1,9 @@
-import { type Piece, pieceImages } from "../../../constants/board.ts";
 import { borderClasses, indicatorConfig } from "./Square.constants.ts";
+import { pieceImages } from "../../../constants/images.ts";
+import type { Square as SquareType } from "../../../types/chess.ts";
 
 interface SquareProps {
-  square: Piece | null;
+  square: SquareType;
   onSquareClick: (row: number, col: number) => void;
   rowIndex: number;
   colIndex: number;
@@ -10,9 +11,8 @@ interface SquareProps {
 }
 
 function Square({ square, onSquareClick, rowIndex, colIndex, borderState }: SquareProps) {
-  const backgroundColor = (rowIndex + colIndex) % 2 === 0
-    ? "bg-amber-800 hover:bg-amber-700"
-    : "bg-amber-100 hover:bg-amber-50";
+  const backgroundColor =
+    (rowIndex + colIndex) % 2 === 0 ? "bg-amber-800 hover:bg-amber-700" : "bg-amber-100 hover:bg-amber-50";
   const pieceImage = square ? pieceImages[square.type][square.color] : null;
   const indicator = indicatorConfig[borderState];
 
