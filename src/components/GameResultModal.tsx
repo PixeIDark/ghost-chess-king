@@ -1,11 +1,11 @@
 import { useState } from "react";
-import type {Color} from "../constants/board.ts";
+import type { Color } from "../constants/board.ts";
 
 interface GameResultModalProps {
   winner: "white" | "black" | "draw";
   playerColor: Color;
   status: string;
-  onResetGame: () => void;
+  onRestartGame: () => void;
 }
 
 const resultMessages = {
@@ -26,7 +26,7 @@ const resultMessages = {
   },
 } as const;
 
-function GameResultModal({ winner, playerColor, status, onResetGame }: GameResultModalProps) {
+function GameResultModal({ winner, playerColor, status, onRestartGame }: GameResultModalProps) {
   const [closeModal, setCloseModal] = useState(false);
 
   let resultType: "win" | "lose" | "draw";
@@ -42,14 +42,12 @@ function GameResultModal({ winner, playerColor, status, onResetGame }: GameResul
       <div className="w-[280px] rounded-2xl border border-amber-500 bg-gradient-to-br from-gray-800 to-gray-900 p-8 shadow-2xl">
         <div className="mb-6 text-center">
           <p className="mb-2 text-4xl font-bold">{result.emoji}</p>
-          <p className={`text-2xl font-bold ${result.color}`}>
-            {result.title}
-          </p>
+          <p className={`text-2xl font-bold ${result.color}`}>{result.title}</p>
           <p className="mt-3 text-sm text-amber-200">{status}</p>
         </div>
         <div className="flex flex-col gap-3">
           <button
-            onClick={onResetGame}
+            onClick={onRestartGame}
             className="w-full rounded-lg bg-gradient-to-r from-amber-600 to-amber-500 px-6 py-3 font-semibold text-white shadow-lg transition hover:from-amber-500 hover:to-amber-400"
           >
             새 게임 시작
