@@ -1,33 +1,9 @@
-export type PieceType = "pawn" | "rook" | "knight" | "bishop" | "queen" | "king";
-export type Color = "white" | "black";
+import type { Board } from "../types/chess.ts";
 
-interface BasePiece {
-  color: Color;
-}
-
-export interface Pawn extends BasePiece {
-  type: "pawn";
-  hasEnPassant: boolean;
-}
-
-export interface King extends BasePiece {
-  type: "king";
-  hasMoved: boolean;
-}
-
-export interface Rook extends BasePiece {
-  type: "rook";
-  hasMoved: boolean;
-}
-
-export interface OtherPiece extends BasePiece {
-  type: Exclude<PieceType, "pawn" | "king" | "rook">;
-}
-
-export type Piece = King | Rook | Pawn | OtherPiece;
-
-export type Square = Piece | null;
-export type Board = Square[][];
+export const MIN_ROW = 0;
+export const MAX_ROW = 7;
+export const MIN_COL = 0;
+export const MAX_COL = 7;
 
 export const initialBoard: Board = [
   [
@@ -75,86 +51,3 @@ export const initialBoard: Board = [
     { type: "rook", color: "white", hasMoved: false },
   ],
 ];
-
-export const MIN_ROW = 0;
-export const MAX_ROW = 7;
-export const MIN_COL = 0;
-export const MAX_COL = 7;
-export const UNDO_COUNT = 1;
-export const LOW_ADVICE_COUNT = 3;
-export const MID_ADVICE_COUNT = 2;
-export const HIGH_ADVICE_COUNT = 1;
-export const PLAYER_TIME_LIMIT = 600;
-
-export const pieceDirections: Record<string, [number, number][]> = {
-  pawn: [[1, 0]],
-  rook: [
-    [-1, 0],
-    [1, 0],
-    [0, -1],
-    [0, 1],
-  ],
-  bishop: [
-    [-1, -1],
-    [-1, 1],
-    [1, -1],
-    [1, 1],
-  ],
-  queen: [
-    [-1, 0],
-    [1, 0],
-    [0, -1],
-    [0, 1],
-    [-1, -1],
-    [-1, 1],
-    [1, -1],
-    [1, 1],
-  ],
-  knight: [
-    [-2, -1],
-    [-2, 1],
-    [-1, -2],
-    [-1, 2],
-    [1, -2],
-    [1, 2],
-    [2, -1],
-    [2, 1],
-  ],
-  king: [
-    [-1, -1],
-    [-1, 0],
-    [-1, 1],
-    [0, -1],
-    [0, 1],
-    [1, -1],
-    [1, 0],
-    [1, 1],
-  ],
-};
-
-export const pieceImages = {
-  pawn: {
-    white: "/pieces/white_pawn.svg",
-    black: "/pieces/black_pawn.svg",
-  },
-  knight: {
-    white: "/pieces/white_knight.svg",
-    black: "/pieces/black_knight.svg",
-  },
-  bishop: {
-    white: "/pieces/white_bishop.svg",
-    black: "/pieces/black_bishop.svg",
-  },
-  rook: {
-    white: "/pieces/white_rook.svg",
-    black: "/pieces/black_rook.svg",
-  },
-  queen: {
-    white: "/pieces/white_queen.svg",
-    black: "/pieces/black_queen.svg",
-  },
-  king: {
-    white: "/pieces/white_king.svg",
-    black: "/pieces/black_king.svg",
-  },
-} as const;
