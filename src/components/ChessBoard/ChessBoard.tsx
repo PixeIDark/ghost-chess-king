@@ -1,9 +1,9 @@
-import { type Board, type Color } from "../../constants/board.ts";
-import { type SelectedSquare, useChessBoard } from "./hooks/useChessBoard.ts";
-import { isCheckedSquare, isSelectedSquare, isValidMoveSquare } from "./utils/boardView.ts";
+import { type Board } from "../../constants/board.ts";
+import { useChessBoard } from "./hooks/useChessBoard.ts";
 import { Square } from "./Square";
 import { getDisplayBoard } from "../../utils/boardUtils.ts";
 import type { Advice } from "../../hooks/useAdvice.ts";
+import { getBorderState } from "./utils/boardState.ts";
 
 interface ChessBoardProps {
   board: Board;
@@ -24,23 +24,6 @@ function ChessBoard({ board, onUpdateGameState, playerColor, currentTurn, gameMo
   );
   const displayBoard = getDisplayBoard(board, playerColor);
 
-  const getBorderState = (
-    row: number,
-    col: number,
-    playerColor: Color,
-    advice: Advice,
-    selectedSquare: SelectedSquare,
-    validMoves: [number, number][]
-  ) => {
-    if (isSelectedSquare(selectedSquare, row, col, playerColor)) return "selected";
-    if (advice && advice.fromRow === row && advice.fromCol === col) return "advisedFrom";
-    if (advice && advice.toRow === row && advice.toCol === col) return "advisedTo";
-    if (isValidMoveSquare(validMoves, row, col, playerColor)) return "movable";
-    if (isCheckedSquare(board, row, col, playerColor)) return "checked";
-
-    return "none";
-  };
-
   return (
     <div className="rounded-lg bg-gradient-to-br from-gray-900 to-black p-2">
       <div className="m-auto w-fit">
@@ -53,6 +36,7 @@ function ChessBoard({ board, onUpdateGameState, playerColor, currentTurn, gameMo
                 rowIndex={displayRowIndex}
                 colIndex={displayColIndex}
                 borderState={getBorderState(
+                  board,
                   displayRowIndex,
                   displayColIndex,
                   playerColor,
