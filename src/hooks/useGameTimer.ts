@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-
-const PLAYER_TIME_LIMIT = 600;
+import { PLAYER_TIME_LIMIT } from "../constants/board.ts";
 
 export const useGameTimer = (currentTurn: "white" | "black", onTimeout: (losingColor: "white" | "black") => void) => {
   const [whiteTime, setWhiteTime] = useState(PLAYER_TIME_LIMIT);

@@ -80,10 +80,11 @@ export const MIN_ROW = 0;
 export const MAX_ROW = 7;
 export const MIN_COL = 0;
 export const MAX_COL = 7;
-export const UNDO_COUNT = 1
-export const LOW_ADVICE_COUNT = 3
-export const MID_ADVICE_COUNT = 2
-export const HIGH_ADVICE_COUNT = 1
+export const UNDO_COUNT = 1;
+export const LOW_ADVICE_COUNT = 3;
+export const MID_ADVICE_COUNT = 2;
+export const HIGH_ADVICE_COUNT = 1;
+export const PLAYER_TIME_LIMIT = 600;
 
 export const pieceDirections: Record<string, [number, number][]> = {
   pawn: [[1, 0]],
