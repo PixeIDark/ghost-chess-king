@@ -1,5 +1,5 @@
-import type { Board, Color, PieceType } from "../constants/board.ts";
 import { getPieceMoves } from "./pieceMoves.ts";
+import type { Board, Color, PieceType } from "../types/chess.ts";
 
 export const findPiece = (board: Board, color: Color, type: PieceType): [number, number] | null => {
   for (let row = 0; row < board.length; row++) {

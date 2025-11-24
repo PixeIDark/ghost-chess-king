@@ -1,5 +1,6 @@
-import { type Board, pieceDirections } from "../constants/board.ts";
 import { canMoveThere, hasEnemyPiece, isInsideBoard } from "./squareValidator.ts";
+import type { Board } from "../types/chess.ts";
+import { pieceDirections } from "../constants/direction.ts";
 
 type Moves = [number, number][];
 type MoveAdder = (board: Board, row: number, col: number, color: "white" | "black") => Moves;
