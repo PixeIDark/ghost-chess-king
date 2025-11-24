@@ -15,12 +15,6 @@ const advisorsText = {
   highAdvisor: "알파고",
 } as const;
 
-const advisorsEmoji = {
-  lowAdvisor: "👨",
-  midAdvisor: "🤵",
-  highAdvisor: "🤖",
-} as const;
-
 const advisorColors = {
   lowAdvisor: {
     enabled: "bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400",
@@ -49,17 +43,14 @@ function Advisor({ advisors, onRequestAdvice }: AdvisorProps) {
             name={advisorsItem}
             key={advisorsItem}
             disabled={advisors[advisorsItem] === 0}
-            className={`group relative overflow-hidden rounded-lg px-4 py-3 font-semibold text-white transition ${
+            className={`rounded-lg px-4 py-3 font-semibold text-white transition ${
               advisors[advisorsItem] > 0
                 ? `cursor-pointer ${advisorColors[advisorsItem].enabled}`
                 : `cursor-not-allowed ${advisorColors[advisorsItem].disabled} opacity-50`
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <span className="text-lg">{advisorsEmoji[advisorsItem]}</span>
-                {advisorsText[advisorsItem]}
-              </span>
+              <span className="flex items-center gap-2">{advisorsText[advisorsItem]}</span>
               <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-bold">
                 {advisors[advisorsItem]}회
               </span>
