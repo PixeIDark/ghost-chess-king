@@ -21,9 +21,20 @@ function ChatPanel({ nickname, lobbyMessages, sendLobbyMessage }: ChatPanelProps
 
   const handleSendMessage = () => {
     if (!inputValue.trim()) return;
+
     sendLobbyMessage(inputValue);
     setInputValue("");
   };
+
+  const processedMessages = lobbyMessages.map((msg) => ({
+    isOwn: msg.nickname === nickname,
+    timestamp: new Date(msg.timestamp).toLocaleTimeString("ko-KR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    nickname: msg.nickname,
+    message: msg.message,
+  }));
 
   return (
     <div className="fixed top-0 right-0 bottom-0 flex w-80 flex-col border-l border-gray-700 bg-gradient-to-b from-gray-800 to-gray-900 shadow-2xl">
@@ -33,34 +44,25 @@ function ChatPanel({ nickname, lobbyMessages, sendLobbyMessage }: ChatPanelProps
           닉네임: <span className="text-blue-300">{nickname}</span>
         </p>
       </div>
-
       <div className="flex-1 space-y-3 overflow-y-auto p-4">
-        {lobbyMessages.length === 0 ? (
+        {processedMessages.length === 0 ? (
           <div className="mt-8 text-center text-sm text-gray-500">채팅을 시작해보세요</div>
         ) : (
-          lobbyMessages.map((msg, idx) => {
-            const isOwn = msg.nickname === nickname;
-            const timestamp = new Date(msg.timestamp).toLocaleTimeString("ko-KR", {
-              hour: "2-digit",
-              minute: "2-digit",
-            });
-
-            return (
-              <div key={idx} className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
-                <div>
-                  {!isOwn && <p className="mb-1 text-xs text-gray-400">{msg.nickname}</p>}
-                  <div
-                    className={`rounded-lg px-4 py-2 text-sm ${
-                      isOwn ? "rounded-br-none bg-blue-600 text-white" : "rounded-bl-none bg-gray-700 text-gray-100"
-                    }`}
-                  >
-                    {msg.message}
-                  </div>
-                  <p className={`mt-1 text-xs text-gray-500 ${isOwn ? "text-right" : ""}`}>{timestamp}</p>
+          processedMessages.map((msg, idx) => (
+            <div key={idx} className={`flex ${msg.isOwn ? "justify-end" : "justify-start"}`}>
+              <div>
+                {!msg.isOwn && <p className="mb-1 text-xs text-gray-400">{msg.nickname}</p>}
+                <div
+                  className={`rounded-lg px-4 py-2 text-sm ${
+                    msg.isOwn ? "rounded-br-none bg-blue-600 text-white" : "rounded-bl-none bg-gray-700 text-gray-100"
+                  }`}
+                >
+                  {msg.message}
                 </div>
+                <p className={`mt-1 text-xs text-gray-500 ${msg.isOwn ? "text-right" : ""}`}>{msg.timestamp}</p>
               </div>
-            );
-          })
+            </div>
+          ))
         )}
         <div ref={messagesEndRef} />
       </div>
