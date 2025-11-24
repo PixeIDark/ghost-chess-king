@@ -1,5 +1,4 @@
 import { useState } from "react";
-import SettingSelector from "./components/SettingSelector.tsx";
 import { ChessBoard } from "./components/ChessBoard";
 import { useAIMove } from "./hooks/useAiMove.ts";
 import Timer from "./components/Timer.tsx";
@@ -15,6 +14,7 @@ import GameResultModal from "./components/GameResultModal.tsx";
 import ChatPanel from "./components/ChatPanel.tsx";
 import { useSocket } from "./hooks/useSocket.ts";
 import PanelController from "./components/PanelController.tsx";
+import { SettingSelector } from "./components/SettingSelector";
 
 function App() {
   const [gameMode, setGameMode] = useState<"solo" | "ai" | null>(null);
