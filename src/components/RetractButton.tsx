@@ -3,16 +3,21 @@ interface RetractButtonProps {
   onLoadBoard: () => void;
 }
 
+const getButtonStyle = (undoCount: number): string => {
+  if (undoCount > 0)
+    return "cursor-pointer bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500";
+  return "cursor-not-allowed bg-gray-600 opacity-50";
+};
+
 function RetractButton({ undoCount, onLoadBoard }: RetractButtonProps) {
+  const buttonStyle = getButtonStyle(undoCount);
+  const isDisabled = undoCount === 0;
+
   return (
     <button
       onClick={onLoadBoard}
-      disabled={undoCount === 0}
-      className={`w-full rounded-lg px-6 py-4 font-semibold text-white transition ${
-        undoCount > 0
-          ? "bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 cursor-pointer"
-          : "bg-gray-600 cursor-not-allowed opacity-50"
-      }`}
+      disabled={isDisabled}
+      className={`w-full rounded-lg px-6 py-4 font-semibold text-white transition ${buttonStyle}`}
     >
       <div className="flex flex-col items-center gap-2">
         <div>
