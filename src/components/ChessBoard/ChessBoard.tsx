@@ -3,7 +3,7 @@ import { useChessBoard } from "./hooks/useChessBoard.ts";
 import { Square } from "./Square";
 import { getDisplayBoard } from "../../utils/boardUtils.ts";
 import type { Advice } from "../../hooks/useAdvice.ts";
-import { getBorderState } from "./utils/boardState.ts";
+import { getBorderState } from "./utils/borderState.ts";
 
 interface ChessBoardProps {
   board: Board;

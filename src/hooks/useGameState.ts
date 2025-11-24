@@ -46,6 +46,7 @@ export const useGameState = (isReadyToPlay: boolean) => {
     setWinner(null);
     setStatus("in_progress");
     setChessHistory([initialBoard]);
+    setUndoCount(UNDO_COUNT);
     resetTime();
   };
 

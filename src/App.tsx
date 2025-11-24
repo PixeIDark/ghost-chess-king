@@ -32,7 +32,11 @@ function App() {
     resetGame,
   } = useGameState(isReadyToPlay);
   const { promotionSquare, checkAndSetPromotion, completePromotion, clearPromotion } = usePromotion();
-  const { advice, advisors, handleRequestAdvice, resetAdvice } = useAdvice(playerColor, currentTurn, board);
+  const { advice, advisors, handleRequestAdvice, resetAdvice, resetAdvisorChance } = useAdvice(
+    playerColor,
+    currentTurn,
+    board
+  );
   const { nickname, lobbyMessages, sendLobbyMessage } = useSocket();
   const [isOpen, setIsOpen] = useState(true);
 
@@ -50,6 +54,11 @@ function App() {
     const promotedBoard = completePromotion(promotionType, board);
     proceedToNextTurn(promotedBoard);
     clearPromotion();
+  };
+
+  const handleRestartGame = () => {
+    resetGame();
+    resetAdvisorChance();
   };
 
   const opponentColor = playerColor === "white" ? "black" : "white";
@@ -103,7 +112,9 @@ function App() {
           </div>
         </div>
       </div>
-      {winner && <GameResultModal winner={winner} playerColor={playerColor} status={status} onResetGame={resetGame} />}
+      {winner && (
+        <GameResultModal winner={winner} playerColor={playerColor} status={status} onRestartGame={handleRestartGame} />
+      )}
       {promotionSquare && <PromotionModal onPromote={handleCompletePromotion} color={currentTurn} />}
     </div>
   );

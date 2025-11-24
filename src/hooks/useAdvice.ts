@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  type Board,
-  type Color,
-  HIGH_ADVICE_COUNT,
-  LOW_ADVICE_COUNT,
-  MID_ADVICE_COUNT
-} from "../constants/board.ts";
+import { type Board, type Color, HIGH_ADVICE_COUNT, LOW_ADVICE_COUNT, MID_ADVICE_COUNT } from "../constants/board.ts";
 import { parseMove } from "../utils/coordinate.ts";
 import { boardToFen } from "../utils/fen.ts";
 import { useStockfish } from "./useStockfish.ts";
@@ -19,7 +13,11 @@ export type Advice = {
 } | null;
 
 export const useAdvice = (playerColor: Color | null, currentTurn: Color, board: Board) => {
-  const [advisors, setAdvisors] = useState({ lowAdvisor: LOW_ADVICE_COUNT, midAdvisor: MID_ADVICE_COUNT, highAdvisor: HIGH_ADVICE_COUNT });
+  const [advisors, setAdvisors] = useState({
+    lowAdvisor: LOW_ADVICE_COUNT,
+    midAdvisor: MID_ADVICE_COUNT,
+    highAdvisor: HIGH_ADVICE_COUNT,
+  });
   const [advice, setAdvice] = useState<Advice>(null);
   const [hasReceivedAdvice, setHasReceivedAdvice] = useState(false);
   const { isReady, getBestMove } = useStockfish();
@@ -65,8 +63,12 @@ export const useAdvice = (playerColor: Color | null, currentTurn: Color, board: 
 
   const resetAdvice = () => {
     setAdvice(null);
-    setHasReceivedAdvice(false)
+    setHasReceivedAdvice(false);
   };
 
-  return { advice, advisors, handleRequestAdvice, resetAdvice };
+  const resetAdvisorChance = () => {
+    setAdvisors({ lowAdvisor: LOW_ADVICE_COUNT, midAdvisor: MID_ADVICE_COUNT, highAdvisor: HIGH_ADVICE_COUNT });
+  };
+
+  return { advice, advisors, handleRequestAdvice, resetAdvice, resetAdvisorChance };
 };
