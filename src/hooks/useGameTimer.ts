@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { PLAYER_TIME_LIMIT } from "../constants/board.ts";
 
-export const useGameTimer = (currentTurn: "white" | "black", onTimeout: (losingColor: "white" | "black") => void) => {
+export const useGameTimer = (
+  currentTurn: "white" | "black",
+  isReadyToPlay: boolean,
+  onTimeout: (losingColor: "white" | "black") => void
+) => {
   const [whiteTime, setWhiteTime] = useState(PLAYER_TIME_LIMIT);
   const [blackTime, setBlackTime] = useState(PLAYER_TIME_LIMIT);
   const intervalRef = useRef<number | null>(null);
@@ -11,6 +15,7 @@ export const useGameTimer = (currentTurn: "white" | "black", onTimeout: (losingC
   };
 
   useEffect(() => {
+    if (!isReadyToPlay) return;
     clearExistingInterval();
 
     intervalRef.current = setInterval(() => {
@@ -36,7 +41,7 @@ export const useGameTimer = (currentTurn: "white" | "black", onTimeout: (losingC
     }, 1000);
 
     return clearExistingInterval;
-  }, [currentTurn, onTimeout]);
+  }, [currentTurn, onTimeout, isReadyToPlay]);
 
   const addTime = (color: "white" | "black") => {
     if (color === "white") setWhiteTime((prev) => prev + 2);

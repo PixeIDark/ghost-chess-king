@@ -7,7 +7,7 @@ import { usePromotion } from "./hooks/usePromotion.ts";
 import RetractButton from "./components/RetractButton.tsx";
 import { isKingInCheck } from "./utils/legalityChecker.ts";
 import PromotionModal from "./components/PromotionModal.tsx";
-import { type Color, type PieceType } from "./constants/board.ts";
+import { type PieceType } from "./constants/board.ts";
 import Advisor from "./components/Advisor.tsx";
 import { useAdvice } from "./hooks/useAdvice.ts";
 import GameResultModal from "./components/GameResultModal.tsx";
@@ -15,10 +15,10 @@ import ChatPanel from "./components/ChatPanel.tsx";
 import { useSocket } from "./hooks/useSocket.ts";
 import PanelController from "./components/PanelController.tsx";
 import { SettingSelector } from "./components/SettingSelector";
+import { useGameSetting } from "./hooks/useGameSetting.ts";
 
 function App() {
-  const [gameMode, setGameMode] = useState<"solo" | "ai" | null>(null);
-  const [playerColor, setPlayerColor] = useState<Color | null>(null);
+  const { gameMode, playerColor, isReadyToPlay, setGameMode, setPlayerColor } = useGameSetting();
   const {
     board,
     currentTurn,
@@ -30,7 +30,7 @@ function App() {
     proceedToNextTurn,
     loadPreviousBoard,
     resetGame,
-  } = useGameState();
+  } = useGameState(isReadyToPlay);
   const { promotionSquare, checkAndSetPromotion, completePromotion, clearPromotion } = usePromotion();
   const { advice, advisors, handleRequestAdvice, resetAdvice } = useAdvice(playerColor, currentTurn, board);
   const { nickname, lobbyMessages, sendLobbyMessage } = useSocket();
