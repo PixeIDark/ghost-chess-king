@@ -10,11 +10,11 @@ import {
 } from "./fenUtils.ts";
 import { squareToIndices } from "../../../utils/squareUtils.ts";
 
-export const pieceMove = (
+export const executeMove = (
   fen: string,
   history: string[],
   from: Square,
-  to: Square
+  to: Square,
 ): { newFen: string; newHistory: string[] } => {
   const board = fenToBoard(fen);
   const { row: fromRow, col: fromCol } = squareToIndices(from);

@@ -19,7 +19,9 @@ const parseRank = (rank: string): Cell[] => {
 
 const createPiece = (char: string): Piece => {
   return {
-    type: FEN_CHAR_TO_PIECE[char.toLowerCase() as keyof typeof FEN_CHAR_TO_PIECE],
+    type: FEN_CHAR_TO_PIECE[
+      char.toLowerCase() as keyof typeof FEN_CHAR_TO_PIECE
+    ],
     color: getColorFromChar(char),
   };
 };

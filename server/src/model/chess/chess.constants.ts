@@ -1,3 +1,6 @@
+export const INITIAL_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+export const BOARD_SIZE = 8;
+
 export const FEN_CHAR_TO_PIECE = {
   p: "pawn",
   n: "knight",
