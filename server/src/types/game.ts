@@ -25,6 +25,7 @@ export interface TimeState {
 
 export interface GameState {
   board: ReturnType<Chess["board"]>;
+  fen: string;
   turn: Side;
   timeState: TimeState;
   status: ReturnType<Chess["status"]>;

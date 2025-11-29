@@ -94,6 +94,7 @@ export class GameManager {
 
     const gameState: GameState = {
       board: room.chess.board(),
+      fen: room.chess.getFen(),
       turn: room.chess.turn(),
       timeState: room.timer.getTime(),
       status: room.chess.status(),
@@ -102,7 +103,6 @@ export class GameManager {
 
     console.log("📤 game-state 전송:", roomId);
 
-    // ✅ AI가 아닌 플레이어에게만 개별 전송
     if (room.whitePlayer !== "AI") {
       this.io.to(room.whitePlayer).emit("game-state", gameState);
     }

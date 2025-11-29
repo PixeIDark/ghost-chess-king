@@ -117,9 +117,7 @@ io.on("connection", (socket) => {
   socket.on("move", ({ roomId, from, to }) => {
     const success = gameManager.makeMove(roomId, socket.id, from, to);
 
-    if (!success) {
-      socket.emit("invalid-move", { from, to });
-    }
+    if (!success) socket.emit("invalid-move", { from, to });
   });
 
   socket.on("resign", ({ roomId }) => {

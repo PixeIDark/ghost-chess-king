@@ -26,6 +26,10 @@ export class Chess {
     return new Chess(newFen, newHistory);
   }
 
+  getFen() {
+    return this.fen;
+  }
+
   board() {
     return fenToBoard(this.fen);
   }

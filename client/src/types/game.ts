@@ -23,6 +23,7 @@ export interface TimeState {
 
 export interface GameState {
   board: Board;
+  fen: string;
   turn: Side;
   timeState: TimeState;
   status: ChessStatus;
