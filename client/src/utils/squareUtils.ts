@@ -1,13 +1,18 @@
-import type { BoardIndex, File, Rank, Square } from "../types/chess.ts";
+import type { Side, Square } from "../types/chess.ts";
 
 export const squareToIndices = (square: Square) => {
-  const row = Number(square[1]) - 1;
+  const row = 8 - Number(square[1]); // "a2" → 8 - 2 = 6 ✅
   const col = square.charCodeAt(0) - "a".charCodeAt(0);
   return { row, col };
 };
 
-export const indicesToSquare = (row: BoardIndex, col: BoardIndex): Square => {
-  const rank = String(row + 1) as Rank;
-  const file = String.fromCharCode(97 + col) as File;
-  return `${file}${rank}`;
+export const indicesToSquare = (row: number, col: number): Square => {
+  const rank = String(8 - row); // row 6 → "2" ✅
+  const file = String.fromCharCode(97 + col);
+  return `${file}${rank}` as Square;
+};
+
+export const getOppositeSide = (side: Side) => {
+  if (side === "white") return "black";
+  return "white";
 };

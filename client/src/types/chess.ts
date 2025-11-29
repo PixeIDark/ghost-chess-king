@@ -11,7 +11,12 @@ export type Cell = Piece | null;
 
 export type Board = Cell[][];
 
-export type Rank = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
 export type File = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h";
+export type Rank = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
 export type Square = `${File}${Rank}`;
-export type BoardIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+
+export type ChessStatus =
+  | { state: "normal"; target: null; winner: null }
+  | { state: "check"; target: Side; winner: null }
+  | { state: "checkmate"; target: Side; winner: Side }
+  | { state: "stalemate"; target: Side; winner: "draw" };
