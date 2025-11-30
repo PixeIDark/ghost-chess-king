@@ -61,9 +61,9 @@ function App() {
   if (!gameState) return <div>게임 로딩 중...</div>;
 
   const handleSquareClick = (square: SquareType, selectedColor: Side | undefined) => {
-    if (!roomId || getOppositeSide(mySide) === selectedColor) return;
+    if (!roomId) return;
 
-    if (!fromSquare) {
+    if (!fromSquare && getOppositeSide(mySide) !== selectedColor) {
       setFromSquare(square);
       socket.emit("get-valid-moves", { roomId, from: square });
       socket.once("valid-moves", (data) => {
