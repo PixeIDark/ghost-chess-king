@@ -1,11 +1,11 @@
-import type { Cell, Square as SquareType } from "./types/chess.ts";
+import type { Cell, Side, Square as SquareType } from "./types/chess.ts";
 import { squareToIndices } from "./utils/squareUtils.ts";
 
 interface SquareProps {
   position: SquareType;
   cell: Cell;
   state: "selected" | "moved" | "kingInChecked" | "none";
-  onSquareClick: (position: SquareType) => void;
+  onSquareClick: (position: SquareType, color: Side | undefined) => void;
 }
 
 const PIECE_IMAGES = {
@@ -51,7 +51,7 @@ function Square({ position, cell, state, onSquareClick }: SquareProps) {
 
   return (
     <button
-      onClick={() => onSquareClick(position)}
+      onClick={() => onSquareClick(position, cell?.color)}
       type="button"
       className={`flex h-full w-full items-center justify-center ${bgColor} ${squareStyle}`}
     >

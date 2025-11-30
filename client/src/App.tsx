@@ -6,6 +6,8 @@ import type { ServerToClientEvents, ClientToServerEvents } from "./types/socket.
 import type { GameState } from "./types/game.ts";
 import type { Square as SquareType } from "./types/chess.ts";
 import { createBoardViewModel } from "./viewModel/board.ts";
+import { useAi } from "./hooks/useAi.ts";
+import { getOppositeSide } from "./utils/squareUtils.ts";
 
 function App() {
   const [socket] = useState<Socket<ServerToClientEvents, ClientToServerEvents>>(() => io("http://localhost:3001"));
@@ -13,7 +15,7 @@ function App() {
   const [fromSquare, setFromSquare] = useState<SquareType | null>(null);
   const [validMoves, setValidMoves] = useState<SquareType[]>([]);
   const [roomId, setRoomId] = useState<string>("");
-  const [mySide, setMySide] = useState<Side | null>(null);
+  const [mySide, setMySide] = useState<Side>("white");
 
   useEffect(() => {
     socket.on("connect", () => {
@@ -28,21 +30,38 @@ function App() {
     });
 
     socket.on("game-state", (data) => {
-      console.log(data);
+      console.log("gameState 수신:", data);
       setGameState(data);
+    });
+
+    socket.on("invalid-move", (data) => {
+      console.log("Invalid move 수신:", data);
     });
 
     return () => {
       socket.off("connect");
       socket.off("game-start");
       socket.off("game-state");
+      socket.off("invalid-move");
     };
   }, [socket]);
 
+  useAi({
+    fen: gameState?.fen ?? "",
+    currentTurn: gameState?.turn ?? "white",
+    aiSide: getOppositeSide(mySide),
+    depth: 15,
+    onAiMove: (from: SquareType, to: SquareType) => {
+      if (!roomId) return;
+      console.log("AI 수:", from, "->", to);
+      socket.emit("move", { roomId, from, to });
+    },
+  });
+
   if (!gameState) return <div>게임 로딩 중...</div>;
 
-  const handleSquareClick = (square: SquareType) => {
-    if (!roomId || gameState.turn !== mySide) return;
+  const handleSquareClick = (square: SquareType, selectedColor: Side | undefined) => {
+    if (!roomId || getOppositeSide(mySide) === selectedColor) return;
 
     if (!fromSquare) {
       setFromSquare(square);
@@ -51,6 +70,12 @@ function App() {
         setValidMoves(data.moves as SquareType[]);
       });
 
+      return;
+    }
+
+    if (!validMoves.includes(square)) {
+      setFromSquare(null);
+      setValidMoves([]);
       return;
     }
 
@@ -64,6 +89,7 @@ function App() {
   return (
     <div>
       <div>현재 턴: {gameState.turn === "white" ? "백" : "흑"}</div>
+      <div>내 진영: {mySide === "white" ? "백" : "흑"}</div>
       <div>상태: {gameState.status.state}</div>
       <div className="grid aspect-square w-full max-w-[640px] min-w-[160px] grid-cols-8 grid-rows-8">
         {boardViewModel.flat().map((square) => (
