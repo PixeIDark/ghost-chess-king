@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 import Square from "./Square.tsx";
 import type { Side } from "./types/chess.ts";
@@ -8,6 +8,7 @@ import type { Square as SquareType } from "./types/chess.ts";
 import { createBoardViewModel } from "./viewModel/board.ts";
 import { useAi } from "./hooks/useAi.ts";
 import { getOppositeSide } from "./utils/squareUtils.ts";
+import { TimerDisplay } from "./TimerDisplay.tsx";
 
 function App() {
   const [socket] = useState<Socket<ServerToClientEvents, ClientToServerEvents>>(() => io("http://localhost:3001"));
@@ -46,16 +47,21 @@ function App() {
     };
   }, [socket]);
 
-  useAi({
-    fen: gameState?.fen ?? "",
-    currentTurn: gameState?.turn ?? "white",
-    aiSide: getOppositeSide(mySide),
-    depth: 15,
-    onAiMove: (from: SquareType, to: SquareType) => {
+  const handleAiMove = useCallback(
+    (from: SquareType, to: SquareType) => {
       if (!roomId) return;
       console.log("AI 수:", from, "->", to);
       socket.emit("move", { roomId, from, to });
     },
+    [roomId, socket]
+  );
+
+  useAi({
+    fen: gameState?.fen ?? "",
+    currentTurn: gameState?.turn ?? "white",
+    aiSide: getOppositeSide(mySide),
+    depth: 20,
+    onAiMove: handleAiMove,
   });
 
   if (!gameState) return <div>게임 로딩 중...</div>;
@@ -112,6 +118,13 @@ function App() {
           />
         ))}
       </div>
+      <TimerDisplay
+        key={`${gameState.timeState.whiteTime}-${gameState.timeState.blackTime}`}
+        whiteTime={gameState.timeState.whiteTime}
+        blackTime={gameState.timeState.blackTime}
+        currentTurn={gameState.turn}
+        isGameActive={gameState.status.state === "normal" || gameState.status.state === "check"}
+      />
     </div>
   );
 }
