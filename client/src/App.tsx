@@ -61,15 +61,25 @@ function App() {
   if (!gameState) return <div>게임 로딩 중...</div>;
 
   const handleSquareClick = (square: SquareType, selectedColor: Side | undefined) => {
-    if (!roomId) return;
+    if (!roomId || gameState.turn !== mySide) return;
 
-    if (!fromSquare && getOppositeSide(mySide) !== selectedColor) {
+    if (!fromSquare && selectedColor !== mySide) return;
+
+    if (!fromSquare) {
       setFromSquare(square);
       socket.emit("get-valid-moves", { roomId, from: square });
       socket.once("valid-moves", (data) => {
         setValidMoves(data.moves as SquareType[]);
       });
+      return;
+    }
 
+    if (selectedColor === mySide) {
+      setFromSquare(square);
+      socket.emit("get-valid-moves", { roomId, from: square });
+      socket.once("valid-moves", (data) => {
+        setValidMoves(data.moves as SquareType[]);
+      });
       return;
     }
 
