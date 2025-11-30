@@ -4,6 +4,7 @@ import { INCREMENT_TIME, INITIAL_TIME } from "./chessTimer.constants.ts";
 export class ChessTimer {
   private whiteTime: number;
   private blackTime: number;
+  private currentTurn: Side;
   private lastUpdateTime: number;
   private timerInterval?: NodeJS.Timeout;
   private onTimeUpdate: (whiteTime: number, blackTime: number) => void;
@@ -12,23 +13,25 @@ export class ChessTimer {
   constructor(onTimeUpdate: (whiteTime: number, blackTime: number) => void, onTimeout: (loser: Side) => void) {
     this.whiteTime = INITIAL_TIME;
     this.blackTime = INITIAL_TIME;
+    this.currentTurn = "white";
     this.lastUpdateTime = Date.now();
     this.onTimeUpdate = onTimeUpdate;
     this.onTimeout = onTimeout;
   }
 
-  start(currentTurn: Side) {
+  start(startTurn: Side) {
+    this.currentTurn = startTurn;
     this.lastUpdateTime = Date.now();
     this.timerInterval = setInterval(() => {
-      this.tick(currentTurn);
+      this.tick();
     }, 100);
   }
 
-  private tick(currentTurn: Side) {
+  private tick() {
     const now = Date.now();
     const elapsed = now - this.lastUpdateTime;
 
-    if (currentTurn === "white") this.whiteTime -= elapsed;
+    if (this.currentTurn === "white") this.whiteTime -= elapsed;
     else this.blackTime -= elapsed;
 
     this.lastUpdateTime = now;
@@ -47,10 +50,14 @@ export class ChessTimer {
     this.onTimeUpdate(Math.max(0, this.whiteTime), Math.max(0, this.blackTime));
   }
 
-  switchTurn(currentTurn: Side) {
-    if (currentTurn === "white") this.blackTime += INCREMENT_TIME;
-    else this.whiteTime += INCREMENT_TIME;
+  private addIncrementTime() {
+    if (this.currentTurn === "white") this.whiteTime += INCREMENT_TIME;
+    else this.blackTime += INCREMENT_TIME;
+  }
 
+  switchTurn(nextTurn: Side) {
+    this.addIncrementTime();
+    this.currentTurn = nextTurn;
     this.lastUpdateTime = Date.now();
   }
 
