@@ -9,10 +9,7 @@ export class ChessTimer {
   private onTimeUpdate: (whiteTime: number, blackTime: number) => void;
   private onTimeout: (loser: Side) => void;
 
-  constructor(
-    onTimeUpdate: (whiteTime: number, blackTime: number) => void,
-    onTimeout: (loser: Side) => void,
-  ) {
+  constructor(onTimeUpdate: (whiteTime: number, blackTime: number) => void, onTimeout: (loser: Side) => void) {
     this.whiteTime = INITIAL_TIME;
     this.blackTime = INITIAL_TIME;
     this.lastUpdateTime = Date.now();
@@ -51,8 +48,8 @@ export class ChessTimer {
   }
 
   switchTurn(currentTurn: Side) {
-    if (currentTurn === "white") this.whiteTime += INCREMENT_TIME;
-    else this.blackTime += INCREMENT_TIME;
+    if (currentTurn === "white") this.blackTime += INCREMENT_TIME;
+    else this.whiteTime += INCREMENT_TIME;
 
     this.lastUpdateTime = Date.now();
   }
