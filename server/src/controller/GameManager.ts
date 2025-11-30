@@ -14,20 +14,14 @@ export class GameManager {
     this.io = io;
   }
 
-  createRoom(
-    roomId: string,
-    whitePlayerId: string,
-    blackPlayerId: string,
-    mode: GameMode,
-  ): GameRoom {
+  createRoom(roomId: string, whitePlayerId: string, blackPlayerId: string, mode: GameMode): GameRoom {
     const chess = new Chess();
     const timer = new ChessTimer(
-      (whiteTime, blackTime) =>
-        this.io.to(roomId).emit("time-update", { whiteTime, blackTime }),
+      (whiteTime, blackTime) => this.io.to(roomId).emit("time-update", { whiteTime, blackTime }),
       (loser) => {
         const winner = getOppositeSide(loser);
         this.endGame(roomId, winner, "timeout");
-      },
+      }
     );
     const room: GameRoom = {
       roomId,
@@ -50,33 +44,21 @@ export class GameManager {
     return room;
   }
 
-  makeMove(
-    roomId: string,
-    socketId: string,
-    from: Square,
-    to: Square,
-  ): boolean {
+  makeMove(roomId: string, socketId: string, from: Square, to: Square): boolean {
     const room = this.rooms.get(roomId);
     if (!room) return false;
 
     const playerSide = room.playerSides.get(socketId);
-    if (playerSide !== room.chess.turn()) return false;
+    if (room.mode === "pvp" && playerSide !== room.chess.turn()) return false;
 
     try {
       room.chess = room.chess.move(from, to);
       room.timer.switchTurn(room.chess.turn());
+      this.broadcastGameState(roomId, { from, to });
 
       const status = room.chess.status();
-      if (status.state === "checkmate") {
-        this.endGame(roomId, status.winner as Side, "checkmate");
-        return true;
-      }
-      if (status.state === "stalemate") {
-        this.endGame(roomId, "draw", "stalemate");
-        return true;
-      }
-
-      this.broadcastGameState(roomId, { from, to });
+      if (status.state === "checkmate") this.endGame(roomId, status.winner as Side, "checkmate");
+      if (status.state === "stalemate") this.endGame(roomId, "draw", "stalemate");
 
       return true;
     } catch (error) {
@@ -85,10 +67,7 @@ export class GameManager {
     }
   }
 
-  private broadcastGameState(
-    roomId: string,
-    lastMove?: { from: Square; to: Square },
-  ) {
+  private broadcastGameState(roomId: string, lastMove?: { from: Square; to: Square }) {
     const room = this.rooms.get(roomId);
     if (!room) return;
 
@@ -101,20 +80,14 @@ export class GameManager {
       lastMove,
     };
 
-    console.log("📤 game-state 전송:", roomId);
-
-    if (room.whitePlayer !== "AI") {
-      this.io.to(room.whitePlayer).emit("game-state", gameState);
-    }
-    if (room.blackPlayer !== "AI") {
-      this.io.to(room.blackPlayer).emit("game-state", gameState);
-    }
+    if (room.whitePlayer !== "AI") this.io.to(room.whitePlayer).emit("game-state", gameState);
+    if (room.blackPlayer !== "AI") this.io.to(room.blackPlayer).emit("game-state", gameState);
   }
 
   private endGame(
     roomId: string,
     winner: Side | "draw",
-    reason: "checkmate" | "timeout" | "stalemate" | "resignation",
+    reason: "checkmate" | "timeout" | "stalemate" | "resignation"
   ) {
     const room = this.rooms.get(roomId);
     if (!room) return;
@@ -138,17 +111,18 @@ export class GameManager {
     this.endGame(roomId, winner, "resignation");
   }
 
-  getValidMoves(
-    roomId: string,
-    socketId: string,
-    from: Square,
-  ): Square[] | null {
+  getValidMoves(roomId: string, socketId: string, from: Square): Square[] | null {
     const room = this.rooms.get(roomId);
     if (!room) return null;
 
     const playerSide = room.playerSides.get(socketId);
-    if (playerSide !== room.chess.turn()) return null;
 
+    if (room.mode === "ai") {
+      if (playerSide !== room.chess.turn()) return null;
+      return room.chess.validMove(from);
+    }
+
+    if (playerSide !== room.chess.turn()) return null;
     return room.chess.validMove(from);
   }
 
@@ -170,8 +144,7 @@ export class GameManager {
 
   getRoomBySocketId(socketId: string): GameRoom | undefined {
     for (const room of this.rooms.values()) {
-      if (room.whitePlayer === socketId || room.blackPlayer === socketId)
-        return room;
+      if (room.whitePlayer === socketId || room.blackPlayer === socketId) return room;
     }
     return undefined;
   }

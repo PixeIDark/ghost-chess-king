@@ -26,15 +26,11 @@ const gameManager = new GameManager(io);
 io.on("connection", (socket) => {
   const user = lobbyManager.addUser(socket.id);
 
-  console.log(`${user.nickname} 연결됨 (${socket.id})`);
-
   socket.emit("nicknameReceived", user.nickname);
   socket.emit("userList", lobbyManager.getUserList());
-
   socket.on("lobbyMessage", (message) => {
     lobbyManager.handleChatMessage(socket.id, message);
   });
-
   socket.on("challenge-player", (targetSocketId: string) => {
     const challenger = lobbyManager.getUser(socket.id);
     const target = lobbyManager.getUser(targetSocketId);
@@ -52,7 +48,6 @@ io.on("connection", (socket) => {
     const isWhite = Math.random() < 0.5;
     const whitePlayer = isWhite ? socket.id : targetSocketId;
     const blackPlayer = isWhite ? targetSocketId : socket.id;
-
     const roomId = uuidv4();
 
     gameManager.createRoom(roomId, whitePlayer, blackPlayer, "pvp");
@@ -116,7 +111,6 @@ io.on("connection", (socket) => {
 
   socket.on("move", ({ roomId, from, to }) => {
     const success = gameManager.makeMove(roomId, socket.id, from, to);
-
     if (!success) socket.emit("invalid-move", { from, to });
   });
 
@@ -132,7 +126,6 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     const user = lobbyManager.getUser(socket.id);
-    console.log(`${user?.nickname} 연결 해제`);
 
     const room = gameManager.getRoomBySocketId(socket.id);
     if (room) gameManager.leaveRoom(room.roomId, socket.id);
