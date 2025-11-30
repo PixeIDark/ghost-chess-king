@@ -56,7 +56,7 @@ export const useStockfish = () => {
     };
   }, []);
 
-  const getBestMove = (fen: string, depth: number = 15): Promise<string> => {
+  const getBestMove = (fen: string, depth: number = 20): Promise<string> => {
     return new Promise((resolve, reject) => {
       if (!engineRef.current || !isReady) {
         reject(new Error("Engine not ready"));

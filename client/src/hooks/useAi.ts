@@ -7,11 +7,11 @@ interface UseAiOptions {
   fen: string;
   currentTurn: "white" | "black";
   aiSide: "white" | "black";
-  onAiMove: (from: SquareType, to: SquareType) => void;
   depth?: number;
+  onAiMove: (from: SquareType, to: SquareType) => void;
 }
 
-export const useAi = ({ fen, currentTurn, aiSide, onAiMove, depth }: UseAiOptions) => {
+export const useAi = ({ fen, currentTurn, aiSide, depth, onAiMove }: UseAiOptions) => {
   const { isReady, getBestMove } = useStockfish();
 
   useEffect(() => {
