@@ -148,4 +148,23 @@ export class GameManager {
     }
     return undefined;
   }
+
+  getRoomByRoomId(roomId: string): GameRoom | undefined {
+    return this.rooms.get(roomId);
+  }
+
+  sendGameState(roomId: string, socketId: string) {
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+
+    const gameState: GameState = {
+      board: room.chess.board(),
+      turn: room.chess.turn(),
+      timeState: room.timer.getTime(),
+      status: room.chess.status(),
+      fen: room.chess.getFen(),
+    };
+
+    this.io.to(socketId).emit("game-state", gameState);
+  }
 }

@@ -87,12 +87,7 @@ io.on("connection", (socket) => {
     const roomId = uuidv4();
     const isWhite = Math.random() < 0.5;
 
-    gameManager.createRoom(
-      roomId,
-      isWhite ? socket.id : "AI",
-      isWhite ? "AI" : socket.id,
-      "ai",
-    );
+    gameManager.createRoom(roomId, isWhite ? socket.id : "AI", isWhite ? "AI" : socket.id, "ai");
 
     socket.join(roomId);
     lobbyManager.setInGame(socket.id, true);
@@ -112,6 +107,17 @@ io.on("connection", (socket) => {
   socket.on("move", ({ roomId, from, to }) => {
     const success = gameManager.makeMove(roomId, socket.id, from, to);
     if (!success) socket.emit("invalid-move", { from, to });
+  });
+
+  socket.on("rejoin-game", ({ roomId }) => {
+    const room = gameManager.getRoomByRoomId(roomId);
+    if (!room) {
+      socket.emit("game-not-found");
+      return;
+    }
+
+    socket.join(roomId);
+    gameManager.sendGameState(roomId, socket.id);
   });
 
   socket.on("resign", ({ roomId }) => {
