@@ -1,5 +1,5 @@
-import type { Cell, Side, Square as SquareType } from "./types/chess.ts";
-import { squareToIndices } from "./utils/squareUtils.ts";
+import type { Cell, Side, Square as SquareType } from "../../../types/chess.ts";
+import { squareToIndices } from "../../../utils/squareUtils.ts";
 
 interface SquareProps {
   position: SquareType;

@@ -1,5 +1,5 @@
-import { useGameTimer } from "./hooks/useGameTimer";
-import type { Side } from "./types/chess";
+import { useGameTimer } from "../hooks/useGameTimer.ts";
+import type { Side } from "../../../types/chess.ts";
 
 interface TimerDisplayProps {
   whiteTime: number;
@@ -20,8 +20,6 @@ export const TimerDisplay = ({
     currentTurn,
     isGameActive,
   });
-
-  console.log(initialBlackTime, initialWhiteTime);
 
   return (
     <>

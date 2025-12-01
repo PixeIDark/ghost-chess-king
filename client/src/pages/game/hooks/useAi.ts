@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { useStockfish } from "./useStockfish.ts";
-import { delay } from "../utils/helper.ts";
-import type { Square as SquareType } from "../types/chess.ts";
+import { useStockfish } from "../../../hooks/useStockfish.ts";
+import { delay } from "../../../utils/helper.ts";
+import type { Square as SquareType } from "../../../types/chess.ts";
 
 interface UseAiOptions {
   fen: string;
