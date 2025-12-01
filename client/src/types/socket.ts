@@ -15,6 +15,7 @@ export interface ServerToClientEvents {
   "invalid-move": (data: InvalidMoveData) => void;
   "time-update": (data: TimeUpdateData) => void;
   "game-over": (data: GameOverData) => void;
+  "game-not-found": () => void; // ✅ 추가
 
   error: (data: ErrorData) => void;
 }
@@ -24,6 +25,7 @@ export interface ClientToServerEvents {
 
   "challenge-player": (targetSocketId: string) => void;
   "start-ai-game": () => void;
+  "rejoin-game": (data: RejoinGameData) => void;
 
   "get-valid-moves": (data: GetValidMovesData) => void;
   move: (data: MoveData) => void;
@@ -79,5 +81,9 @@ export interface ResignData {
 }
 
 export interface LeaveGameData {
+  roomId: string;
+}
+
+export interface RejoinGameData {
   roomId: string;
 }
