@@ -1,16 +1,8 @@
-import GamePage from "./pages/game/GamePage.tsx";
-import LobbyPage from "./pages/lobby/LobbyPage.tsx";
-import { BrowserRouter, Routes, Route } from "react-router";
+import { router } from "./pages/router.ts";
+import { RouterProvider } from "react-router";
 
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LobbyPage />} />
-        <Route path="/game" element={<GamePage />} />
-      </Routes>
-    </BrowserRouter>
-  );
+  return <RouterProvider router={router}></RouterProvider>;
 }
 
 export default App;
