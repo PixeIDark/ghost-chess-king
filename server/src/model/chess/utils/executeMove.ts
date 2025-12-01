@@ -1,6 +1,7 @@
 import type { Square } from "../../../types/chess.ts";
 import { fenToBoard } from "./fenToBoard.ts";
 import { boardToFen } from "./boardToFen.ts";
+import { getValidMoves } from "./moveValidation.ts";
 import {
   updateTurn,
   updateCastlingRights,
@@ -14,9 +15,13 @@ export const executeMove = (
   fen: string,
   history: string[],
   from: Square,
-  to: Square,
+  to: Square
 ): { newFen: string; newHistory: string[] } => {
   const board = fenToBoard(fen);
+  const validMoves = getValidMoves(board, fen, from);
+
+  if (!validMoves || !validMoves.includes(to)) throw new Error(`Invalid move: ${from} -> ${to}`);
+
   const { row: fromRow, col: fromCol } = squareToIndices(from);
   const { row: toRow, col: toCol } = squareToIndices(to);
 
