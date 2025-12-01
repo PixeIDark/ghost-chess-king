@@ -5,11 +5,11 @@ import { ROUTES } from "../constants/routes.ts";
 
 export const router = createBrowserRouter([
   {
-    path: ROUTES.LOBBY,
+    path: ROUTES.LOBBY(),
     Component: LobbyPage,
   },
   {
-    path: ROUTES.GAME,
+    path: ROUTES.GAME(),
     Component: GamePage,
   },
 ]);

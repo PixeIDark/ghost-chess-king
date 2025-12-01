@@ -1,4 +1,4 @@
 export const ROUTES = {
-  LOBBY: "/",
-  GAME: "/game",
+  LOBBY: () => "/",
+  GAME: (roomId: number | string = ":roomId") => `/game/${roomId}`,
 } as const;
