@@ -6,9 +6,9 @@ import type { Square as SquareType } from "../../types/chess.ts";
 import { createBoardViewModel } from "../../viewModel/board.ts";
 import { useAi } from "./hooks/useAi.ts";
 import { getOppositeSide } from "../../utils/squareUtils.ts";
-import { TimerDisplay } from "./components/TimerDisplay.tsx";
 import { useSocket } from "../../contexts/SocketContext.tsx";
 import type { GameOverData } from "../../types/socket.ts";
+import { TimerDisplay } from "./components/TimerDisplay";
 
 function GamePage() {
   const socket = useSocket();

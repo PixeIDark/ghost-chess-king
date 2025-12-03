@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Side } from "../../../types/chess.ts";
+import type { Side } from "../../../../../types/chess.ts";
 
 interface UseGameTimerProps {
   whiteTime: number;
