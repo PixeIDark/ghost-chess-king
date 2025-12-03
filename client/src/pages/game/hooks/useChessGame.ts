@@ -1,4 +1,4 @@
-import type { Socket } from "socket.io-client";
+import { type Socket } from "socket.io-client";
 import type { ClientToServerEvents, GameOverData, ServerToClientEvents } from "../../../types/socket.ts";
 import { useEffect, useState } from "react";
 import type { GameState } from "../../../types/game.ts";
@@ -6,10 +6,7 @@ import type { Side, Square as SquareType } from "../../../types/chess.ts";
 import { useAi } from "./useAi.ts";
 import { getOppositeSide } from "../../../utils/squareUtils.ts";
 
-export const useChessGame = (
-  socket: Socket<ServerToClientEvents, ClientToServerEvents>,
-  mode: "ai" | "pvp" | "solo"
-) => {
+export const useChessGame = (socket: Socket<ServerToClientEvents, ClientToServerEvents>) => {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [roomId, setRoomId] = useState<string>("");
   const [mySide, setMySide] = useState<Side>("white");
@@ -18,8 +15,6 @@ export const useChessGame = (
   const [gameResult, setGameResult] = useState<GameOverData | null>(null);
 
   useEffect(() => {
-    if (mode === "ai") socket.emit("start-ai-game");
-
     socket.on("game-start", (data) => {
       console.log("게임 시작:", data);
       setMySide(data.yourSide);
@@ -34,12 +29,14 @@ export const useChessGame = (
       setGameResult(data);
     });
 
+    socket.emit("start-ai-game");
+
     return () => {
       socket.off("game-start");
       socket.off("game-state");
       socket.off("game-over");
     };
-  }, [socket, mode]);
+  }, [socket]);
 
   const handleAiMove = (from: SquareType, to: SquareType) => {
     if (!roomId) return;
@@ -80,7 +77,6 @@ export const useChessGame = (
   };
 
   useAi({
-    enabled: mode === "ai",
     fen: gameState?.fen ?? "",
     currentTurn: gameState?.turn ?? "white",
     aiSide: getOppositeSide(mySide),

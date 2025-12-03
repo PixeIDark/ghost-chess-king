@@ -6,7 +6,7 @@ import { useChessGame } from "./hooks/useChessGame.ts";
 
 function GamePage() {
   const socket = useSocket();
-  const { gameState, mySide, gameResult, validMoves, fromSquare, handleSquareClick } = useChessGame(socket, "ai");
+  const { gameState, mySide, gameResult, validMoves, fromSquare, handleSquareClick } = useChessGame(socket);
 
   if (!gameState) return <div>게임 로딩 중...</div>;
 
