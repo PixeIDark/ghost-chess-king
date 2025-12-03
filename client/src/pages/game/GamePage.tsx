@@ -1,28 +1,26 @@
 import { useState, useEffect, useCallback } from "react";
-import { io, Socket } from "socket.io-client";
 import Square from "./components/Square.tsx";
 import type { Side } from "../../types/chess.ts";
-import type { ServerToClientEvents, ClientToServerEvents } from "../../types/socket.ts";
 import type { GameState } from "../../types/game.ts";
 import type { Square as SquareType } from "../../types/chess.ts";
 import { createBoardViewModel } from "../../viewModel/board.ts";
 import { useAi } from "./hooks/useAi.ts";
 import { getOppositeSide } from "../../utils/squareUtils.ts";
 import { TimerDisplay } from "./components/TimerDisplay.tsx";
+import { useSocket } from "../../contexts/SocketContext.tsx";
+import type { GameOverData } from "../../types/socket.ts";
 
 function GamePage() {
-  const [socket] = useState<Socket<ServerToClientEvents, ClientToServerEvents>>(() => io("http://localhost:3001"));
+  const socket = useSocket();
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [fromSquare, setFromSquare] = useState<SquareType | null>(null);
   const [validMoves, setValidMoves] = useState<SquareType[]>([]);
   const [roomId, setRoomId] = useState<string>("");
   const [mySide, setMySide] = useState<Side>("white");
+  const [gameResult, setGameResult] = useState<GameOverData | null>(null);
 
   useEffect(() => {
-    socket.on("connect", () => {
-      console.log("서버 연결됨:", socket.id);
-      socket.emit("start-ai-game");
-    });
+    socket.emit("start-ai-game");
 
     socket.on("game-start", (data) => {
       console.log("내 진영:", data.yourSide);
@@ -41,6 +39,7 @@ function GamePage() {
 
     socket.on("game-over", (data) => {
       console.log("게임 종료:", data.winner, data.reason);
+      setGameResult(data);
     });
 
     return () => {
@@ -112,6 +111,11 @@ function GamePage() {
       <div>현재 턴: {gameState.turn === "white" ? "백" : "흑"}</div>
       <div>내 진영: {mySide === "white" ? "백" : "흑"}</div>
       <div>상태: {gameState.status.state}</div>
+      {gameResult && (
+        <div>
+          {gameResult.winner}이 {gameResult.reason}로 승리!
+        </div>
+      )}
       <div className="grid aspect-square w-full max-w-[640px] min-w-[160px] grid-cols-8 grid-rows-8">
         {boardViewModel.flat().map((square) => (
           <Square

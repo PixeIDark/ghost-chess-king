@@ -15,7 +15,7 @@ export interface ServerToClientEvents {
   "invalid-move": (data: InvalidMoveData) => void;
   "time-update": (data: TimeUpdateData) => void;
   "game-over": (data: GameOverData) => void;
-  "game-not-found": () => void; // ✅ 추가
+  "game-not-found": () => void;
 
   error: (data: ErrorData) => void;
 }

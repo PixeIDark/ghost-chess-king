@@ -1,10 +1,10 @@
 import { Link } from "react-router";
+import { ROUTES } from "../../constants/routes.ts";
 
 function LobbyPage() {
   return (
     <div>
-      <p>로비</p>
-      <Link to="/game">게임 시작</Link>
+      <Link to={ROUTES.GAME()}>ai와 게임하기</Link>
     </div>
   );
 }
