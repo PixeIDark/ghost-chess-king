@@ -97,6 +97,8 @@ io.on("connection", (socket) => {
       mode: "ai",
       yourSide: isWhite ? "white" : "black",
     });
+
+    gameManager.sendGameState(roomId, socket.id);
   });
 
   socket.on("get-valid-moves", ({ roomId, from }) => {
