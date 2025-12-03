@@ -4,6 +4,7 @@ import { delay } from "../../../utils/helper.ts";
 import type { Square as SquareType } from "../../../types/chess.ts";
 
 interface UseAiOptions {
+  enabled?: boolean; // ✅ 추가
   fen: string;
   currentTurn: "white" | "black";
   aiSide: "white" | "black";
@@ -11,10 +12,11 @@ interface UseAiOptions {
   onAiMove: (from: SquareType, to: SquareType) => void;
 }
 
-export const useAi = ({ fen, currentTurn, aiSide, depth, onAiMove }: UseAiOptions) => {
+export const useAi = ({ enabled = true, fen, currentTurn, aiSide, depth, onAiMove }: UseAiOptions) => {
   const { isReady, getBestMove } = useStockfish();
 
   useEffect(() => {
+    if (!enabled) return;
     if (!isReady || currentTurn !== aiSide || !fen) return;
 
     let cancelled = false;
@@ -35,5 +37,5 @@ export const useAi = ({ fen, currentTurn, aiSide, depth, onAiMove }: UseAiOption
     return () => {
       cancelled = true;
     };
-  }, [getBestMove, onAiMove, fen, currentTurn, aiSide, isReady, depth]);
+  }, [enabled, getBestMove, onAiMove, fen, currentTurn, aiSide, isReady, depth]); // ✅ enabled 추가
 };
