@@ -44,7 +44,7 @@ export const useChessGame = (socket: Socket<ServerToClientEvents, ClientToServer
   };
 
   const handleSquareClick = (square: SquareType, selectedColor: Side | undefined) => {
-    if (!roomId || gameState?.turn !== mySide) return;
+    if (!roomId || gameState?.turn !== mySide || gameResult) return;
     if (!fromSquare && selectedColor !== mySide) return;
 
     if (!fromSquare) {
