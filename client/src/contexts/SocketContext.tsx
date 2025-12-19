@@ -7,7 +7,6 @@ const SocketContext = createContext<Socket<ServerToClientEvents, ClientToServerE
 
 export function SocketProvider({ children }: { children: ReactNode }) {
   const [socket] = useState(() => io("http://localhost:3001"));
-
   return <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>;
 }
 
