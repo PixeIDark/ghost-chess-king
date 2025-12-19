@@ -5,7 +5,9 @@ import { SocketProvider } from "./contexts/SocketContext.tsx";
 function App() {
   return (
     <SocketProvider>
-      <RouterProvider router={router}></RouterProvider>
+      <div className="flex justify-center">
+        <RouterProvider router={router}></RouterProvider>
+      </div>
     </SocketProvider>
   );
 }

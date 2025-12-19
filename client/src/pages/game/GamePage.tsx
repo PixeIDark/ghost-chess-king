@@ -13,7 +13,7 @@ function GamePage() {
   const boardViewModel = createBoardViewModel(gameState.board, validMoves, fromSquare);
 
   return (
-    <div>
+    <div className="flex w-full flex-col items-center">
       <div>현재 턴: {gameState.turn === "white" ? "백" : "흑"}</div>
       <div>내 진영: {mySide === "white" ? "백" : "흑"}</div>
       <div>상태: {gameState.status.state}</div>
