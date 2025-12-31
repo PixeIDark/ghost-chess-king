@@ -3,60 +3,79 @@ import { ChatMessage, User, UserInfo } from "../types/lobby.ts";
 import { ClientToServerEvents, ServerToClientEvents } from "../types/socket.ts";
 
 export class LobbyManager {
-  private users: Map<string, User> = new Map();
+  private users: Map<string, User> = new Map(); // odId -> User
   private io: Server<ClientToServerEvents, ServerToClientEvents>;
 
   constructor(io: Server) {
     this.io = io;
   }
 
-  addUser(socketId: string): User {
+  addUser(odId: string, socketId: string): User {
     const nickname = this.generateNickname();
     const user: User = {
+      odId,
       socketId,
       nickname,
       lastMessageTime: Date.now(),
       inGame: false,
+      currentRoomId: null,
     };
 
-    this.users.set(socketId, user);
+    this.users.set(odId, user);
     this.io.emit("userConnected", { nickname, totalUsers: this.users.size });
     this.broadcastUserList();
 
     return user;
   }
 
-  removeUser(socketId: string): void {
-    const user = this.users.get(socketId);
+  updateSocketId(odId: string, socketId: string): User | undefined {
+    const user = this.users.get(odId);
+    if (!user) return undefined;
+
+    user.socketId = socketId;
+    return user;
+  }
+
+  removeUser(odId: string): void {
+    const user = this.users.get(odId);
     if (!user) return;
 
-    this.users.delete(socketId);
+    this.users.delete(odId);
     this.io.emit("userDisconnected", { totalUsers: this.users.size });
     this.broadcastUserList();
   }
 
-  getUser(socketId: string): User | undefined {
-    return this.users.get(socketId);
+  getUser(odId: string): User | undefined {
+    return this.users.get(odId);
+  }
+
+  getUserBySocketId(socketId: string): User | undefined {
+    for (const user of this.users.values()) {
+      if (user.socketId === socketId) return user;
+    }
+    return undefined;
   }
 
   getUserList(): UserInfo[] {
     return Array.from(this.users.values()).map((u) => ({
+      odId: u.odId,
       socketId: u.socketId,
       nickname: u.nickname,
       inGame: u.inGame,
     }));
   }
 
-  setInGame(socketId: string, inGame: boolean): void {
-    const user = this.users.get(socketId);
+  setInGame(odId: string, inGame: boolean, roomId: string | null = null): void {
+    const user = this.users.get(odId);
     if (!user) return;
 
     user.inGame = inGame;
+    user.currentRoomId = roomId;
     this.broadcastUserList();
   }
 
-  handleChatMessage(socketId: string, message: string): void {
-    const user = this.users.get(socketId);
+  handleChatMessage(odId: string, message: string): void {
+    const user = this.users.get(odId);
     if (!user) return;
 
     const timestamp = Date.now();
@@ -66,7 +85,7 @@ export class LobbyManager {
       nickname: user.nickname,
       message,
       timestamp,
-      socketId,
+      odId,
     };
 
     this.io.emit("lobbyMessage", chatData);
