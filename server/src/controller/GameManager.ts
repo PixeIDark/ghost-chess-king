@@ -98,6 +98,7 @@ export class GameManager {
     room.timer.stop();
 
     this.io.to(roomId).emit("game-over", { winner, reason });
+    this.rooms.delete(roomId);
   }
 
   resign(roomId: string, socketId: string) {
