@@ -5,8 +5,10 @@ import type { GameState } from "../../../types/game.ts";
 import type { Side, Square as SquareType } from "../../../types/chess.ts";
 import { useAi } from "./useAi.ts";
 import { getOppositeSide } from "../../../utils/squareUtils.ts";
+import { useUserInfo } from "../../../contexts/SocketContext.tsx";
 
 export const useChessGame = (socket: Socket<ServerToClientEvents, ClientToServerEvents>) => {
+  const { currentRoomId, isRegistered } = useUserInfo();
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [roomId, setRoomId] = useState<string>("");
   const [mySide, setMySide] = useState<Side>("white");
@@ -15,28 +17,50 @@ export const useChessGame = (socket: Socket<ServerToClientEvents, ClientToServer
   const [gameResult, setGameResult] = useState<GameOverData | null>(null);
 
   useEffect(() => {
-    socket.on("game-start", (data) => {
-      console.log("게임 시작:", data);
+    if (!isRegistered) return;
+
+    const handleGameStart = (data: { roomId: string; yourSide: Side }) => {
       setMySide(data.yourSide);
       setRoomId(data.roomId);
-    });
+      setGameResult(null);
+    };
 
-    socket.on("game-state", (data) => {
+    const handleGameState = (data: GameState) => {
       setGameState(data);
-    });
+    };
 
-    socket.on("game-over", (data) => {
+    const handleGameRestored = (data: { roomId: string; yourSide: Side; gameState: GameState }) => {
+      setRoomId(data.roomId);
+      setMySide(data.yourSide);
+      setGameState(data.gameState);
+      setGameResult(null);
+    };
+
+    const handleGameOver = (data: GameOverData) => {
       setGameResult(data);
-    });
+    };
 
-    socket.emit("start-ai-game");
+    const handleGameNotFound = () => {
+      socket.emit("start-ai-game");
+    };
+
+    socket.on("game-start", handleGameStart);
+    socket.on("game-state", handleGameState);
+    socket.on("game-restored", handleGameRestored);
+    socket.on("game-over", handleGameOver);
+    socket.on("game-not-found", handleGameNotFound);
+
+    if (currentRoomId) socket.emit("reconnect-game");
+    else socket.emit("start-ai-game");
 
     return () => {
-      socket.off("game-start");
-      socket.off("game-state");
-      socket.off("game-over");
+      socket.off("game-start", handleGameStart);
+      socket.off("game-state", handleGameState);
+      socket.off("game-restored", handleGameRestored);
+      socket.off("game-over", handleGameOver);
+      socket.off("game-not-found", handleGameNotFound);
     };
-  }, [socket]);
+  }, [socket, isRegistered, currentRoomId]);
 
   const handleAiMove = (from: SquareType, to: SquareType) => {
     if (!roomId) return;
