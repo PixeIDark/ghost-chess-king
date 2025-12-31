@@ -24,16 +24,55 @@ const lobbyManager = new LobbyManager(io);
 const gameManager = new GameManager(io);
 
 io.on("connection", (socket) => {
-  const user = lobbyManager.addUser(socket.id);
+  socket.on("register", ({ odId }) => {
+    const existingUser = lobbyManager.getUser(odId);
 
-  socket.emit("nicknameReceived", user.nickname);
-  socket.emit("userList", lobbyManager.getUserList());
-  socket.on("lobbyMessage", (message) => {
-    lobbyManager.handleChatMessage(socket.id, message);
+    if (existingUser) {
+      lobbyManager.updateSocketId(odId, socket.id);
+      gameManager.updateSocketId(odId, socket.id);
+
+      socket.emit("registered", {
+        odId,
+        nickname: existingUser.nickname,
+        currentRoomId: existingUser.currentRoomId,
+      });
+
+      if (existingUser.currentRoomId) {
+        const restoreData = gameManager.getGameStateForRestore(existingUser.currentRoomId, odId);
+        if (restoreData) {
+          socket.join(existingUser.currentRoomId);
+          socket.emit("game-restored", {
+            roomId: existingUser.currentRoomId,
+            yourSide: restoreData.yourSide,
+            gameState: restoreData.gameState,
+          });
+        } else {
+          lobbyManager.setInGame(odId, false, null);
+        }
+      }
+    } else {
+      const user = lobbyManager.addUser(odId, socket.id);
+      gameManager.updateSocketId(odId, socket.id);
+
+      socket.emit("registered", {
+        odId,
+        nickname: user.nickname,
+        currentRoomId: null,
+      });
+    }
+
+    socket.emit("userList", lobbyManager.getUserList());
   });
-  socket.on("challenge-player", (targetSocketId: string) => {
-    const challenger = lobbyManager.getUser(socket.id);
-    const target = lobbyManager.getUser(targetSocketId);
+
+  socket.on("lobbyMessage", (message) => {
+    const user = lobbyManager.getUserBySocketId(socket.id);
+    if (!user) return;
+    lobbyManager.handleChatMessage(user.odId, message);
+  });
+
+  socket.on("challenge-player", (targetOdId: string) => {
+    const challenger = lobbyManager.getUserBySocketId(socket.id);
+    const target = lobbyManager.getUser(targetOdId);
 
     if (!challenger || !target) {
       socket.emit("error", { message: "상대를 찾을 수 없습니다" });
@@ -46,37 +85,37 @@ io.on("connection", (socket) => {
     }
 
     const isWhite = Math.random() < 0.5;
-    const whitePlayer = isWhite ? socket.id : targetSocketId;
-    const blackPlayer = isWhite ? targetSocketId : socket.id;
+    const whiteOdId = isWhite ? challenger.odId : targetOdId;
+    const blackOdId = isWhite ? targetOdId : challenger.odId;
     const roomId = uuidv4();
 
-    gameManager.createRoom(roomId, whitePlayer, blackPlayer, "pvp");
+    gameManager.createRoom(roomId, whiteOdId, blackOdId, "pvp");
 
     socket.join(roomId);
-    io.sockets.sockets.get(targetSocketId)?.join(roomId);
+    io.sockets.sockets.get(target.socketId)?.join(roomId);
 
-    lobbyManager.setInGame(socket.id, true);
-    lobbyManager.setInGame(targetSocketId, true);
+    lobbyManager.setInGame(challenger.odId, true, roomId);
+    lobbyManager.setInGame(targetOdId, true, roomId);
 
     socket.emit("game-start", {
       roomId,
       mode: "pvp",
-      whitePlayer: lobbyManager.getUser(whitePlayer)?.nickname,
-      blackPlayer: lobbyManager.getUser(blackPlayer)?.nickname,
-      yourSide: socket.id === whitePlayer ? "white" : "black",
+      whitePlayer: lobbyManager.getUser(whiteOdId)?.nickname,
+      blackPlayer: lobbyManager.getUser(blackOdId)?.nickname,
+      yourSide: challenger.odId === whiteOdId ? "white" : "black",
     });
 
-    io.to(targetSocketId).emit("game-start", {
+    io.to(target.socketId).emit("game-start", {
       roomId,
       mode: "pvp",
-      whitePlayer: lobbyManager.getUser(whitePlayer)?.nickname,
-      blackPlayer: lobbyManager.getUser(blackPlayer)?.nickname,
-      yourSide: targetSocketId === whitePlayer ? "white" : "black",
+      whitePlayer: lobbyManager.getUser(whiteOdId)?.nickname,
+      blackPlayer: lobbyManager.getUser(blackOdId)?.nickname,
+      yourSide: targetOdId === whiteOdId ? "white" : "black",
     });
   });
 
   socket.on("start-ai-game", () => {
-    const user = lobbyManager.getUser(socket.id);
+    const user = lobbyManager.getUserBySocketId(socket.id);
     if (!user) return;
 
     if (user.inGame) {
@@ -87,10 +126,10 @@ io.on("connection", (socket) => {
     const roomId = uuidv4();
     const isWhite = Math.random() < 0.5;
 
-    gameManager.createRoom(roomId, isWhite ? socket.id : "AI", isWhite ? "AI" : socket.id, "ai");
+    gameManager.createRoom(roomId, isWhite ? user.odId : "AI", isWhite ? "AI" : user.odId, "ai");
 
     socket.join(roomId);
-    lobbyManager.setInGame(socket.id, true);
+    lobbyManager.setInGame(user.odId, true, roomId);
 
     socket.emit("game-start", {
       roomId,
@@ -101,44 +140,96 @@ io.on("connection", (socket) => {
     gameManager.sendGameState(roomId, socket.id);
   });
 
+  socket.on("reconnect-game", () => {
+    const user = lobbyManager.getUserBySocketId(socket.id);
+    if (!user || !user.currentRoomId) {
+      socket.emit("game-not-found");
+      return;
+    }
+
+    const restoreData = gameManager.getGameStateForRestore(user.currentRoomId, user.odId);
+    if (restoreData) {
+      socket.join(user.currentRoomId);
+      socket.emit("game-restored", {
+        roomId: user.currentRoomId,
+        yourSide: restoreData.yourSide,
+        gameState: restoreData.gameState,
+      });
+    } else {
+      lobbyManager.setInGame(user.odId, false, null);
+      socket.emit("game-not-found");
+    }
+  });
+
   socket.on("get-valid-moves", ({ roomId, from }) => {
-    const validMoves = gameManager.getValidMoves(roomId, socket.id, from);
+    const user = lobbyManager.getUserBySocketId(socket.id);
+    if (!user) return;
+
+    const validMoves = gameManager.getValidMoves(roomId, user.odId, from);
     socket.emit("valid-moves", { from, moves: validMoves });
   });
 
   socket.on("move", ({ roomId, from, to }) => {
-    const success = gameManager.makeMove(roomId, socket.id, from, to);
+    const user = lobbyManager.getUserBySocketId(socket.id);
+    if (!user) return;
+
+    const success = gameManager.makeMove(roomId, user.odId, from, to);
     if (!success) socket.emit("invalid-move", { from, to });
   });
 
   socket.on("rejoin-game", ({ roomId }) => {
-    const room = gameManager.getRoomByRoomId(roomId);
-    if (!room) {
+    const user = lobbyManager.getUserBySocketId(socket.id);
+    if (!user) return;
+
+    const restoreData = gameManager.getGameStateForRestore(roomId, user.odId);
+    if (!restoreData) {
       socket.emit("game-not-found");
       return;
     }
 
     socket.join(roomId);
-    gameManager.sendGameState(roomId, socket.id);
+    lobbyManager.setInGame(user.odId, true, roomId);
+    socket.emit("game-restored", {
+      roomId,
+      yourSide: restoreData.yourSide,
+      gameState: restoreData.gameState,
+    });
   });
 
   socket.on("resign", ({ roomId }) => {
-    gameManager.resign(roomId, socket.id);
+    const user = lobbyManager.getUserBySocketId(socket.id);
+    if (!user) return;
+
+    gameManager.resign(roomId, user.odId);
+    lobbyManager.setInGame(user.odId, false, null);
   });
 
   socket.on("leave-game", ({ roomId }) => {
-    lobbyManager.setInGame(socket.id, false);
-    gameManager.leaveRoom(roomId, socket.id);
+    const user = lobbyManager.getUserBySocketId(socket.id);
+    if (!user) return;
+
+    lobbyManager.setInGame(user.odId, false, null);
+    gameManager.leaveRoom(roomId, user.odId);
     socket.leave(roomId);
   });
 
   socket.on("disconnect", () => {
-    const user = lobbyManager.getUser(socket.id);
+    const user = lobbyManager.getUserBySocketId(socket.id);
+    if (!user) return;
 
-    const room = gameManager.getRoomBySocketId(socket.id);
-    if (room) gameManager.leaveRoom(room.roomId, socket.id);
-
-    lobbyManager.removeUser(socket.id);
+    setTimeout(
+      () => {
+        const currentUser = lobbyManager.getUser(user.odId);
+        if (currentUser && currentUser.socketId === socket.id) {
+          if (currentUser.currentRoomId) {
+            gameManager.leaveRoom(currentUser.currentRoomId, user.odId);
+          }
+          lobbyManager.removeUser(user.odId);
+          gameManager.removeSocketId(user.odId);
+        }
+      },
+      5 * 60 * 1000
+    );
   });
 });
 
