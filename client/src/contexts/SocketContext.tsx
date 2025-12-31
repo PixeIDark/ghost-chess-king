@@ -48,7 +48,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
     if (socket.connected) socket.emit("register", { odId });
 
-
     return () => {
       socket.off("connect", handleConnect);
       socket.off("registered", handleRegistered);
