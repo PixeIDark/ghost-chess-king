@@ -3,34 +3,48 @@ import { GameMode, GameState } from "./game.ts";
 import { UserInfo } from "./lobby.ts";
 
 export interface ServerToClientEvents {
+  registered: (data: RegisteredData) => void;
   nicknameReceived: (nickname: string) => void;
   userConnected: (data: { nickname: string; totalUsers: number }) => void;
   userDisconnected: (data: { totalUsers: number }) => void;
   userList: (users: UserInfo[]) => void;
-  lobbyMessage: (data: { nickname: string; message: string; timestamp: number; socketId: string }) => void;
+  lobbyMessage: (data: { nickname: string; message: string; timestamp: number; odId: string }) => void;
 
   "game-start": (data: GameStartData) => void;
   "game-state": (state: GameState) => void;
+  "game-restored": (data: GameRestoredData) => void;
   "valid-moves": (data: ValidMovesData) => void;
   "invalid-move": (data: InvalidMoveData) => void;
   "time-update": (data: TimeUpdateData) => void;
   "game-over": (data: GameOverData) => void;
-  "game-not-found": () => void; // ✅ 추가
+  "game-not-found": () => void;
 
   error: (data: ErrorData) => void;
 }
 
 export interface ClientToServerEvents {
+  register: (data: RegisterData) => void;
   lobbyMessage: (message: string) => void;
 
-  "challenge-player": (targetSocketId: string) => void;
+  "challenge-player": (targetOdId: string) => void;
   "start-ai-game": () => void;
   "rejoin-game": (data: RejoinGameData) => void;
+  "reconnect-game": () => void;
 
   "get-valid-moves": (data: GetValidMovesData) => void;
   move: (data: MoveData) => void;
   resign: (data: ResignData) => void;
   "leave-game": (data: LeaveGameData) => void;
+}
+
+export interface RegisterData {
+  odId: string;
+}
+
+export interface RegisteredData {
+  odId: string;
+  nickname: string;
+  currentRoomId: string | null;
 }
 
 export interface GameStartData {
@@ -39,6 +53,12 @@ export interface GameStartData {
   whitePlayer?: string;
   blackPlayer?: string;
   yourSide: Side;
+}
+
+export interface GameRestoredData {
+  roomId: string;
+  yourSide: Side;
+  gameState: GameState;
 }
 
 export interface ValidMovesData {

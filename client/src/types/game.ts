@@ -9,8 +9,7 @@ export interface GameRoom {
   chess: object;
   timer: object;
   whitePlayer: string;
-  blackPlayer: string | "AI";
-  playerSides: Map<string, Side>;
+  blackPlayer: string;
   status: GameStatus;
   winner?: Side | "draw";
   winReason?: "checkmate" | "timeout" | "stalemate" | "resignation";
