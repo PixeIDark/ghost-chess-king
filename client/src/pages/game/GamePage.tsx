@@ -1,9 +1,10 @@
 import Square from "./components/Square.tsx";
 import { createBoardViewModel } from "../../viewModel/board.ts";
-import { useSocket } from "../../contexts/SocketContext.tsx";
+import { useSocket } from "../../contexts/SessionContext.tsx";
 import { TimerDisplay } from "./components/TimerDisplay";
 import { useChessGame } from "./hooks/useChessGame.ts";
 
+// 리팩토링 해야함 useChessGame, SocketContext
 function GamePage() {
   const socket = useSocket();
   const { gameState, mySide, gameResult, validMoves, fromSquare, handleSquareClick } = useChessGame(socket);

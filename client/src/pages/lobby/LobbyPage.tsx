@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { ROUTES } from "../../constants/routes.ts";
+import { ROUTES } from "../../route/routes.constant.ts";
 
 function LobbyPage() {
   return (

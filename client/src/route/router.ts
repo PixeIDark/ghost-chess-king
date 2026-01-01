@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router";
-import LobbyPage from "./lobby/LobbyPage.tsx";
-import GamePage from "./game/GamePage.tsx";
-import { ROUTES } from "../constants/routes.ts";
+import LobbyPage from "../pages/lobby/LobbyPage.tsx";
+import GamePage from "../pages/game/GamePage.tsx";
+import { ROUTES } from "./routes.constant.ts";
 
 export const router = createBrowserRouter([
   {
