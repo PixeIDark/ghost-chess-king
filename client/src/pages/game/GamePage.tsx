@@ -3,16 +3,26 @@ import { createBoardViewModel } from "../../viewModel/board.ts";
 import { useSocket, useUserInfo } from "../../contexts/SessionContext.tsx";
 import { TimerDisplay } from "./components/TimerDisplay";
 import { useChessGame } from "./hooks/useChessGame.ts";
+import { useAi } from "./hooks/useAi.ts";
 import { useParams } from "react-router";
+import { getOppositeSide } from "../../utils/squareUtils.ts";
 
 function GamePage() {
   const { roomId } = useParams() as { roomId: string };
   const socket = useSocket();
   const { isRegistered } = useUserInfo();
-  const { gameState, mySide, gameResult, validMoves, fromSquare, handleSquareClick } = useChessGame({
+  const { gameState, mySide, gameResult, validMoves, fromSquare, handleSquareClick, handleMove } = useChessGame({
     socket,
     roomId,
     isRegistered,
+  });
+
+  useAi({
+    fen: gameState?.fen ?? "",
+    currentTurn: gameState?.turn ?? "white",
+    aiSide: getOppositeSide(mySide),
+    depth: 20,
+    onAiMove: handleMove,
   });
 
   if (!gameState) return <div>게임 로딩 중...</div>;

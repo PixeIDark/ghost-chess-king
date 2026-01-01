@@ -3,8 +3,6 @@ import type { ClientToServerEvents, GameOverData, ServerToClientEvents } from ".
 import { useEffect, useState } from "react";
 import type { GameState } from "../../../types/game.ts";
 import type { Side, Square as SquareType } from "../../../types/chess.ts";
-import { useAi } from "./useAi.ts";
-import { getOppositeSide } from "../../../utils/squareUtils.ts";
 import { useNavigate } from "react-router";
 
 interface UseChessGameParams {
@@ -56,7 +54,7 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
     };
   }, [socket, isRegistered, roomId, navigate]);
 
-  const handleAiMove = (from: SquareType, to: SquareType) => {
+  const handleMove = (from: SquareType, to: SquareType) => {
     if (!roomId) return;
     socket.emit("move", { roomId, from, to });
   };
@@ -90,14 +88,6 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
     setValidMoves([]);
   };
 
-  useAi({
-    fen: gameState?.fen ?? "",
-    currentTurn: gameState?.turn ?? "white",
-    aiSide: getOppositeSide(mySide),
-    depth: 20,
-    onAiMove: handleAiMove,
-  });
-
   return {
     gameState,
     mySide,
@@ -106,5 +96,6 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
     validMoves,
     fromSquare,
     handleSquareClick,
+    handleMove,
   };
 };
