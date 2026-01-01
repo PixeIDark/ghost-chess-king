@@ -6,7 +6,7 @@ import { ChessTimer } from "../model/chessTimer";
 import { getOppositeSide } from "../utils/squareUtils.ts";
 import { ClientToServerEvents, ServerToClientEvents } from "../types/socket.ts";
 
-export class GameManager {
+export class GameService {
   private rooms: Map<string, GameRoom> = new Map();
   private odIdToSocketId: Map<string, string> = new Map(); // odId -> socketId
   private io: Server<ClientToServerEvents, ServerToClientEvents>;

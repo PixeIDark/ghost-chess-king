@@ -2,7 +2,7 @@ import { Server } from "socket.io";
 import { ChatMessage, User, UserInfo } from "../types/lobby.ts";
 import { ClientToServerEvents, ServerToClientEvents } from "../types/socket.ts";
 
-export class LobbyManager {
+export class LobbyService {
   private users: Map<string, User> = new Map(); // odId -> User
   private io: Server<ClientToServerEvents, ServerToClientEvents>;
 
