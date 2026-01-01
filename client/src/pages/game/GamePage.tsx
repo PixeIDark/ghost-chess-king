@@ -1,13 +1,19 @@
 import Square from "./components/Square.tsx";
 import { createBoardViewModel } from "../../viewModel/board.ts";
-import { useSocket } from "../../contexts/SessionContext.tsx";
+import { useSocket, useUserInfo } from "../../contexts/SessionContext.tsx";
 import { TimerDisplay } from "./components/TimerDisplay";
 import { useChessGame } from "./hooks/useChessGame.ts";
+import { useParams } from "react-router";
 
-// 리팩토링 해야함 useChessGame, SocketContext
 function GamePage() {
+  const { roomId } = useParams() as { roomId: string };
   const socket = useSocket();
-  const { gameState, mySide, gameResult, validMoves, fromSquare, handleSquareClick } = useChessGame(socket);
+  const { isRegistered } = useUserInfo();
+  const { gameState, mySide, gameResult, validMoves, fromSquare, handleSquareClick } = useChessGame({
+    socket,
+    roomId,
+    isRegistered,
+  });
 
   if (!gameState) return <div>게임 로딩 중...</div>;
 

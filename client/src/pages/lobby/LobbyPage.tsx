@@ -1,10 +1,26 @@
-import { Link } from "react-router";
-import { ROUTES } from "../../route/routes.constant.ts";
+import { useNavigate } from "react-router";
+import { links } from "../../route/routes.constant.ts";
+import { useSocket } from "../../contexts/SessionContext.tsx";
 
 function LobbyPage() {
+  const socket = useSocket();
+  const navigate = useNavigate();
+
+  const handleGameStart = () => {
+    socket.once("game-start", (data) => navigate(links.ai(data.roomId)));
+    socket.once("error", (data) => {
+      if (data.roomId) navigate(links.ai(data.roomId));
+      else console.error("Duplicated Game Error");
+    });
+
+    socket.emit("start-ai-game");
+  };
+
   return (
     <div>
-      <Link to={ROUTES.GAME()}>ai와 게임하기</Link>
+      <button onClick={handleGameStart} type="button">
+        AI Game Start
+      </button>
     </div>
   );
 }
