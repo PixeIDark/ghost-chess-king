@@ -83,6 +83,7 @@ export interface GameOverData {
 
 export interface ErrorData {
   message: string;
+  roomId?: string;
 }
 
 export interface GetValidMovesData {

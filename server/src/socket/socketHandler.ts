@@ -103,6 +103,14 @@ export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToCli
       const user = lobbyService.getUserBySocketId(socket.id);
       if (!user) return;
 
+      if (user.inGame && user.currentRoomId) {
+        socket.emit("error", {
+          message: "이미 게임 중입니다",
+          roomId: user.currentRoomId,
+        });
+        return;
+      }
+
       if (user.inGame) {
         socket.emit("error", { message: "이미 게임 중입니다" });
         return;
