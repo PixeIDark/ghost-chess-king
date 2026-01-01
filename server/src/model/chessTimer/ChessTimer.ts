@@ -7,8 +7,8 @@ export class ChessTimer {
   private currentTurn: Side;
   private lastUpdateTime: number;
   private timerInterval?: NodeJS.Timeout;
-  private onTimeUpdate: (whiteTime: number, blackTime: number) => void;
-  private onTimeout: (loser: Side) => void;
+  private readonly onTimeUpdate: (whiteTime: number, blackTime: number) => void;
+  private readonly onTimeout: (loser: Side) => void;
 
   constructor(onTimeUpdate: (whiteTime: number, blackTime: number) => void, onTimeout: (loser: Side) => void) {
     this.whiteTime = INITIAL_TIME;
