@@ -12,7 +12,7 @@ interface SocketContextValue {
   isRegistered: boolean;
 }
 
-const SocketContext = createContext<SocketContextValue | null>(null);
+const SessionContext = createContext<SocketContextValue | null>(null);
 
 const OD_ID_KEY = "odId";
 
@@ -55,21 +55,21 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   }, [socket, odId]);
 
   return (
-    <SocketContext.Provider value={{ socket, odId, nickname, currentRoomId, isRegistered }}>
+    <SessionContext.Provider value={{ socket, odId, nickname, currentRoomId, isRegistered }}>
       {children}
-    </SocketContext.Provider>
+    </SessionContext.Provider>
   );
 }
 
 export const useSocket = () => {
-  const context = useContext(SocketContext);
+  const context = useContext(SessionContext);
   if (!context) throw new Error("useSocket must be used within SocketProvider");
 
   return context.socket;
 };
 
 export const useUserInfo = () => {
-  const context = useContext(SocketContext);
+  const context = useContext(SessionContext);
   if (!context) throw new Error("useUserInfo must be used within SocketProvider");
 
   return {

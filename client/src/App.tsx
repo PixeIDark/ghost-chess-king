@@ -1,6 +1,6 @@
 import { router } from "./pages/router.ts";
 import { RouterProvider } from "react-router";
-import { SocketProvider } from "./contexts/SocketContext.tsx";
+import { SocketProvider } from "./contexts/SessionContext.tsx";
 
 function App() {
   return (
