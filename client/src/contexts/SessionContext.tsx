@@ -26,7 +26,7 @@ const getOrCreateOdId = (): string => {
 };
 
 export function SocketProvider({ children }: { children: ReactNode }) {
-  const [socket] = useState(() => io("http://localhost:3001"));
+  const [socket] = useState<Socket<ServerToClientEvents, ClientToServerEvents>>(() => io("http://localhost:3001"));
   const [odId] = useState(getOrCreateOdId);
   const [nickname, setNickname] = useState<string | null>(null);
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
