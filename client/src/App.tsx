@@ -1,4 +1,4 @@
-import { router } from "./pages/router.ts";
+import { router } from "./route/router.ts";
 import { RouterProvider } from "react-router";
 import { SocketProvider } from "./contexts/SessionContext.tsx";
 
