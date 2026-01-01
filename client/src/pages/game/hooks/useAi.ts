@@ -3,7 +3,7 @@ import { useStockfish } from "../../../hooks/useStockfish.ts";
 import { delay } from "../../../utils/helper.ts";
 import type { Square as SquareType } from "../../../types/chess.ts";
 
-interface UseAiOptions {
+interface UseAiParams {
   fen: string;
   currentTurn: "white" | "black";
   aiSide: "white" | "black";
@@ -11,7 +11,7 @@ interface UseAiOptions {
   onAiMove: (from: SquareType, to: SquareType) => void;
 }
 
-export const useAi = ({ fen, currentTurn, aiSide, depth, onAiMove }: UseAiOptions) => {
+export const useAi = ({ fen, currentTurn, aiSide, depth, onAiMove }: UseAiParams) => {
   const { isReady, getBestMove } = useStockfish();
 
   useEffect(() => {
