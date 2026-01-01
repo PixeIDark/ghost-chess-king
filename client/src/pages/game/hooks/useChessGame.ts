@@ -5,7 +5,7 @@ import type { GameState } from "../../../types/game.ts";
 import type { Side, Square as SquareType } from "../../../types/chess.ts";
 import { useAi } from "./useAi.ts";
 import { getOppositeSide } from "../../../utils/squareUtils.ts";
-import { useUserInfo } from "../../../contexts/SocketContext.tsx";
+import { useUserInfo } from "../../../contexts/SessionContext.tsx";
 
 export const useChessGame = (socket: Socket<ServerToClientEvents, ClientToServerEvents>) => {
   const { currentRoomId, isRegistered } = useUserInfo();
@@ -74,18 +74,14 @@ export const useChessGame = (socket: Socket<ServerToClientEvents, ClientToServer
     if (!fromSquare) {
       setFromSquare(square);
       socket.emit("get-valid-moves", { roomId, from: square });
-      socket.once("valid-moves", (data) => {
-        setValidMoves(data.moves || []);
-      });
+      socket.once("valid-moves", (data) => setValidMoves(data.moves || []));
       return;
     }
 
     if (selectedColor === mySide) {
       setFromSquare(square);
       socket.emit("get-valid-moves", { roomId, from: square });
-      socket.once("valid-moves", (data) => {
-        setValidMoves(data.moves || []);
-      });
+      socket.once("valid-moves", (data) => setValidMoves(data.moves || []));
       return;
     }
 
