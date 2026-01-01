@@ -1,4 +1,9 @@
 export const ROUTES = {
-  LOBBY: () => "/",
-  GAME: (roomId: number | string = ":roomId") => `/game/${roomId}`,
+  LOBBY: "/",
+  AI: "/ai/:roomId",
 } as const;
+
+export const links = {
+  lobby: () => "/",
+  ai: (roomId: string) => `/ai/${roomId}`,
+};
