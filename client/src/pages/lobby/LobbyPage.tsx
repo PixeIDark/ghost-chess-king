@@ -10,7 +10,7 @@ function LobbyPage() {
     socket.once("game-start", (data) => navigate(links.ai(data.roomId)));
     socket.once("error", (data) => {
       if (data.roomId) navigate(links.ai(data.roomId));
-      else console.error("Duplicated Game Error");
+      else console.error("Duplicated game error");
     });
 
     socket.emit("start-ai-game");
