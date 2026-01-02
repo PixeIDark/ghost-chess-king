@@ -1,6 +1,6 @@
 import { GameMode, GameRoom, GameState } from "../types/game.ts";
 import { Server } from "socket.io";
-import { Side, Square } from "../types/chess.ts";
+import { GameEndReason, Side, Square } from "../types/chess.ts";
 import { Chess } from "../model/chess";
 import { ChessTimer } from "../model/chessTimer";
 import { getOppositeSide } from "../utils/squareUtils.ts";
@@ -103,11 +103,7 @@ export class GameService {
     if (blackSocketId) this.io.to(blackSocketId).emit("game-state", gameState);
   }
 
-  private endGame(
-    roomId: string,
-    winner: Side | "draw",
-    reason: "checkmate" | "timeout" | "stalemate" | "resignation"
-  ) {
+  private endGame(roomId: string, winner: Side | "draw", reason: GameEndReason) {
     const room = this.rooms.get(roomId);
     if (!room) return;
 
