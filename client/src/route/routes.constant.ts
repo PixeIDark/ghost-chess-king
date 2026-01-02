@@ -6,4 +6,4 @@ export const ROUTES = {
 export const links = {
   lobby: () => "/",
   ai: (roomId: string) => `/ai/${roomId}`,
-};
+} as const;
