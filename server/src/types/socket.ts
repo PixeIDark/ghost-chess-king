@@ -1,4 +1,4 @@
-import { Side, Square } from "./chess.ts";
+import { GameEndReason, Side, Square } from "./chess.ts";
 import { GameMode, GameState } from "./game.ts";
 import { UserInfo } from "./lobby.ts";
 
@@ -78,7 +78,7 @@ export interface TimeUpdateData {
 
 export interface GameOverData {
   winner: Side | "draw";
-  reason: string;
+  reason: GameEndReason;
 }
 
 export interface ErrorData {

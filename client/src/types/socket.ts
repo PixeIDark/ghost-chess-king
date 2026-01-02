@@ -1,6 +1,6 @@
 import type { UserInfo } from "./lobby.ts";
 import type { GameMode, GameState } from "./game.ts";
-import type { Side, Square } from "./chess.ts";
+import type { GameEndReason, Side, Square } from "./chess.ts";
 
 export interface ServerToClientEvents {
   registered: (data: RegisteredData) => void;
@@ -78,7 +78,7 @@ export interface TimeUpdateData {
 
 export interface GameOverData {
   winner: Side | "draw";
-  reason: string;
+  reason: GameEndReason;
 }
 
 export interface ErrorData {
