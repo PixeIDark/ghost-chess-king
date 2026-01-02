@@ -2,7 +2,7 @@ export const saveLocalStorage = <T>(key: string, value: T) => {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (error) {
-    console.error("localStorage 저장 실패:", error);
+    console.error("LocalStorage save failed:", error);
   }
 };
 
@@ -13,7 +13,7 @@ export const loadLocalStorage = <T>(key: string): T | null => {
 
     return JSON.parse(value);
   } catch (error) {
-    console.error("localStorage 불러오기 실패:", error);
+    console.error("LocalStorage load failed:", error);
     return null;
   }
 };

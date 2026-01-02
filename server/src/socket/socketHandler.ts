@@ -60,12 +60,12 @@ export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToCli
       const target = lobbyService.getUser(targetOdId);
 
       if (!challenger || !target) {
-        socket.emit("error", { message: "상대를 찾을 수 없습니다" });
+        socket.emit("error", { message: "Not found Enemy" });
         return;
       }
 
       if (challenger.inGame || target.inGame) {
-        socket.emit("error", { message: "이미 게임 중입니다" });
+        socket.emit("error", { message: "Already running game" });
         return;
       }
 
@@ -105,14 +105,14 @@ export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToCli
 
       if (user.inGame && user.currentRoomId) {
         socket.emit("error", {
-          message: "이미 게임 중입니다",
+          message: "Already running game",
           roomId: user.currentRoomId,
         });
         return;
       }
 
       if (user.inGame) {
-        socket.emit("error", { message: "이미 게임 중입니다" });
+        socket.emit("error", { message: "Already running game" });
         return;
       }
 
