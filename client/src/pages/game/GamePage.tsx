@@ -6,11 +6,15 @@ import { useChessGame } from "./hooks/useChessGame.ts";
 import { useAi } from "./hooks/useAi.ts";
 import { useParams } from "react-router";
 import { getOppositeSide } from "../../utils/squareUtils.ts";
+import { useState } from "react";
+import GameResultModal from "./components/GameResultModal.tsx";
+import { createGameResultViewModel } from "../../viewModel/gameResult.ts";
 
 function GamePage() {
   const { roomId } = useParams() as { roomId: string };
   const socket = useSocket();
   const { isRegistered } = useUserInfo();
+  const [isOpen, setIsOpen] = useState(true);
   const { gameState, mySide, gameResult, validMoves, fromSquare, handleSquareClick, handleMove } = useChessGame({
     socket,
     roomId,
@@ -27,6 +31,7 @@ function GamePage() {
 
   if (!gameState) return <div>게임 로딩 중...</div>;
 
+  const gameResultViewModel = gameResult ? createGameResultViewModel(gameResult, mySide) : null;
   const boardViewModel = createBoardViewModel(gameState.board, validMoves, fromSquare);
 
   return (
@@ -34,11 +39,7 @@ function GamePage() {
       <div>현재 턴: {gameState.turn === "white" ? "백" : "흑"}</div>
       <div>내 진영: {mySide === "white" ? "백" : "흑"}</div>
       <div>상태: {gameState.status.state}</div>
-      {gameResult && (
-        <div>
-          {gameResult.winner}이 {gameResult.reason}로 승리!
-        </div>
-      )}
+      {gameResult && isOpen && <GameResultModal gameResult={gameResultViewModel} onClose={() => setIsOpen(false)} />}
       <div className="grid aspect-square w-full max-w-[640px] min-w-[160px] grid-cols-8 grid-rows-8">
         {boardViewModel.flat().map((square) => (
           <Square
