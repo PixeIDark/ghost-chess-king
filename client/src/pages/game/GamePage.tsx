@@ -8,7 +8,7 @@ import { useParams } from "react-router";
 import { getOppositeSide } from "../../utils/squareUtils.ts";
 import { useState } from "react";
 import GameResultModal from "./components/GameResultModal.tsx";
-import { createGameResultViewModel } from "../../viewModel/gameResult.ts";
+import { createGameResultViewModel, type GameResultViewModel } from "../../viewModel/gameResult.ts";
 
 function GamePage() {
   const { roomId } = useParams() as { roomId: string };
@@ -39,7 +39,9 @@ function GamePage() {
       <div>현재 턴: {gameState.turn === "white" ? "백" : "흑"}</div>
       <div>내 진영: {mySide === "white" ? "백" : "흑"}</div>
       <div>상태: {gameState.status.state}</div>
-      {gameResult && isOpen && <GameResultModal gameResult={gameResultViewModel} onClose={() => setIsOpen(false)} />}
+      {gameResult && isOpen && (
+        <GameResultModal gameResult={gameResultViewModel as GameResultViewModel} onClose={() => setIsOpen(false)} />
+      )}
       <div className="grid aspect-square w-full max-w-[640px] min-w-[160px] grid-cols-8 grid-rows-8">
         {boardViewModel.flat().map((square) => (
           <Square
