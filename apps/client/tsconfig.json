@@ -1,0 +1,16 @@
+{
+  "extends": "@ghost-chess-king/typescript-config/react.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@ghost-chess-king/shared": ["../../packages/shared/src/index.ts"]
+    }
+  },
+  "include": ["src", "../../packages/shared/src"]
+}

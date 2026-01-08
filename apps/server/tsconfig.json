@@ -1,0 +1,11 @@
+{
+  "extends": "@ghost-chess-king/typescript-config/base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@ghost-chess/shared": ["../../packages/shared/src/index.ts"]
+    }
+  },
+  "include": ["src", "../../packages/shared/src"]
+}

@@ -1,0 +1,20 @@
+{
+  "name": "ghost-chess-king",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter ghost-chess-king-client --filter ghost-chess-king-server --parallel dev",
+    "client": "pnpm --filter ghost-chess-king-client dev",
+    "server": "pnpm --filter ghost-chess-king-server dev",
+    "dev:all": "pnpm --filter \"ghost-chess-king-*\" --parallel dev"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.7.1",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@9.0.0"
+}
