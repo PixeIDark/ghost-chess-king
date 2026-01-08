@@ -23,9 +23,6 @@ importers:
       '@ghost-chess-king/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@tailwindcss/vite':
-        specifier: ^4.1.17
-        version: 4.1.18(vite@7.3.1(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0))
       react:
         specifier: ^19.2.0
         version: 19.2.3
@@ -51,6 +48,9 @@ importers:
       '@ghost-chess-king/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
+      '@tailwindcss/vite':
+        specifier: ^4.1.18
+        version: 4.1.18(vite@7.3.1(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0))
       '@types/react':
         specifier: ^19.2.2
         version: 19.2.7
