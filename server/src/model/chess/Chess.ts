@@ -17,12 +17,7 @@ export class Chess {
   }
 
   move(from: Square, to: Square): Chess {
-    const { newFen, newHistory } = executeMove(
-      this.fen,
-      this.history,
-      from,
-      to,
-    );
+    const { newFen, newHistory } = executeMove(this.fen, this.history, from, to);
     return new Chess(newFen, newHistory);
   }
 
@@ -52,10 +47,8 @@ export class Chess {
         target: turn,
         winner: getOppositeSide(turn),
       };
-    if (isStalemate(board, this.fen, turn))
-      return { state: "stalemate", target: turn, winner: "draw" };
-    if (isCheck(board, turn))
-      return { state: "check", target: turn, winner: null };
+    if (isStalemate(board, this.fen, turn)) return { state: "stalemate", target: turn, winner: "draw" };
+    if (isCheck(board, turn)) return { state: "check", target: turn, winner: null };
 
     return { state: "normal", target: null, winner: null };
   }
