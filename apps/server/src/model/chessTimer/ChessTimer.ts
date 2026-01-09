@@ -1,5 +1,5 @@
 import { IChessTimer, Side } from "@ghost-chess-king/shared";
-import { INCREMENT_TIME, INITIAL_TIME } from "@/model/chessTimer/chessTimer.constants";
+import { INCREMENT_TIME, INITIAL_TIME } from "@/model/chessTimer/ChessTimer.constants";
 
 export class ChessTimer implements IChessTimer {
   private whiteTime: number;

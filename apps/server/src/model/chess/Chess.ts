@@ -1,10 +1,11 @@
-import { INITIAL_FEN } from "@/model/chess/chess.constants";
-import { getOppositeSide, IChess, MatchStatus, Side, Square } from "@ghost-chess-king/shared";
+import { INITIAL_FEN } from "@/model/chess/Chess.constants";
+import { getOppositeSide, Side, Square } from "@ghost-chess-king/shared";
 import { executeMove } from "@/model/chess/utils/executeMove";
 import { fenToBoard } from "@/model/chess/utils/fenToBoard";
 import { getTurn } from "@/model/chess/utils/fenUtils";
 import { getValidMoves } from "@/model/chess/utils/moveValidation";
 import { isCheck, isCheckmate, isStalemate } from "@/model/chess/utils/gameState";
+import { IChess } from "@/model/chess/Chess.interface";
 
 export class Chess implements IChess {
   private readonly fen: string;
@@ -28,7 +29,7 @@ export class Chess implements IChess {
     return fenToBoard(this.fen);
   }
 
-  turn(): Side {
+  turn() {
     return getTurn(this.fen);
   }
 
@@ -36,7 +37,7 @@ export class Chess implements IChess {
     return getValidMoves(this.board(), this.fen, from);
   }
 
-  status(): MatchStatus {
+  status() {
     const board = this.board();
     const turn = this.turn();
 
