@@ -1,16 +1,11 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
-import { io, type Socket } from "socket.io-client";
-import {
-  ClientToServerEvents,
-  loadLocalStorage,
-  RegisteredData,
-  saveLocalStorage,
-  ServerToClientEvents,
-} from "@ghost-chess-king/shared";
+import { io } from "socket.io-client";
+import { loadLocalStorage, RegisteredData, saveLocalStorage } from "@ghost-chess-king/shared";
+import { ClientSocket } from "@/types/socket.ts";
 
 interface SocketContextValue {
-  socket: Socket<ServerToClientEvents, ClientToServerEvents>;
+  socket: ClientSocket;
   odId: string;
   nickname: string | null;
   currentRoomId: string | null;
@@ -31,7 +26,7 @@ const getOrCreateOdId = (): string => {
 };
 
 export function SocketProvider({ children }: { children: ReactNode }) {
-  const [socket] = useState<Socket<ServerToClientEvents, ClientToServerEvents>>(() => io("http://localhost:3001"));
+  const [socket] = useState<ClientSocket>(() => io("http://localhost:3001"));
   const [odId] = useState(getOrCreateOdId);
   const [nickname, setNickname] = useState<string | null>(null);
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);

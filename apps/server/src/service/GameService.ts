@@ -1,26 +1,13 @@
-import { Server } from "socket.io";
 import { Chess } from "@/model/chess";
 import { ChessTimer } from "@/model/chessTimer";
-import {
-  ClientToServerEvents,
-  GameEndReason,
-  GameMode,
-  GameRoom,
-  GameState,
-  getOppositeSide,
-  ServerToClientEvents,
-  Side,
-  Square,
-} from "@ghost-chess-king/shared";
+import { GameEndReason, GameMode, GameRoom, GameState, getOppositeSide, Side, Square } from "@ghost-chess-king/shared";
+import { AppServer } from "@/types/socket";
 
 export class GameService {
   private rooms: Map<string, GameRoom> = new Map();
-  private odIdToSocketId: Map<string, string> = new Map(); // odId -> socketId
-  private io: Server<ClientToServerEvents, ServerToClientEvents>;
+  private odIdToSocketId: Map<string, string> = new Map();
 
-  constructor(io: Server) {
-    this.io = io;
-  }
+  constructor(private readonly io: AppServer) {}
 
   updateSocketId(odId: string, socketId: string): void {
     this.odIdToSocketId.set(odId, socketId);

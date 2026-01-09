@@ -1,13 +1,10 @@
-import { Server } from "socket.io";
-import { ChatMessage, ClientToServerEvents, ServerToClientEvents, User, UserInfo } from "@ghost-chess-king/shared";
+import { ChatMessage, User, UserInfo } from "@ghost-chess-king/shared";
+import { AppServer } from "@/types/socket";
 
 export class LobbyService {
-  private users: Map<string, User> = new Map(); // odId -> User
-  private io: Server<ClientToServerEvents, ServerToClientEvents>;
+  private users: Map<string, User> = new Map();
 
-  constructor(io: Server) {
-    this.io = io;
-  }
+  constructor(private readonly io: AppServer) {}
 
   addUser(odId: string, socketId: string): User {
     const nickname = this.generateNickname();
