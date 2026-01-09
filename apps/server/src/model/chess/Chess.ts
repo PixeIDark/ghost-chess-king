@@ -42,10 +42,10 @@ export class Chess implements IChess {
 
     if (isCheckmate(board, this.fen, turn)) {
       return {
-        state: "checkmate", // "checkmate" as GamePhase 라고 써도 됩니다.
+        state: "checkmate",
         target: turn,
         winner: getOppositeSide(turn),
-      } as const; // as const를 붙여 리터럴 타입으로 고정
+      } as const;
     }
 
     if (isStalemate(board, this.fen, turn)) {
