@@ -12,6 +12,8 @@
     "dev:all": "pnpm --filter \"ghost-chess-king-*\" --parallel dev"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.1",
     "typescript": "^5.9.3"
