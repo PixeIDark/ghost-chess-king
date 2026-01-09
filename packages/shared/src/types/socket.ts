@@ -1,5 +1,5 @@
 import { UserInfo } from "./lobby";
-import { GameMode, GameState } from "./game";
+import { GameMode, GameState } from "../../../../apps/server/src/types/game";
 import { GameEndReason, Side, Square } from "./chess";
 
 export interface ServerToClientEvents {

@@ -1,5 +1,6 @@
-import { Side, Square } from "./chess";
-import { IChess, IChessTimer } from "./interface";
+import { Side, Square } from "../../../../packages/shared";
+import { IChess } from "@/model/chess/Chess.interface";
+import { IChessTimer } from "@/model/chessTimer/ChessTimer.interface";
 
 export type GameMode = "ai" | "pvp";
 export type GameStatus = "waiting" | "playing" | "finished";
