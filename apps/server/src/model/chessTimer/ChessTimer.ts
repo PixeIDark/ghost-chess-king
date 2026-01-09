@@ -1,7 +1,7 @@
-import { Side } from "@ghost-chess/shared";
+import { IChessTimer, Side } from "@ghost-chess/shared";
 import { INCREMENT_TIME, INITIAL_TIME } from "@/model/chessTimer/chessTimer.constants";
 
-export class ChessTimer {
+export class ChessTimer implements IChessTimer {
   private whiteTime: number;
   private blackTime: number;
   private currentTurn: Side;

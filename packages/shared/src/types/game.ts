@@ -1,6 +1,5 @@
-import { Chess } from "../model/chess";
-import { ChessTimer } from "../model/chessTimer";
-import { Side, Square } from "./chess.ts";
+import { Side, Square } from "./chess";
+import { IChess, IChessTimer } from "./interface";
 
 export type GameMode = "ai" | "pvp";
 export type GameStatus = "waiting" | "playing" | "finished";
@@ -8,8 +7,8 @@ export type GameStatus = "waiting" | "playing" | "finished";
 export interface GameRoom {
   roomId: string;
   mode: GameMode;
-  chess: Chess;
-  timer: ChessTimer;
+  chess: IChess;
+  timer: IChessTimer;
   whitePlayer: string;
   blackPlayer: string;
   status: GameStatus;
@@ -23,10 +22,10 @@ export interface TimeState {
 }
 
 export interface GameState {
-  board: ReturnType<Chess["board"]>;
+  board: ReturnType<IChess["board"]>;
   fen: string;
   turn: Side;
   timeState: TimeState;
-  status: ReturnType<Chess["status"]>;
+  status: ReturnType<IChess["status"]>;
   lastMove?: { from: Square; to: Square };
 }
