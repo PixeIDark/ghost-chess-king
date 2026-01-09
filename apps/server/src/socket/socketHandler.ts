@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
 import { LobbyService } from "@/service/LobbyService";
-import { ClientToServerEvents, ServerToClientEvents } from "@ghost-chess/shared";
+import { ClientToServerEvents, ServerToClientEvents } from "@ghost-chess-king/shared";
 import { GameService } from "@/service/GameService";
 
 export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToClientEvents>) {

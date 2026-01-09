@@ -1,4 +1,4 @@
-import { Board } from "@ghost-chess/shared";
+import { Board } from "@ghost-chess-king/shared";
 
 const isPathClear = (board: Board, fromRow: number, fromCol: number, toRow: number, toCol: number): boolean => {
   const rowDir = toRow > fromRow ? 1 : toRow < fromRow ? -1 : 0;

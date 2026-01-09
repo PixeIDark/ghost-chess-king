@@ -1,4 +1,4 @@
-import { Board, Cell, Piece } from "@ghost-chess/shared";
+import { Board, Cell, Piece } from "@ghost-chess-king/shared";
 import { PIECE_TO_FEN_CHAR } from "@/model/chess/chess.constants";
 
 export const boardToFen = (board: Board, originalFen: string): string => {

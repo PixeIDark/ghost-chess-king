@@ -1,5 +1,5 @@
 import { INITIAL_FEN } from "@/model/chess/chess.constants";
-import { getOppositeSide, IChess, MatchStatus, Side, Square } from "@ghost-chess/shared";
+import { getOppositeSide, IChess, MatchStatus, Side, Square } from "@ghost-chess-king/shared";
 import { executeMove } from "@/model/chess/utils/executeMove";
 import { fenToBoard } from "@/model/chess/utils/fenToBoard";
 import { getTurn } from "@/model/chess/utils/fenUtils";

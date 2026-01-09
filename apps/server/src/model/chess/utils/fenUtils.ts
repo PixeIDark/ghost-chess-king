@@ -1,4 +1,4 @@
-import type { Cell, Side, Square } from "@ghost-chess/shared";
+import type { Cell, Side, Square } from "@ghost-chess-king/shared";
 
 export const getRanks = (fen: string): string[] => {
   return fen.split(" ")[0].split("/");

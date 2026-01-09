@@ -1,4 +1,4 @@
-import { Board, Piece } from "@ghost-chess/shared";
+import { Board, Piece } from "@ghost-chess-king/shared";
 import { pieceFunctions } from "@/model/chess/utils/pieceMoves";
 
 export const canPieceAttack = (

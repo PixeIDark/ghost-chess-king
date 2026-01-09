@@ -1,4 +1,4 @@
-import { Board, Square, squareToIndices } from "@ghost-chess/shared";
+import { Board, Square, squareToIndices } from "@ghost-chess-king/shared";
 import { getEnPassantTarget } from "@/model/chess/utils/fenUtils";
 
 export const simulateMove = (board: Board, from: Square, to: Square, fen: string): Board => {

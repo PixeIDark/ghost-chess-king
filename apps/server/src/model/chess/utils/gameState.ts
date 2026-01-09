@@ -1,4 +1,4 @@
-import { type Board, getOppositeSide, indicesToSquare, type Side, type Square } from "@ghost-chess/shared";
+import { type Board, getOppositeSide, indicesToSquare, type Side, type Square } from "@ghost-chess-king/shared";
 import { BOARD_SIZE } from "@/model/chess/chess.constants";
 import { canPieceAttack } from "@/model/chess/utils/attackValidation";
 import { simulateMove } from "@/model/chess/utils/boardSimulation";

@@ -1,4 +1,4 @@
-import { Board, indicesToSquare, Piece, Side, Square, squareToIndices } from "@ghost-chess/shared";
+import { Board, indicesToSquare, Piece, Side, Square, squareToIndices } from "@ghost-chess-king/shared";
 import { isSquareAttacked, wouldBeCheck } from "@/model/chess/utils/gameState";
 import { BOARD_SIZE } from "@/model/chess/chess.constants";
 import { canPieceAttack } from "@/model/chess/utils/attackValidation";

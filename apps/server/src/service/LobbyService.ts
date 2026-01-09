@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { ChatMessage, ClientToServerEvents, ServerToClientEvents, User, UserInfo } from "@ghost-chess/shared";
+import { ChatMessage, ClientToServerEvents, ServerToClientEvents, User, UserInfo } from "@ghost-chess-king/shared";
 
 export class LobbyService {
   private users: Map<string, User> = new Map(); // odId -> User

@@ -1,4 +1,4 @@
-import { Square, squareToIndices } from "@ghost-chess/shared";
+import { Square, squareToIndices } from "@ghost-chess-king/shared";
 import { fenToBoard } from "@/model/chess/utils/fenToBoard";
 import { getValidMoves } from "@/model/chess/utils/moveValidation";
 import { boardToFen } from "@/model/chess/utils/boardToFen";

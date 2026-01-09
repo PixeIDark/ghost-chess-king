@@ -11,7 +11,7 @@ import {
   ServerToClientEvents,
   Side,
   Square,
-} from "@ghost-chess/shared";
+} from "@ghost-chess-king/shared";
 
 export class GameService {
   private rooms: Map<string, GameRoom> = new Map();

@@ -4,7 +4,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@ghost-chess/shared": ["../../packages/shared/src/index.ts"]
+      "@ghost-chess-king/shared": ["../../packages/shared/src/index.ts"]
     }
   },
   "include": ["src", "../../packages/shared/src"]

@@ -2,7 +2,7 @@ import express from "express";
 import * as http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
-import { ClientToServerEvents, ServerToClientEvents } from "@ghost-chess/shared";
+import { ClientToServerEvents, ServerToClientEvents } from "@ghost-chess-king/shared";
 import { setupSocketHandlers } from "@/socket/socketHandler";
 
 const app = express();
