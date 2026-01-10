@@ -6,9 +6,9 @@ export interface Position {
 }
 
 export interface IPiece {
-  id: number;
-  type: PieceName;
-  color: Side;
-  position: Position;
-  hasMoved: boolean;
+  readonly id: number;
+  readonly type: PieceName;
+  readonly color: Side;
+  readonly position: Position;
+  readonly hasMoved: boolean;
 }
