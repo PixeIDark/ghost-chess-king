@@ -1,5 +1,5 @@
 import { Piece } from "./Piece";
-import { Position } from "./Piece.interface";
+import { Position } from "@ghost-chess-king/shared";
 import { PieceName } from "@ghost-chess-king/shared";
 
 class TestPiece extends Piece {
@@ -8,6 +8,11 @@ class TestPiece extends Piece {
   public clone() {
     return new TestPiece(this.id, this.color, { ...this.position }, this.hasMoved);
   }
+
+  public getAttackPaths(): Position[][] {
+    return [];
+  }
+
   public getPotentialPaths(): Position[][] {
     return [];
   }
@@ -40,12 +45,12 @@ describe("Piece (Abstract Class) 공통 메서드 테스트", () => {
       piece.setPosition(2, 2);
 
       expect(piece.position).toEqual({ row: 2, col: 2 });
-      expect(piece.hasMoved).toBe(false); // 변화 없음
+      expect(piece.hasMoved).toBe(false);
     });
   });
 
   describe("toDto()", () => {
-    it("기물의 현재 상태를 담은 순수 객체(IPiece)를 반환해야 한다", () => {
+    it("기물의 현재 상태를 담은 순수 객체(IPieceData)를 반환해야 한다", () => {
       const dto = piece.toDto();
 
       expect(dto).toEqual({

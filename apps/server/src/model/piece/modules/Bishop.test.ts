@@ -7,6 +7,22 @@ describe("Bishop", () => {
     bishop = new Bishop(1, "black", { row: 4, col: 4 });
   });
 
+  describe("getAttackPaths()", () => {
+    it("4개의 대각선 방향 공격 경로 배열을 반환해야 한다", () => {
+      const paths = bishop.getAttackPaths();
+      expect(paths).toHaveLength(4);
+      paths.forEach((path) => {
+        expect(path.length).toBeGreaterThan(0);
+      });
+    });
+
+    it("getPotentialPaths()와 동일한 경로를 반환해야 한다", () => {
+      const attackPaths = bishop.getAttackPaths();
+      const potentialPaths = bishop.getPotentialPaths();
+      expect(attackPaths).toEqual(potentialPaths);
+    });
+  });
+
   describe("getPotentialPaths()", () => {
     it("4개 대각선 방향의 독립된 경로 배열을 반환해야 한다", () => {
       const paths = bishop.getPotentialPaths();

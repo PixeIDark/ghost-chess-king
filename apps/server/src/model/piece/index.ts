@@ -1,4 +1,3 @@
-export * from "./Piece.interface";
 export * from "./Piece";
 export * from "./modules/Rook";
 export * from "./modules/Bishop";

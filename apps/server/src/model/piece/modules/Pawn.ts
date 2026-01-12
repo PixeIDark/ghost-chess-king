@@ -1,9 +1,27 @@
-import { PieceName } from "@ghost-chess-king/shared";
-import { Position } from "@/model/piece/Piece.interface";
+import { PieceName, Position } from "@ghost-chess-king/shared";
 import { Piece } from "@/model/piece";
 
 export class Pawn extends Piece {
   public readonly type: PieceName = "pawn";
+
+  public getAttackPaths(): Position[][] {
+    const { row, col } = this.position;
+    const direction = this.color === "white" ? -1 : 1;
+    const paths: Position[][] = [];
+
+    const diagonals = [
+      { row: row + direction, col: col - 1 },
+      { row: row + direction, col: col + 1 },
+    ];
+
+    diagonals.forEach((pos) => {
+      if (this.isValidBounds(pos)) {
+        paths.push([pos]);
+      }
+    });
+
+    return paths;
+  }
 
   public getPotentialPaths(): Position[][] {
     const { row, col } = this.position;

@@ -1,5 +1,4 @@
-import { PieceName } from "@ghost-chess-king/shared";
-import { Position } from "@/model/piece/Piece.interface";
+import { PieceName, Position } from "@ghost-chess-king/shared";
 import { Piece } from "@/model/piece";
 
 export class Rook extends Piece {
@@ -7,6 +6,15 @@ export class Rook extends Piece {
 
   public clone(): Piece {
     return new Rook(this.id, this.color, { ...this.position }, this.hasMoved);
+  }
+
+  public getAttackPaths(): Position[][] {
+    return [
+      this.generateLinePath(0, 1),
+      this.generateLinePath(0, -1),
+      this.generateLinePath(1, 0),
+      this.generateLinePath(-1, 0),
+    ];
   }
 
   public getPotentialPaths(): Position[][] {

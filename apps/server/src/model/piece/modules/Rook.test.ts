@@ -7,6 +7,22 @@ describe("Rook", () => {
     rook = new Rook(1, "white", { row: 4, col: 4 });
   });
 
+  describe("getAttackPaths()", () => {
+    it("상, 하, 좌, 우 4개 방향의 독립된 공격 경로 배열을 반환해야 한다", () => {
+      const paths = rook.getAttackPaths();
+      expect(paths).toHaveLength(4);
+      paths.forEach((path) => {
+        expect(path.length).toBeGreaterThan(0);
+      });
+    });
+
+    it("getPotentialPaths()와 동일한 경로를 반환해야 한다", () => {
+      const attackPaths = rook.getAttackPaths();
+      const potentialPaths = rook.getPotentialPaths();
+      expect(attackPaths).toEqual(potentialPaths);
+    });
+  });
+
   describe("getPotentialPaths()", () => {
     it("상, 하, 좌, 우 4개 방향의 독립된 경로 배열을 반환해야 한다", () => {
       const paths = rook.getPotentialPaths();
@@ -26,7 +42,7 @@ describe("Rook", () => {
   describe("clone()", () => {
     it("동일한 속성을 갖지만 참조가 다른 깊은 복사본을 생성해야 한다", () => {
       const cloned = rook.clone();
-      expect(cloned).not.toBe(rook); // 참조 비교
+      expect(cloned).not.toBe(rook);
       expect(cloned.id).toBe(rook.id);
       expect(cloned.position).toEqual(rook.position);
       expect(cloned.hasMoved).toBe(rook.hasMoved);
