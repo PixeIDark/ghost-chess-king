@@ -1,3 +1,5 @@
+import { IPiece, IPieceData } from "./models";
+
 export type PieceName = "pawn" | "knight" | "bishop" | "rook" | "queen" | "king";
 
 export type Side = "black" | "white";
@@ -9,10 +11,27 @@ export interface Piece {
 
 export type Cell = Piece | null;
 
-export type Board = Cell[][];
+export type BoardDTO = IPieceData | null[][];
+export type BoardEntity = IPiece | null[][];
 
 export type File = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h";
 export type Rank = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
 export type Square = `${File}${Rank}`;
 
-export type GameEndReason = "checkmate" | "timeout" | "stalemate" | "resignation";
+export interface Position {
+  row: number;
+  col: number;
+}
+
+export interface Move {
+  readonly pieceId: string;
+  readonly pieceType: PieceName;
+  readonly from: Position;
+  readonly to: Position;
+  readonly color: Side;
+  readonly capturedPieceId?: string;
+  readonly promotion?: PieceName;
+  readonly isEnPassant?: boolean;
+  readonly isCastle?: boolean;
+  readonly timestamp: number;
+}
