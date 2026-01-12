@@ -1,4 +1,4 @@
-import { MAX_INDEX, MIN_INDEX, IPiece, PieceName, Position, Side, IPieceData } from "@ghost-chess-king/shared";
+import { IPiece, PieceName, Position, Side, IPieceData } from "@ghost-chess-king/shared";
 
 export abstract class Piece implements IPiece {
   public abstract readonly type: PieceName;
@@ -11,15 +11,15 @@ export abstract class Piece implements IPiece {
   ) {}
 
   public abstract clone(): IPiece;
-  public abstract getAttackPaths(): Position[][];
-  public abstract getPotentialPaths(): Position[][];
+  public abstract getAttackPaths(maxRow: number, maxCol: number): Position[][];
+  public abstract getPotentialPaths(maxRow: number, maxCol: number): Position[][];
 
-  protected generateLinePath(dRow: number, dCol: number): Position[] {
+  protected generateLinePath(dRow: number, dCol: number, maxRow: number, maxCol: number): Position[] {
     const path: Position[] = [];
     let row = this.position.row + dRow;
     let col = this.position.col + dCol;
 
-    while (row >= MIN_INDEX && row <= MAX_INDEX && col >= MIN_INDEX && col <= MAX_INDEX) {
+    while (row >= 0 && row < maxRow && col >= 0 && col < maxCol) {
       path.push({ row, col });
       row += dRow;
       col += dCol;

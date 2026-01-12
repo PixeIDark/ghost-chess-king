@@ -10,8 +10,8 @@ export interface IPieceData {
 
 export interface IPiece extends IPieceData {
   clone(): IPiece;
-  getAttackPaths(): Position[][];
-  getPotentialPaths(): Position[][];
+  getAttackPaths(maxRow: number, maxCol: number): Position[][];
+  getPotentialPaths(maxRow: number, maxCol: number): Position[][];
   moveTo(row: number, col: number): void;
   setPosition(row: number, col: number): void;
   toDto(): IPieceData;
