@@ -1,6 +1,4 @@
-import { IPiece, Position } from "@/model/piece/Piece.interface";
-import { PieceName, Side } from "@ghost-chess-king/shared";
-import { MAX_INDEX, MIN_INDEX } from "../../../../../packages/shared/src/constants/game";
+import { MAX_INDEX, MIN_INDEX, IPiece, PieceName, Position, Side, IPieceData } from "@ghost-chess-king/shared";
 
 export abstract class Piece implements IPiece {
   public abstract readonly type: PieceName;
@@ -13,7 +11,7 @@ export abstract class Piece implements IPiece {
   ) {}
 
   public abstract clone(): IPiece;
-
+  public abstract getAttackPaths(): Position[][];
   public abstract getPotentialPaths(): Position[][];
 
   protected generateLinePath(dRow: number, dCol: number): Position[] {
@@ -39,7 +37,7 @@ export abstract class Piece implements IPiece {
     this.position = { row, col };
   }
 
-  public toDto(): IPiece {
+  public toDto(): IPieceData {
     return {
       id: this.id,
       type: this.type,
