@@ -2,6 +2,8 @@ import { Rook } from "./Rook";
 
 describe("Rook", () => {
   let rook: Rook;
+  const maxRow = 8;
+  const maxCol = 8;
 
   beforeEach(() => {
     rook = new Rook(1, "white", { row: 4, col: 4 });
@@ -9,7 +11,7 @@ describe("Rook", () => {
 
   describe("getAttackPaths()", () => {
     it("상, 하, 좌, 우 4개 방향의 독립된 공격 경로 배열을 반환해야 한다", () => {
-      const paths = rook.getAttackPaths();
+      const paths = rook.getAttackPaths(maxRow, maxCol);
       expect(paths).toHaveLength(4);
       paths.forEach((path) => {
         expect(path.length).toBeGreaterThan(0);
@@ -17,15 +19,15 @@ describe("Rook", () => {
     });
 
     it("getPotentialPaths()와 동일한 경로를 반환해야 한다", () => {
-      const attackPaths = rook.getAttackPaths();
-      const potentialPaths = rook.getPotentialPaths();
+      const attackPaths = rook.getAttackPaths(maxRow, maxCol);
+      const potentialPaths = rook.getPotentialPaths(maxRow, maxCol);
       expect(attackPaths).toEqual(potentialPaths);
     });
   });
 
   describe("getPotentialPaths()", () => {
     it("상, 하, 좌, 우 4개 방향의 독립된 경로 배열을 반환해야 한다", () => {
-      const paths = rook.getPotentialPaths();
+      const paths = rook.getPotentialPaths(maxRow, maxCol);
       expect(paths).toHaveLength(4);
       paths.forEach((path) => {
         expect(path.length).toBeGreaterThan(0);
@@ -34,7 +36,7 @@ describe("Rook", () => {
 
     it("보드 끝(0,0)에 위치할 때 유효한 직선 경로는 2개(우, 하)여야 한다", () => {
       const cornerRook = new Rook(2, "white", { row: 0, col: 0 });
-      const validPaths = cornerRook.getPotentialPaths().filter((p) => p.length > 0);
+      const validPaths = cornerRook.getPotentialPaths(maxRow, maxCol).filter((p) => p.length > 0);
       expect(validPaths).toHaveLength(2);
     });
   });

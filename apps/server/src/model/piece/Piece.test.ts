@@ -17,13 +17,15 @@ class TestPiece extends Piece {
     return [];
   }
 
-  public testGenerateLinePath(dRow: number, dCol: number): Position[] {
-    return this.generateLinePath(dRow, dCol);
+  public testGenerateLinePath(dRow: number, dCol: number, maxRow: number, maxCol: number): Position[] {
+    return this.generateLinePath(dRow, dCol, maxRow, maxCol);
   }
 }
 
 describe("Piece (Abstract Class) 공통 메서드 테스트", () => {
   let piece: TestPiece;
+  const maxRow = 8;
+  const maxCol = 8;
 
   beforeEach(() => {
     piece = new TestPiece(1, "white", { row: 4, col: 4 });
@@ -66,16 +68,16 @@ describe("Piece (Abstract Class) 공통 메서드 테스트", () => {
 
   describe("generateLinePath() - protected", () => {
     it("주어진 방향으로 보드 끝까지의 경로 좌표를 생성해야 한다", () => {
-      const path = piece.testGenerateLinePath(0, 1);
+      const path = piece.testGenerateLinePath(0, 1, maxRow, maxCol);
 
       expect(path).toHaveLength(3);
       expect(path[0]).toEqual({ row: 4, col: 5 });
       expect(path[2]).toEqual({ row: 4, col: 7 });
     });
 
-    it("보드 경계(MAX_INDEX, MIN_INDEX)를 벗어나는 좌표는 포함하지 않아야 한다", () => {
+    it("보드 경계를 벗어나는 좌표는 포함하지 않아야 한다", () => {
       const edgePiece = new TestPiece(2, "black", { row: 0, col: 0 });
-      const path = edgePiece.testGenerateLinePath(-1, 0);
+      const path = edgePiece.testGenerateLinePath(-1, 0, maxRow, maxCol);
 
       expect(path).toHaveLength(0);
     });

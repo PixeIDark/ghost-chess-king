@@ -8,7 +8,7 @@ export class King extends Piece {
     return new King(this.id, this.color, { ...this.position }, this.hasMoved);
   }
 
-  public getAttackPaths(): Position[][] {
+  public getAttackPaths(maxRow: number, maxCol: number): Position[][] {
     const { row, col } = this.position;
     const candidates: Position[] = [
       { row: row - 1, col: col },
@@ -21,10 +21,12 @@ export class King extends Piece {
       { row: row + 1, col: col + 1 },
     ];
 
-    return candidates.filter((pos) => pos.row >= 0 && pos.row < 8 && pos.col >= 0 && pos.col < 8).map((pos) => [pos]);
+    return candidates
+      .filter((pos) => pos.row >= 0 && pos.row < maxRow && pos.col >= 0 && pos.col < maxCol)
+      .map((pos) => [pos]);
   }
 
-  public getPotentialPaths(): Position[][] {
+  public getPotentialPaths(maxRow: number, maxCol: number): Position[][] {
     const { row, col } = this.position;
     const candidates: Position[] = [
       { row: row - 1, col: col },
@@ -37,6 +39,8 @@ export class King extends Piece {
       { row: row + 1, col: col + 1 },
     ];
 
-    return candidates.filter((pos) => pos.row >= 0 && pos.row < 8 && pos.col >= 0 && pos.col < 8).map((pos) => [pos]);
+    return candidates
+      .filter((pos) => pos.row >= 0 && pos.row < maxRow && pos.col >= 0 && pos.col < maxCol)
+      .map((pos) => [pos]);
   }
 }

@@ -8,29 +8,29 @@ export class Queen extends Piece {
     return new Queen(this.id, this.color, { ...this.position }, this.hasMoved);
   }
 
-  public getAttackPaths(): Position[][] {
+  public getAttackPaths(maxRow: number, maxCol: number): Position[][] {
     return [
-      this.generateLinePath(0, 1),
-      this.generateLinePath(0, -1),
-      this.generateLinePath(1, 0),
-      this.generateLinePath(-1, 0),
-      this.generateLinePath(1, 1),
-      this.generateLinePath(1, -1),
-      this.generateLinePath(-1, -1),
-      this.generateLinePath(-1, 1),
+      this.generateLinePath(0, 1, maxRow, maxCol),
+      this.generateLinePath(0, -1, maxRow, maxCol),
+      this.generateLinePath(1, 0, maxRow, maxCol),
+      this.generateLinePath(-1, 0, maxRow, maxCol),
+      this.generateLinePath(1, 1, maxRow, maxCol),
+      this.generateLinePath(1, -1, maxRow, maxCol),
+      this.generateLinePath(-1, -1, maxRow, maxCol),
+      this.generateLinePath(-1, 1, maxRow, maxCol),
     ];
   }
 
-  public getPotentialPaths(): Position[][] {
+  public getPotentialPaths(maxRow: number, maxCol: number): Position[][] {
     return [
-      this.generateLinePath(0, 1),
-      this.generateLinePath(0, -1),
-      this.generateLinePath(1, 0),
-      this.generateLinePath(-1, 0),
-      this.generateLinePath(1, 1),
-      this.generateLinePath(1, -1),
-      this.generateLinePath(-1, -1),
-      this.generateLinePath(-1, 1),
+      this.generateLinePath(0, 1, maxRow, maxCol),
+      this.generateLinePath(0, -1, maxRow, maxCol),
+      this.generateLinePath(1, 0, maxRow, maxCol),
+      this.generateLinePath(-1, 0, maxRow, maxCol),
+      this.generateLinePath(1, 1, maxRow, maxCol),
+      this.generateLinePath(1, -1, maxRow, maxCol),
+      this.generateLinePath(-1, -1, maxRow, maxCol),
+      this.generateLinePath(-1, 1, maxRow, maxCol),
     ];
   }
 }

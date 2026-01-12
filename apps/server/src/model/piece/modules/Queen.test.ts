@@ -2,6 +2,8 @@ import { Queen } from "./Queen";
 
 describe("Queen", () => {
   let queen: Queen;
+  const maxRow = 8;
+  const maxCol = 8;
 
   beforeEach(() => {
     queen = new Queen(1, "white", { row: 4, col: 4 });
@@ -9,7 +11,7 @@ describe("Queen", () => {
 
   describe("getAttackPaths()", () => {
     it("8개 방향(직선 4개 + 대각선 4개)의 공격 경로 배열을 반환해야 한다", () => {
-      const paths = queen.getAttackPaths();
+      const paths = queen.getAttackPaths(maxRow, maxCol);
       expect(paths).toHaveLength(8);
       paths.forEach((path) => {
         expect(path.length).toBeGreaterThan(0);
@@ -17,20 +19,20 @@ describe("Queen", () => {
     });
 
     it("getPotentialPaths()와 동일한 경로를 반환해야 한다", () => {
-      const attackPaths = queen.getAttackPaths();
-      const potentialPaths = queen.getPotentialPaths();
+      const attackPaths = queen.getAttackPaths(maxRow, maxCol);
+      const potentialPaths = queen.getPotentialPaths(maxRow, maxCol);
       expect(attackPaths).toEqual(potentialPaths);
     });
   });
 
   describe("getPotentialPaths()", () => {
     it("직선 4방향과 대각선 4방향을 합쳐 총 8개 방향의 경로를 반환해야 한다", () => {
-      const paths = queen.getPotentialPaths();
+      const paths = queen.getPotentialPaths(maxRow, maxCol);
       expect(paths).toHaveLength(8);
     });
 
     it("중앙(4,4)에서 퀸이 갈 수 있는 모든 칸의 총합은 27칸이어야 한다", () => {
-      const total = queen.getPotentialPaths().reduce((acc, p) => acc + p.length, 0);
+      const total = queen.getPotentialPaths(maxRow, maxCol).reduce((acc, p) => acc + p.length, 0);
       expect(total).toBe(27);
     });
   });
