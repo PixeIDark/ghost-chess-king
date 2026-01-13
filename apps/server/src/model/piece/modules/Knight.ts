@@ -1,4 +1,4 @@
-import { PieceName, Position } from "@ghost-chess-king/shared";
+import { isValidPosition, PieceName, Position } from "@ghost-chess-king/shared";
 import { Piece } from "@/model/piece";
 
 export class Knight extends Piece {
@@ -21,9 +21,7 @@ export class Knight extends Piece {
       { row: row + 1, col: col + 2 },
     ];
 
-    return candidates
-      .filter((pos) => pos.row >= 0 && pos.row < maxRow && pos.col >= 0 && pos.col < maxCol)
-      .map((pos) => [pos]);
+    return candidates.filter((pos) => isValidPosition(pos, maxRow, maxCol)).map((pos) => [pos]);
   }
 
   public getPotentialPaths(maxRow: number, maxCol: number): Position[][] {
@@ -39,8 +37,6 @@ export class Knight extends Piece {
       { row: row + 1, col: col + 2 },
     ];
 
-    return candidates
-      .filter((pos) => pos.row >= 0 && pos.row < maxRow && pos.col >= 0 && pos.col < maxCol)
-      .map((pos) => [pos]);
+    return candidates.filter((pos) => isValidPosition(pos, maxRow, maxCol)).map((pos) => [pos]);
   }
 }

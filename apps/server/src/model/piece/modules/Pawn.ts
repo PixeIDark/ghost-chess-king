@@ -1,4 +1,4 @@
-import { PieceName, Position } from "@ghost-chess-king/shared";
+import { isValidPosition, PieceName, Position } from "@ghost-chess-king/shared";
 import { Piece } from "@/model/piece";
 
 export class Pawn extends Piece {
@@ -15,7 +15,7 @@ export class Pawn extends Piece {
     ];
 
     diagonals.forEach((pos) => {
-      if (this.isValidBounds(pos, maxRow, maxCol)) {
+      if (isValidPosition(pos, maxRow, maxCol)) {
         paths.push([pos]);
       }
     });
@@ -29,14 +29,12 @@ export class Pawn extends Piece {
     const paths: Position[][] = [];
     const forward1 = { row: row + direction, col };
 
-    if (this.isValidBounds(forward1, maxRow, maxCol)) {
+    if (isValidPosition(forward1, maxRow, maxCol)) {
       paths.push([forward1]);
 
       if (!this.hasMoved) {
         const forward2 = { row: row + direction * 2, col };
-        if (this.isValidBounds(forward2, maxRow, maxCol)) {
-          paths.push([forward1, forward2]);
-        }
+        if (isValidPosition(forward2, maxRow, maxCol)) paths.push([forward1, forward2]);
       }
     }
 
@@ -46,16 +44,10 @@ export class Pawn extends Piece {
     ];
 
     diagonals.forEach((pos) => {
-      if (this.isValidBounds(pos, maxRow, maxCol)) {
-        paths.push([pos]);
-      }
+      if (isValidPosition(pos, maxRow, maxCol)) paths.push([pos]);
     });
 
     return paths;
-  }
-
-  private isValidBounds(pos: Position, maxRow: number, maxCol: number): boolean {
-    return pos.row >= 0 && pos.row < maxRow && pos.col >= 0 && pos.col < maxCol;
   }
 
   public clone(): Piece {

@@ -1,4 +1,4 @@
-import { IPiece, PieceName, Position, Side, IPieceData } from "@ghost-chess-king/shared";
+import { IPiece, PieceName, Position, Side, IPieceData, isValidPosition } from "@ghost-chess-king/shared";
 
 export abstract class Piece implements IPiece {
   public abstract readonly type: PieceName;
@@ -19,7 +19,7 @@ export abstract class Piece implements IPiece {
     let row = this.position.row + dRow;
     let col = this.position.col + dCol;
 
-    while (row >= 0 && row < maxRow && col >= 0 && col < maxCol) {
+    while (isValidPosition({ row, col }, maxRow, maxCol)) {
       path.push({ row, col });
       row += dRow;
       col += dCol;
