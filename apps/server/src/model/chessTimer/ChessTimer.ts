@@ -1,6 +1,6 @@
 import { Side } from "@ghost-chess-king/shared";
 import { INCREMENT_TIME, INITIAL_TIME } from "@/model/chessTimer/ChessTimer.constants";
-import { IChessTimer } from "@/model/chessTimer/ChessTimer.interface";
+import { IChessTimer } from "../../../../../packages/shared/src/types/models/ChessTimer.interface";
 
 export class ChessTimer implements IChessTimer {
   private whiteTime: number;
