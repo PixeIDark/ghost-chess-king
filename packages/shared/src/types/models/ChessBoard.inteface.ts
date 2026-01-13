@@ -12,6 +12,8 @@ export interface IChessBoard {
   clone(): IChessBoard;
   findKing(color: Side): Position | undefined;
   getAllPieces(color: Side): IPiece[];
+  getAttackedPositions(color: Side): Position[];
+  isPositionUnderAttack(position: Position, byColor: Side): boolean;
   toDto(): BoardDTO;
   clear(): void;
 }

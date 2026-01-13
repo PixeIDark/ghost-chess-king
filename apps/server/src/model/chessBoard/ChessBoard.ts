@@ -1,18 +1,18 @@
-import { BoardDTO, BoardEntity, IChessBoard, IPiece, Position, Side } from "@ghost-chess-king/shared";
+import { BoardDTO, BoardEntity, IChessBoard, IPiece, isSamePosition, Position, Side } from "@ghost-chess-king/shared";
 
 export class ChessBoard implements IChessBoard {
-  // ChessRuler에서 boardEntity를 주입하는 방식
-  constructor(
-    public readonly boardEntity: BoardEntity,
-    public readonly rows: number,
-    public readonly cols: number
-  ) {}
+  public readonly rows: number;
+  public readonly cols: number;
+
+  constructor(public readonly boardEntity: BoardEntity) {
+    this.rows = boardEntity.length;
+    this.cols = boardEntity[0].length;
+  }
 
   public getPiece(position: Position): IPiece | null {
     return this.boardEntity[position.row][position.col];
   }
 
-  // 프로모션에서 사용할 수 있다.
   public setPiece(position: Position, piece: IPiece | null) {
     this.boardEntity[position.row][position.col] = piece;
   }
@@ -21,7 +21,7 @@ export class ChessBoard implements IChessBoard {
     const fromPiece = this.boardEntity[from.row][from.col]!;
     this.boardEntity[to.row][to.col] = fromPiece;
     this.boardEntity[from.row][from.col] = null;
-    fromPiece.setPosition(to.row, to.col);
+    fromPiece.moveTo(to.row, to.col);
   }
 
   public removePiece(position: Position): IPiece | null {
@@ -32,7 +32,7 @@ export class ChessBoard implements IChessBoard {
 
   public clone(): IChessBoard {
     const clonedEntity: BoardEntity = this.boardEntity.map((row) => row.map((piece) => (piece ? piece.clone() : null)));
-    return new ChessBoard(clonedEntity, this.rows, this.cols);
+    return new ChessBoard(clonedEntity);
   }
 
   public findKing(color: Side): Position | undefined {
@@ -42,6 +42,28 @@ export class ChessBoard implements IChessBoard {
 
   public getAllPieces(color: Side): IPiece[] {
     return this.boardEntity.flat().filter((piece): piece is IPiece => piece?.color === color);
+  }
+
+  public getAttackedPositions(color: Side): Position[] {
+    const pieces = this.getAllPieces(color);
+    const attacked: Position[] = [];
+
+    pieces.forEach((piece) => {
+      const attackPaths = piece.getAttackPaths(this.rows, this.cols);
+      attackPaths.forEach((path) => {
+        for (const pos of path) {
+          attacked.push(pos);
+          if (this.getPiece(pos)) break;
+        }
+      });
+    });
+
+    return attacked;
+  }
+
+  public isPositionUnderAttack(position: Position, byColor: Side): boolean {
+    const attackedPositions = this.getAttackedPositions(byColor);
+    return attackedPositions.some((pos) => isSamePosition(pos, position));
   }
 
   public toDto(): BoardDTO {

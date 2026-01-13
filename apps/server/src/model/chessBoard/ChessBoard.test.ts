@@ -203,6 +203,91 @@ describe("ChessBoard", () => {
     });
   });
 
+  describe("getAttackedPositions()", () => {
+    it("특정 색상이 공격하는 모든 위치를 반환해야 한다", () => {
+      const whiteRook = new MockPiece(1, "rook", "white", { row: 0, col: 0 });
+      whiteRook.getAttackPaths = () => [
+        [
+          { row: 0, col: 1 },
+          { row: 0, col: 2 },
+          { row: 0, col: 3 },
+        ],
+        [
+          { row: 1, col: 0 },
+          { row: 2, col: 0 },
+          { row: 3, col: 0 },
+        ],
+      ];
+      board.setPiece({ row: 0, col: 0 }, whiteRook);
+
+      const attacked = board.getAttackedPositions("white");
+
+      expect(attacked).toContainEqual({ row: 0, col: 1 });
+      expect(attacked).toContainEqual({ row: 0, col: 2 });
+      expect(attacked).toContainEqual({ row: 1, col: 0 });
+    });
+
+    it("경로에 기물이 있으면 그 위치까지만 공격 범위에 포함해야 한다", () => {
+      const whiteRook = new MockPiece(1, "rook", "white", { row: 0, col: 0 });
+      whiteRook.getAttackPaths = () => [
+        [
+          { row: 0, col: 1 },
+          { row: 0, col: 2 },
+          { row: 0, col: 3 },
+        ],
+      ];
+      const blackPawn = new MockPiece(2, "pawn", "black", { row: 0, col: 2 });
+
+      board.setPiece({ row: 0, col: 0 }, whiteRook);
+      board.setPiece({ row: 0, col: 2 }, blackPawn);
+
+      const attacked = board.getAttackedPositions("white");
+
+      expect(attacked).toContainEqual({ row: 0, col: 1 });
+      expect(attacked).toContainEqual({ row: 0, col: 2 });
+      expect(attacked).not.toContainEqual({ row: 0, col: 3 });
+    });
+
+    it("공격 가능한 기물이 없으면 빈 배열을 반환해야 한다", () => {
+      const attacked = board.getAttackedPositions("white");
+
+      expect(attacked).toEqual([]);
+    });
+  });
+
+  describe("isPositionUnderAttack()", () => {
+    it("특정 위치가 공격받고 있으면 true를 반환해야 한다", () => {
+      const blackRook = new MockPiece(1, "rook", "black", { row: 0, col: 0 });
+      blackRook.getAttackPaths = () => [
+        [
+          { row: 0, col: 1 },
+          { row: 0, col: 2 },
+          { row: 0, col: 3 },
+        ],
+      ];
+      board.setPiece({ row: 0, col: 0 }, blackRook);
+
+      const result = board.isPositionUnderAttack({ row: 0, col: 2 }, "black");
+
+      expect(result).toBe(true);
+    });
+
+    it("특정 위치가 공격받지 않으면 false를 반환해야 한다", () => {
+      const blackRook = new MockPiece(1, "rook", "black", { row: 0, col: 0 });
+      blackRook.getAttackPaths = () => [
+        [
+          { row: 0, col: 1 },
+          { row: 0, col: 2 },
+        ],
+      ];
+      board.setPiece({ row: 0, col: 0 }, blackRook);
+
+      const result = board.isPositionUnderAttack({ row: 5, col: 5 }, "black");
+
+      expect(result).toBe(false);
+    });
+  });
+
   describe("toDto()", () => {
     it("보드 상태를 DTO 형태로 변환해야 한다", () => {
       const piece = new MockPiece(1, "knight", "white", { row: 2, col: 3 });
