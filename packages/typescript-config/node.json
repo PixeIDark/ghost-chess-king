@@ -3,6 +3,5 @@
   "compilerOptions": {
     "lib": ["ES2023"],
     "types": ["node", "jest"],
-    "allowImportingTsExtensions": true
   }
 }
