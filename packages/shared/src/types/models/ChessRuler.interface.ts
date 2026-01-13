@@ -1,15 +1,12 @@
-import { IPiece, Position, Side, Move, MatchResultType, BoardEntity } from "../";
+import { IPiece, Position, Side, IChessBoard, BoardEntity, Move } from "../";
 
 export interface IChessRuler {
-  isSquareAttacked(pos: Position, board: BoardEntity, attackerColor: Side): boolean;
-  getAllAttackedSquares(board: BoardEntity, attackerColor: Side): Position[];
-  filterObstacles(piece: IPiece, board: BoardEntity): Position[];
-  findKing(board: BoardEntity, color: Side): Position | undefined;
-  canEnPassant(piece: IPiece, targetPos: Position, board: BoardEntity, lastMove: Move | null): boolean;
-  canCastle(board: BoardEntity, color: Side, side: "KING" | "QUEEN"): boolean;
-  isValidMove(piece: IPiece, targetPos: Position, board: BoardEntity, lastMove: Move | null): boolean;
-  isCheck(board: BoardEntity, color: Side): boolean;
-  isCheckmate(board: BoardEntity, color: Side, lastMove: Move | null): boolean;
-  isStalemate(board: BoardEntity, color: Side, lastMove: Move | null): boolean;
-  getGameStatus(board: BoardEntity, turn: Side, lastMove: Move | null): MatchResultType;
+  createBoard(): BoardEntity;
+  getCastlingMoves(board: IChessBoard, king: IPiece): Position[];
+  getEnPassantMoves(board: IChessBoard, pawn: IPiece, lastMove?: Move): Position[];
+  isCheckmate(board: IChessBoard, color: Side): boolean;
+  isStalemate(board: IChessBoard, color: Side): boolean;
+  getValidMoves(board: IChessBoard, piece: IPiece): Position[];
+  wouldExposeKing(board: IChessBoard, from: Position, to: Position): boolean;
+  isInCheck(board: IChessBoard, color: Side): boolean;
 }
