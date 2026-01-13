@@ -1,7 +1,8 @@
-import { Chess } from "@/model/chess";
+import { Chess } from "src/controller/chess";
 import { ChessTimer } from "@/model/chessTimer";
-import { GameEndReason, GameMode, GameRoom, GameState, getOppositeSide, Side, Square } from "@ghost-chess-king/shared";
+import { GameEndReason, getOppositeSide, Side, Square } from "@ghost-chess-king/shared";
 import { AppServer } from "@/types/socket";
+import { GameMode, GameRoom, GameState } from "../../../../packages/shared/src/types/game";
 
 export class GameService {
   private rooms: Map<string, GameRoom> = new Map();
