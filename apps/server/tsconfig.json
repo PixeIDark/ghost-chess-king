@@ -1,5 +1,5 @@
 {
-  "extends": "@ghost-chess-king/typescript-config/base.json",
+  "extends": "@ghost-chess-king/typescript-config/node.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

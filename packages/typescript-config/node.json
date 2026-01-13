@@ -2,7 +2,7 @@
   "extends": "./base.json",
   "compilerOptions": {
     "lib": ["ES2023"],
-    "types": ["node"],
+    "types": ["node", "jest"],
     "allowImportingTsExtensions": true
   }
 }

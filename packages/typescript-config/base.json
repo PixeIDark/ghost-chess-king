@@ -13,6 +13,7 @@
     "noUnusedParameters": true,
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
+    "types": ["jest"],
     "paths": {
       "@/*": [
         "./src/*"
