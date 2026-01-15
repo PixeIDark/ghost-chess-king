@@ -20,7 +20,7 @@ export class EventManager<T extends Record<string, unknown>> {
     if (eventListeners) eventListeners.forEach((listener) => listener(data));
   }
 
-  public removeAll(): void {
+  public clear(): void {
     this.listeners.clear();
   }
 }
