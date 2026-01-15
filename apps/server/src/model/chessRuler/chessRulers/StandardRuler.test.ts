@@ -57,6 +57,71 @@ describe("StandardRuler", () => {
     });
   });
 
+  describe("getValidMoves", () => {
+    it("폰은 전진할 때 빈 칸만 이동 가능하다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const pawn = new Pawn(1, "white", { row: 6, col: 4 });
+      const blockingPiece = new Pawn(2, "black", { row: 5, col: 4 });
+
+      emptyBoard[6][4] = pawn;
+      emptyBoard[5][4] = blockingPiece;
+
+      const board = new ChessBoard(emptyBoard);
+      const moves = ruler.getValidMoves(board, pawn);
+
+      expect(moves).not.toContainEqual({ row: 5, col: 4 });
+      expect(moves).not.toContainEqual({ row: 4, col: 4 });
+    });
+
+    it("폰은 대각선 이동 시 적 기물이 있어야 한다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const pawn = new Pawn(1, "white", { row: 6, col: 4 });
+
+      emptyBoard[6][4] = pawn;
+
+      const board = new ChessBoard(emptyBoard);
+      const moves = ruler.getValidMoves(board, pawn);
+
+      expect(moves).not.toContainEqual({ row: 5, col: 3 });
+      expect(moves).not.toContainEqual({ row: 5, col: 5 });
+    });
+
+    it("폰은 대각선에 적 기물이 있으면 캡처 가능하다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const pawn = new Pawn(1, "white", { row: 6, col: 4 });
+      const enemyPawn = new Pawn(2, "black", { row: 5, col: 5 });
+
+      emptyBoard[6][4] = pawn;
+      emptyBoard[5][5] = enemyPawn;
+
+      const board = new ChessBoard(emptyBoard);
+      const moves = ruler.getValidMoves(board, pawn);
+
+      expect(moves).toContainEqual({ row: 5, col: 5 });
+    });
+
+    it("폰은 처음 위치에서 2칸 전진 가능하다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const pawn = new Pawn(1, "white", { row: 6, col: 4 });
+
+      emptyBoard[6][4] = pawn;
+
+      const board = new ChessBoard(emptyBoard);
+      const moves = ruler.getValidMoves(board, pawn);
+
+      expect(moves).toContainEqual({ row: 5, col: 4 });
+      expect(moves).toContainEqual({ row: 4, col: 4 });
+    });
+  });
+
   describe("getCastlingMoves", () => {
     it("킹과 룩이 이동하지 않았으면 캐슬링 위치를 반환한다", () => {
       const emptyBoard = Array(8)
@@ -242,7 +307,7 @@ describe("StandardRuler", () => {
       emptyBoard[3][4] = whitePawn;
 
       const board = new ChessBoard(emptyBoard);
-      const moves = ruler.getEnPassantMoves(board, whitePawn);
+      const moves = ruler.getEnPassantMoves(board, whitePawn, undefined);
 
       expect(moves).toHaveLength(0);
     });
@@ -519,12 +584,6 @@ describe("StandardRuler", () => {
 
   describe("getPromotionOptions", () => {
     it("표준 체스 프로모션 옵션을 반환한다", () => {
-      const options = ruler.getPromotionOptions();
-
-      expect(options).toEqual(["queen", "rook", "bishop", "knight"]);
-    });
-
-    it("검은색도 같은 옵션을 반환한다", () => {
       const options = ruler.getPromotionOptions();
 
       expect(options).toEqual(["queen", "rook", "bishop", "knight"]);
@@ -809,7 +868,7 @@ describe("StandardRuler", () => {
     });
 
     it("마지막 이동이 없으면 null을 반환한다", () => {
-      const target = ruler.getEnPassantTarget();
+      const target = ruler.getEnPassantTarget(undefined);
 
       expect(target).toBeNull();
     });

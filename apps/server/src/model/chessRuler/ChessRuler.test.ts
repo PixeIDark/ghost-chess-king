@@ -108,6 +108,10 @@ class TestRuler extends ChessRuler {
     return Array.from({ length: 8 }, () => Array(8).fill(null));
   }
 
+  getValidMoves(): Position[] {
+    return [];
+  }
+
   getCastlingMoves(): Position[] {
     return [];
   }
@@ -157,88 +161,6 @@ describe("ChessRuler", () => {
     ruler = new TestRuler();
     const boardEntity = ruler.createBoard();
     board = new ChessBoard(boardEntity);
-  });
-
-  describe("getValidMoves()", () => {
-    it("기물의 잠재적 경로를 필터링하여 유효한 이동만 반환해야 한다", () => {
-      const piece = new MockPiece(1, "rook", "white", { row: 4, col: 4 });
-      board.setPiece({ row: 4, col: 4 }, piece);
-
-      const validMoves = ruler.getValidMoves(board, piece);
-
-      expect(validMoves.length).toBeGreaterThan(0);
-      expect(validMoves).toContainEqual({ row: 4, col: 5 });
-      expect(validMoves).toContainEqual({ row: 5, col: 4 });
-    });
-
-    it("자기 편 기물이 있는 위치는 제외해야 한다", () => {
-      const piece = new MockPiece(1, "rook", "white", { row: 4, col: 4 });
-      const allyPiece = new MockPiece(2, "pawn", "white", { row: 4, col: 5 });
-
-      board.setPiece({ row: 4, col: 4 }, piece);
-      board.setPiece({ row: 4, col: 5 }, allyPiece);
-
-      const validMoves = ruler.getValidMoves(board, piece);
-
-      expect(validMoves).not.toContainEqual({ row: 4, col: 5 });
-      expect(validMoves).not.toContainEqual({ row: 4, col: 6 });
-    });
-
-    it("적 기물이 있는 위치는 포함하지만 그 뒤는 차단해야 한다", () => {
-      const piece = new MockPiece(1, "rook", "white", { row: 4, col: 4 });
-      const enemyPiece = new MockPiece(2, "pawn", "black", { row: 4, col: 5 });
-
-      board.setPiece({ row: 4, col: 4 }, piece);
-      board.setPiece({ row: 4, col: 5 }, enemyPiece);
-
-      const validMoves = ruler.getValidMoves(board, piece);
-
-      expect(validMoves).toContainEqual({ row: 4, col: 5 });
-      expect(validMoves).not.toContainEqual({ row: 4, col: 6 });
-    });
-
-    it("킹을 체크 상태로 만드는 이동은 제외해야 한다", () => {
-      const king = new MockPiece(1, "king", "white", { row: 4, col: 4 });
-      const piece = new MockPiece(2, "rook", "white", { row: 4, col: 5 });
-      const enemyRook = new MockPiece(3, "rook", "black", { row: 4, col: 7 });
-
-      board.setPiece({ row: 4, col: 4 }, king);
-      board.setPiece({ row: 4, col: 5 }, piece);
-      board.setPiece({ row: 4, col: 7 }, enemyRook);
-
-      const validMoves = ruler.getValidMoves(board, piece);
-
-      expect(validMoves).not.toContainEqual({ row: 5, col: 5 });
-      expect(validMoves).not.toContainEqual({ row: 3, col: 5 });
-    });
-
-    it("킹의 캐슬링 가능 위치를 포함해야 한다", () => {
-      const king = new MockPiece(1, "king", "white", { row: 0, col: 4 });
-      const castlingPositions = [
-        { row: 0, col: 2 },
-        { row: 0, col: 6 },
-      ];
-
-      board.setPiece({ row: 0, col: 4 }, king);
-      ruler.getCastlingMoves = () => castlingPositions;
-
-      const validMoves = ruler.getValidMoves(board, king);
-
-      expect(validMoves).toContainEqual({ row: 0, col: 2 });
-      expect(validMoves).toContainEqual({ row: 0, col: 6 });
-    });
-
-    it("폰의 앙파상 가능 위치를 포함해야 한다", () => {
-      const pawn = new MockPiece(1, "pawn", "white", { row: 4, col: 4 });
-      const enPassantPositions = [{ row: 5, col: 3 }];
-
-      board.setPiece({ row: 4, col: 4 }, pawn);
-      ruler.getEnPassantMoves = () => enPassantPositions;
-
-      const validMoves = ruler.getValidMoves(board, pawn);
-
-      expect(validMoves).toContainEqual({ row: 5, col: 3 });
-    });
   });
 
   describe("wouldExposeKing()", () => {
