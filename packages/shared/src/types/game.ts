@@ -15,8 +15,6 @@ export type MatchResultType =
   | "TIMEOUT"
   | "DRAW_AGREEMENT";
 
-export type GameEndReason = Exclude<MatchResultType, "PLAYING" | "CHECK">;
-
 export interface GameState {
   readonly currentTurn: Side;
   readonly matchResult: MatchResultType;

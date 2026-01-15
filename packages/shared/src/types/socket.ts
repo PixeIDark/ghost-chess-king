@@ -1,5 +1,5 @@
 import { UserInfo } from "./lobby";
-import { GameEndReason, GameMode, GameState } from "./game";
+import { GameMode, GameState, MatchResultType } from "./game";
 import { Side, Position, PromotionPieceName } from "./chess";
 
 export interface ServerToClientEvents {
@@ -79,7 +79,7 @@ export interface TimeUpdateData {
 
 export interface GameOverData {
   winner: Side | "draw";
-  reason: GameEndReason;
+  reason: MatchResultType;
 }
 export interface PromotionRequiredData {
   position: Position;
