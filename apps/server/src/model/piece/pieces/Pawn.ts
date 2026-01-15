@@ -30,12 +30,11 @@ export class Pawn extends Piece {
     const forward1 = { row: row + direction, col };
 
     if (isValidPosition(forward1, maxRow, maxCol)) {
-      paths.push([forward1]);
+      const forward2 = !this.hasMoved ? { row: row + direction * 2, col } : null;
 
-      if (!this.hasMoved) {
-        const forward2 = { row: row + direction * 2, col };
-        if (isValidPosition(forward2, maxRow, maxCol)) paths.push([forward1, forward2]);
-      }
+      if (forward2 && isValidPosition(forward2, maxRow, maxCol)) {
+        paths.push([forward1, forward2]);
+      } else paths.push([forward1]);
     }
 
     const diagonals = [
