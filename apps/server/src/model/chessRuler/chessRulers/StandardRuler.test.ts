@@ -1,4 +1,4 @@
-import { Move } from "@ghost-chess-king/shared";
+import { Move, PromotionPieceName } from "@ghost-chess-king/shared";
 import { ChessBoard } from "@/model/chessBoard";
 import { King, Rook, Pawn, Queen, Bishop, Knight } from "@/model/piece";
 import { StandardRuler } from "@/model/chessRuler";
@@ -195,7 +195,7 @@ describe("StandardRuler", () => {
 
       const board = new ChessBoard(emptyBoard);
       const lastMove: Move = {
-        pieceId: "2",
+        pieceId: 2,
         pieceType: "pawn",
         from: { row: 1, col: 5 },
         to: { row: 3, col: 5 },
@@ -220,7 +220,7 @@ describe("StandardRuler", () => {
 
       const board = new ChessBoard(emptyBoard);
       const lastMove: Move = {
-        pieceId: "2",
+        pieceId: 2,
         pieceType: "pawn",
         from: { row: 1, col: 5 },
         to: { row: 3, col: 5 },
@@ -259,7 +259,7 @@ describe("StandardRuler", () => {
 
       const board = new ChessBoard(emptyBoard);
       const lastMove: Move = {
-        pieceId: "2",
+        pieceId: 2,
         pieceType: "pawn",
         from: { row: 2, col: 5 },
         to: { row: 3, col: 5 },
@@ -284,7 +284,7 @@ describe("StandardRuler", () => {
 
       const board = new ChessBoard(emptyBoard);
       const lastMove: Move = {
-        pieceId: "2",
+        pieceId: 2,
         pieceType: "pawn",
         from: { row: 1, col: 5 },
         to: { row: 3, col: 5 },
@@ -309,7 +309,7 @@ describe("StandardRuler", () => {
 
       const board = new ChessBoard(emptyBoard);
       const lastMove: Move = {
-        pieceId: "2",
+        pieceId: 2,
         pieceType: "pawn",
         from: { row: 1, col: 6 },
         to: { row: 3, col: 6 },
@@ -334,7 +334,7 @@ describe("StandardRuler", () => {
 
       const board = new ChessBoard(emptyBoard);
       const lastMove: Move = {
-        pieceId: "2",
+        pieceId: 2,
         pieceType: "pawn",
         from: { row: 6, col: 5 },
         to: { row: 4, col: 5 },
@@ -445,6 +445,418 @@ describe("StandardRuler", () => {
       const result = ruler.isStalemate(board, "white");
 
       expect(result).toBe(true);
+    });
+  });
+
+  describe("needsPromotion", () => {
+    it("흰색 폰이 0행에 도달하면 true를 반환한다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const whitePawn = new Pawn(1, "white", { row: 0, col: 4 });
+
+      emptyBoard[0][4] = whitePawn;
+
+      const board = new ChessBoard(emptyBoard);
+      const result = ruler.needsPromotion(board, { row: 0, col: 4 });
+
+      expect(result).toBe(true);
+    });
+
+    it("검은색 폰이 7행에 도달하면 true를 반환한다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const blackPawn = new Pawn(1, "black", { row: 7, col: 4 });
+
+      emptyBoard[7][4] = blackPawn;
+
+      const board = new ChessBoard(emptyBoard);
+      const result = ruler.needsPromotion(board, { row: 7, col: 4 });
+
+      expect(result).toBe(true);
+    });
+
+    it("폰이 프로모션 행이 아니면 false를 반환한다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const whitePawn = new Pawn(1, "white", { row: 5, col: 4 });
+
+      emptyBoard[5][4] = whitePawn;
+
+      const board = new ChessBoard(emptyBoard);
+      const result = ruler.needsPromotion(board, { row: 5, col: 4 });
+
+      expect(result).toBe(false);
+    });
+
+    it("폰이 아닌 기물은 false를 반환한다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const knight = new Knight(1, "white", { row: 0, col: 4 });
+
+      emptyBoard[0][4] = knight;
+
+      const board = new ChessBoard(emptyBoard);
+      const result = ruler.needsPromotion(board, { row: 0, col: 4 });
+
+      expect(result).toBe(false);
+    });
+
+    it("해당 위치에 기물이 없으면 false를 반환한다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+
+      const board = new ChessBoard(emptyBoard);
+      const result = ruler.needsPromotion(board, { row: 0, col: 4 });
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe("getPromotionOptions", () => {
+    it("표준 체스 프로모션 옵션을 반환한다", () => {
+      const options = ruler.getPromotionOptions();
+
+      expect(options).toEqual(["queen", "rook", "bishop", "knight"]);
+    });
+
+    it("검은색도 같은 옵션을 반환한다", () => {
+      const options = ruler.getPromotionOptions();
+
+      expect(options).toEqual(["queen", "rook", "bishop", "knight"]);
+    });
+  });
+
+  describe("executePromotion", () => {
+    it("폰을 퀸으로 프로모션한다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const whitePawn = new Pawn(1, "white", { row: 0, col: 4 });
+
+      emptyBoard[0][4] = whitePawn;
+
+      const board = new ChessBoard(emptyBoard);
+      const promotedPiece = ruler.executePromotion(board, { row: 0, col: 4 }, "queen");
+
+      expect(promotedPiece.type).toBe("queen");
+      expect(promotedPiece.color).toBe("white");
+      expect(promotedPiece.id).toBe(1);
+      expect(board.getPiece({ row: 0, col: 4 })?.type).toBe("queen");
+    });
+
+    it("폰을 룩으로 프로모션한다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const blackPawn = new Pawn(2, "black", { row: 7, col: 3 });
+
+      emptyBoard[7][3] = blackPawn;
+
+      const board = new ChessBoard(emptyBoard);
+      const promotedPiece = ruler.executePromotion(board, { row: 7, col: 3 }, "rook");
+
+      expect(promotedPiece.type).toBe("rook");
+      expect(promotedPiece.color).toBe("black");
+      expect(board.getPiece({ row: 7, col: 3 })?.type).toBe("rook");
+    });
+
+    it("폰을 비숍으로 프로모션한다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const whitePawn = new Pawn(3, "white", { row: 0, col: 2 });
+
+      emptyBoard[0][2] = whitePawn;
+
+      const board = new ChessBoard(emptyBoard);
+      const promotedPiece = ruler.executePromotion(board, { row: 0, col: 2 }, "bishop");
+
+      expect(promotedPiece.type).toBe("bishop");
+      expect(board.getPiece({ row: 0, col: 2 })?.type).toBe("bishop");
+    });
+
+    it("폰을 나이트로 프로모션한다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const blackPawn = new Pawn(4, "black", { row: 7, col: 1 });
+
+      emptyBoard[7][1] = blackPawn;
+
+      const board = new ChessBoard(emptyBoard);
+      const promotedPiece = ruler.executePromotion(board, { row: 7, col: 1 }, "knight");
+
+      expect(promotedPiece.type).toBe("knight");
+      expect(board.getPiece({ row: 7, col: 1 })?.type).toBe("knight");
+    });
+
+    it("프로모션된 기물은 hasMoved가 true이다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const whitePawn = new Pawn(5, "white", { row: 0, col: 5 });
+
+      emptyBoard[0][5] = whitePawn;
+
+      const board = new ChessBoard(emptyBoard);
+      const promotedPiece = ruler.executePromotion(board, { row: 0, col: 5 }, "queen");
+
+      expect(promotedPiece.hasMoved).toBe(true);
+    });
+
+    it("해당 위치에 기물이 없으면 에러를 던진다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+
+      const board = new ChessBoard(emptyBoard);
+
+      expect(() => {
+        ruler.executePromotion(board, { row: 0, col: 4 }, "queen");
+      }).toThrow("No piece at promotion position");
+    });
+
+    it("폰이 아닌 기물이면 에러를 던진다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const knight = new Knight(6, "white", { row: 0, col: 4 });
+
+      emptyBoard[0][4] = knight;
+
+      const board = new ChessBoard(emptyBoard);
+
+      expect(() => {
+        ruler.executePromotion(board, { row: 0, col: 4 }, "queen");
+      }).toThrow("Only pawns can be promoted");
+    });
+
+    it("잘못된 프로모션 기물이면 에러를 던진다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const whitePawn = new Pawn(7, "white", { row: 0, col: 4 });
+
+      emptyBoard[0][4] = whitePawn;
+
+      const board = new ChessBoard(emptyBoard);
+
+      expect(() => {
+        ruler.executePromotion(board, { row: 0, col: 4 }, "king" as PromotionPieceName);
+      }).toThrow("Invalid promotion piece: king");
+    });
+  });
+
+  describe("canCastling", () => {
+    it("킹과 킹사이드 룩이 안 움직였으면 true를 반환한다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const king = new King(1, "white", { row: 7, col: 4 });
+      const kingsideRook = new Rook(2, "white", { row: 7, col: 7 });
+
+      emptyBoard[7][4] = king;
+      emptyBoard[7][7] = kingsideRook;
+
+      const board = new ChessBoard(emptyBoard);
+      const result = ruler.canCastling(board, "white", "kingside");
+
+      expect(result).toBe(true);
+    });
+
+    it("킹과 퀸사이드 룩이 안 움직였으면 true를 반환한다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const king = new King(1, "white", { row: 7, col: 4 });
+      const queensideRook = new Rook(2, "white", { row: 7, col: 0 });
+
+      emptyBoard[7][4] = king;
+      emptyBoard[7][0] = queensideRook;
+
+      const board = new ChessBoard(emptyBoard);
+      const result = ruler.canCastling(board, "white", "queenside");
+
+      expect(result).toBe(true);
+    });
+
+    it("킹이 없으면 false를 반환한다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+
+      const board = new ChessBoard(emptyBoard);
+      const result = ruler.canCastling(board, "white", "kingside");
+
+      expect(result).toBe(false);
+    });
+
+    it("킹이 움직였으면 false를 반환한다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const king = new King(1, "white", { row: 7, col: 4 });
+      king.hasMoved = true;
+      const kingsideRook = new Rook(2, "white", { row: 7, col: 7 });
+
+      emptyBoard[7][4] = king;
+      emptyBoard[7][7] = kingsideRook;
+
+      const board = new ChessBoard(emptyBoard);
+      const result = ruler.canCastling(board, "white", "kingside");
+
+      expect(result).toBe(false);
+    });
+
+    it("룩이 없으면 false를 반환한다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const king = new King(1, "white", { row: 7, col: 4 });
+
+      emptyBoard[7][4] = king;
+
+      const board = new ChessBoard(emptyBoard);
+      const result = ruler.canCastling(board, "white", "kingside");
+
+      expect(result).toBe(false);
+    });
+
+    it("룩이 움직였으면 false를 반환한다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const king = new King(1, "white", { row: 7, col: 4 });
+      const kingsideRook = new Rook(2, "white", { row: 7, col: 7 });
+      kingsideRook.hasMoved = true;
+
+      emptyBoard[7][4] = king;
+      emptyBoard[7][7] = kingsideRook;
+
+      const board = new ChessBoard(emptyBoard);
+      const result = ruler.canCastling(board, "white", "kingside");
+
+      expect(result).toBe(false);
+    });
+
+    it("룩 위치에 다른 기물이 있으면 false를 반환한다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const king = new King(1, "white", { row: 7, col: 4 });
+      const bishop = new Bishop(2, "white", { row: 7, col: 7 });
+
+      emptyBoard[7][4] = king;
+      emptyBoard[7][7] = bishop;
+
+      const board = new ChessBoard(emptyBoard);
+      const result = ruler.canCastling(board, "white", "kingside");
+
+      expect(result).toBe(false);
+    });
+
+    it("검은색도 캐슬링 권한을 확인한다", () => {
+      const emptyBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
+      const king = new King(1, "black", { row: 0, col: 4 });
+      const kingsideRook = new Rook(2, "black", { row: 0, col: 7 });
+
+      emptyBoard[0][4] = king;
+      emptyBoard[0][7] = kingsideRook;
+
+      const board = new ChessBoard(emptyBoard);
+      const result = ruler.canCastling(board, "black", "kingside");
+
+      expect(result).toBe(true);
+    });
+  });
+
+  describe("getEnPassantTarget", () => {
+    it("흰색 폰이 2칸 전진하면 타겟 위치를 반환한다", () => {
+      const lastMove: Move = {
+        pieceId: 1,
+        pieceType: "pawn",
+        from: { row: 6, col: 4 },
+        to: { row: 4, col: 4 },
+        color: "white",
+        timestamp: Date.now(),
+      };
+
+      const target = ruler.getEnPassantTarget(lastMove);
+
+      expect(target).toEqual({ row: 5, col: 4 });
+    });
+
+    it("검은색 폰이 2칸 전진하면 타겟 위치를 반환한다", () => {
+      const lastMove: Move = {
+        pieceId: 2,
+        pieceType: "pawn",
+        from: { row: 1, col: 3 },
+        to: { row: 3, col: 3 },
+        color: "black",
+        timestamp: Date.now(),
+      };
+
+      const target = ruler.getEnPassantTarget(lastMove);
+
+      expect(target).toEqual({ row: 2, col: 3 });
+    });
+
+    it("마지막 이동이 없으면 null을 반환한다", () => {
+      const target = ruler.getEnPassantTarget();
+
+      expect(target).toBeNull();
+    });
+
+    it("폰이 아닌 기물이 이동하면 null을 반환한다", () => {
+      const lastMove: Move = {
+        pieceId: 3,
+        pieceType: "knight",
+        from: { row: 7, col: 1 },
+        to: { row: 5, col: 2 },
+        color: "white",
+        timestamp: Date.now(),
+      };
+
+      const target = ruler.getEnPassantTarget(lastMove);
+
+      expect(target).toBeNull();
+    });
+
+    it("폰이 1칸만 전진하면 null을 반환한다", () => {
+      const lastMove: Move = {
+        pieceId: 4,
+        pieceType: "pawn",
+        from: { row: 5, col: 4 },
+        to: { row: 4, col: 4 },
+        color: "white",
+        timestamp: Date.now(),
+      };
+
+      const target = ruler.getEnPassantTarget(lastMove);
+
+      expect(target).toBeNull();
+    });
+
+    it("폰이 대각선으로 이동하면 null을 반환한다", () => {
+      const lastMove: Move = {
+        pieceId: 5,
+        pieceType: "pawn",
+        from: { row: 4, col: 4 },
+        to: { row: 3, col: 5 },
+        color: "white",
+        timestamp: Date.now(),
+      };
+
+      const target = ruler.getEnPassantTarget(lastMove);
+
+      expect(target).toBeNull();
     });
   });
 });

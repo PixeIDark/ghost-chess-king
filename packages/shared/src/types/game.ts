@@ -1,5 +1,5 @@
-import { Side, Square } from "./chess";
-import { IChess } from "./models";
+import { BoardDTO, Move, Side } from "./chess";
+import { IPieceData } from "./models";
 
 export type GameMode = "ai" | "pvp";
 export type RoomStatus = "WAITING" | "PLAYING" | "FINISHED";
@@ -15,6 +15,17 @@ export type MatchResultType =
   | "TIMEOUT"
   | "DRAW_AGREEMENT";
 
+export interface GameState {
+  readonly currentTurn: Side;
+  readonly matchResult: MatchResultType;
+  readonly isCheck: boolean;
+  readonly board: BoardDTO;
+  readonly moveHistory: readonly Move[];
+  readonly capturedPieces: { white: IPieceData[]; black: IPieceData[] };
+  readonly fen: string;
+  readonly timeRemaining: { whiteTime: number; blackTime: number };
+}
+
 export interface GameResult {
   status: MatchResultType;
   winner: Side | "DRAW" | null;
@@ -24,13 +35,4 @@ export interface GameResult {
 export interface TimeState {
   whiteTime: number;
   blackTime: number;
-}
-
-export interface GameState {
-  board: ReturnType<IChess["board"]>;
-  fen: string;
-  turn: Side;
-  timeState: TimeState;
-  status: ReturnType<IChess["status"]>;
-  lastMove?: { from: Square; to: Square };
 }

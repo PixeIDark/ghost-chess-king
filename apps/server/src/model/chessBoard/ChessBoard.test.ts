@@ -48,7 +48,7 @@ describe("ChessBoard", () => {
 
   beforeEach(() => {
     boardEntity = Array.from({ length: 8 }, () => Array(8).fill(null));
-    board = new ChessBoard(boardEntity, 8, 8);
+    board = new ChessBoard(boardEntity);
   });
 
   describe("getPiece()", () => {

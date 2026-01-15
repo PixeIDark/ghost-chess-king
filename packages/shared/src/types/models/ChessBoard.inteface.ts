@@ -16,4 +16,5 @@ export interface IChessBoard {
   isPositionUnderAttack(position: Position, byColor: Side): boolean;
   toDto(): BoardDTO;
   clear(): void;
+  toBoardString(): string;
 }

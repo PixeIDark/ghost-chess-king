@@ -1,14 +1,28 @@
-import { BoardEntity, IChessBoard, IChessRuler, IPiece, Move, Position, Side } from "@ghost-chess-king/shared";
+import {
+  BoardEntity,
+  IChessBoard,
+  IChessRuler,
+  IPiece,
+  Move,
+  Position,
+  PromotionPieceName,
+  Side,
+} from "@ghost-chess-king/shared";
 
 export abstract class ChessRuler implements IChessRuler {
   public abstract createBoard(): BoardEntity;
+  public abstract canCastling(board: IChessBoard, color: Side, side: "kingside" | "queenside"): boolean;
+  public abstract getEnPassantTarget(lastMove?: Move): Position | null;
   public abstract getCastlingMoves(board: IChessBoard, king: IPiece): Position[];
   public abstract getEnPassantMoves(board: IChessBoard, pawn: IPiece, lastMove?: Move): Position[];
   public abstract isCheckmate(board: IChessBoard, color: Side): boolean;
   public abstract isStalemate(board: IChessBoard, color: Side): boolean;
+  public abstract needsPromotion(board: IChessBoard, position: Position): boolean;
+  public abstract getPromotionOptions(): PromotionPieceName[];
+  public abstract executePromotion(board: IChessBoard, position: Position, promoteTo: PromotionPieceName): IPiece;
 
   // TODO: 추후에 getValidMoves의 최종 배열에 필터 걸어야 할수도 있음 isSpecialRuler 메서드로. 체스 규칙이 다양하기 때문
-  public getValidMoves(board: IChessBoard, piece: IPiece): Position[] {
+  public getValidMoves(board: IChessBoard, piece: IPiece, lastMove?: Move): Position[] {
     const potentialPaths = piece.getPotentialPaths(board.rows, board.cols);
     const validPositions: Position[] = [];
 
@@ -27,7 +41,7 @@ export abstract class ChessRuler implements IChessRuler {
     }
 
     if (piece.type === "pawn") {
-      const enPassantMoves = this.getEnPassantMoves(board, piece);
+      const enPassantMoves = this.getEnPassantMoves(board, piece, lastMove);
       validPositions.push(...enPassantMoves);
     }
 

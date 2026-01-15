@@ -1,4 +1,13 @@
-import { BoardDTO, BoardEntity, IChessBoard, IPiece, isSamePosition, Position, Side } from "@ghost-chess-king/shared";
+import {
+  BoardDTO,
+  BoardEntity,
+  IChessBoard,
+  IPiece,
+  isSamePosition,
+  PieceName,
+  Position,
+  Side,
+} from "@ghost-chess-king/shared";
 
 export class ChessBoard implements IChessBoard {
   public readonly rows: number;
@@ -72,5 +81,50 @@ export class ChessBoard implements IChessBoard {
 
   public clear() {
     this.boardEntity.forEach((row) => row.fill(null));
+  }
+
+  public toBoardString(): string {
+    const rows: string[] = [];
+
+    for (let row = 0; row < this.rows; row++) {
+      let rowString = "";
+      let emptyCount = 0;
+
+      for (let col = 0; col < this.cols; col++) {
+        const piece = this.boardEntity[row][col];
+
+        if (piece === null) {
+          emptyCount++;
+        } else {
+          if (emptyCount > 0) {
+            rowString += emptyCount;
+            emptyCount = 0;
+          }
+          rowString += this.pieceToFenChar(piece);
+        }
+      }
+
+      if (emptyCount > 0) {
+        rowString += emptyCount;
+      }
+
+      rows.push(rowString);
+    }
+
+    return rows.join("/");
+  }
+
+  private pieceToFenChar(piece: IPiece): string {
+    const charMap: Record<PieceName, string> = {
+      king: "k",
+      queen: "q",
+      rook: "r",
+      bishop: "b",
+      knight: "n",
+      pawn: "p",
+    };
+
+    const char = charMap[piece.type];
+    return piece.color === "white" ? char.toUpperCase() : char;
   }
 }

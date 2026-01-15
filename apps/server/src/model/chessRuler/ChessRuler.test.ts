@@ -1,5 +1,13 @@
 import { ChessRuler } from "./ChessRuler";
-import { BoardEntity, IChessBoard, IPiece, PieceName, Position, Side } from "@ghost-chess-king/shared";
+import {
+  BoardEntity,
+  IChessBoard,
+  IPiece,
+  PieceName,
+  Position,
+  PromotionPieceName,
+  Side,
+} from "@ghost-chess-king/shared";
 import { ChessBoard } from "@/model/chessBoard";
 
 class MockPiece implements IPiece {
@@ -114,6 +122,26 @@ class TestRuler extends ChessRuler {
 
   isStalemate(): boolean {
     return false;
+  }
+
+  needsPromotion(): boolean {
+    return false;
+  }
+
+  getPromotionOptions(): PromotionPieceName[] {
+    return [];
+  }
+
+  executePromotion(): IPiece {
+    throw new Error("Not implemented in test");
+  }
+
+  canCastling(): boolean {
+    return false;
+  }
+
+  getEnPassantTarget(): Position | null {
+    return null;
   }
 
   public testIsPinned(board: IChessBoard, piece: IPiece): boolean {

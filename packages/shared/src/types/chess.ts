@@ -1,6 +1,7 @@
 import { IPiece, IPieceData } from "./models";
 
 export type PieceName = "pawn" | "knight" | "bishop" | "rook" | "queen" | "king";
+export type PromotionPieceName = "queen" | "rook" | "bishop" | "knight";
 
 export type Side = "black" | "white";
 
@@ -24,7 +25,7 @@ export interface Position {
 }
 
 export interface Move {
-  readonly pieceId: string;
+  readonly pieceId: number;
   readonly pieceType: PieceName;
   readonly from: Position;
   readonly to: Position;
