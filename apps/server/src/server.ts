@@ -4,7 +4,7 @@ import { Server } from "socket.io";
 import cors from "cors";
 import { ClientToServerEvents, ServerToClientEvents } from "@ghost-chess-king/shared";
 import { SocketController } from "@/controller/SocketController";
-import { GameService } from "@/service/GameService";
+import { GameService } from "@/service/gameService/GameService";
 import { LobbyService } from "@/service/LobbyService";
 
 const app = express();
