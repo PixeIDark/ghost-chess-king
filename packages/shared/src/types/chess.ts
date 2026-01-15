@@ -15,10 +15,6 @@ export type Cell = Piece | null;
 export type BoardDTO = (IPieceData | null)[][];
 export type BoardEntity = (IPiece | null)[][];
 
-export type File = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h";
-export type Rank = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
-export type Square = `${File}${Rank}`;
-
 export interface Position {
   row: number;
   col: number;
@@ -36,3 +32,5 @@ export interface Move {
   readonly isCastle?: boolean;
   readonly timestamp: number;
 }
+
+export type LastMove = Move | undefined;

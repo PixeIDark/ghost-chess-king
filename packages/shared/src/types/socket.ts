@@ -1,6 +1,6 @@
 import { UserInfo } from "./lobby";
-import { GameMode, GameState, MatchResultType } from "./game";
-import { Side, Square } from "./chess";
+import { GameEndReason, GameMode, GameState } from "./game";
+import { Side, Position, PromotionPieceName } from "./chess";
 
 export interface ServerToClientEvents {
   registered: (data: RegisteredData) => void;
@@ -18,6 +18,7 @@ export interface ServerToClientEvents {
   "time-update": (data: TimeUpdateData) => void;
   "game-over": (data: GameOverData) => void;
   "game-not-found": () => void;
+  "promotion-required": (data: PromotionRequiredData) => void;
 
   error: (data: GameErrorData) => void;
 }
@@ -62,13 +63,13 @@ export interface GameRestoredData {
 }
 
 export interface ValidMovesData {
-  from: Square;
-  moves: Square[] | null;
+  from: Position;
+  moves: Position[] | null;
 }
 
 export interface InvalidMoveData {
-  from: Square;
-  to: Square;
+  from: Position;
+  to: Position;
 }
 
 export interface TimeUpdateData {
@@ -78,7 +79,12 @@ export interface TimeUpdateData {
 
 export interface GameOverData {
   winner: Side | "draw";
-  reason: MatchResultType;
+  reason: GameEndReason;
+}
+export interface PromotionRequiredData {
+  position: Position;
+  color: Side;
+  options: PromotionPieceName[];
 }
 
 export interface GameErrorData {
@@ -88,13 +94,13 @@ export interface GameErrorData {
 
 export interface GetValidMovesData {
   roomId: string;
-  from: Square;
+  from: Position;
 }
 
 export interface MoveData {
   roomId: string;
-  from: Square;
-  to: Square;
+  from: Position;
+  to: Position;
 }
 
 export interface ResignData {

@@ -1,6 +1,6 @@
 import { IChess, IChessTimer } from "./models";
 import { Side } from "./chess";
-import { GameMode, RoomStatus } from "./game";
+import { GameMode, MatchResultType, RoomStatus } from "./game";
 
 export interface GameRoom {
   roomId: string;
@@ -11,5 +11,5 @@ export interface GameRoom {
   blackPlayer: string;
   status: RoomStatus;
   winner?: Side | "draw";
-  winReason?: "checkmate" | "timeout" | "stalemate" | "resignation";
+  winReason?: MatchResultType;
 }
