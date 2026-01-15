@@ -1,17 +1,18 @@
 import { useEffect } from "react";
 import { useStockfish } from "@/hooks/useStockfish";
 import { delay } from "@/utils/helper";
-import type { Square as SquareType } from "@ghost-chess-king/shared";
+import { squareToIndices } from "@ghost-chess-king/shared";
+import type { Position } from "@ghost-chess-king/shared";
 
 interface UseAiParams {
   fen: string;
   currentTurn: "white" | "black";
   aiSide: "white" | "black";
-  depth?: number;
-  onAiMove: (from: SquareType, to: SquareType) => void;
+  depth: number;
+  onAiMove: (from: Position, to: Position) => void;
 }
 
-export const useAi = ({ fen, currentTurn, aiSide, depth, onAiMove }: UseAiParams) => {
+export const useAi = ({ fen, currentTurn, aiSide, depth = 15, onAiMove }: UseAiParams) => {
   const { isReady, getBestMove } = useStockfish();
 
   useEffect(() => {
@@ -23,8 +24,8 @@ export const useAi = ({ fen, currentTurn, aiSide, depth, onAiMove }: UseAiParams
       try {
         await delay(1000);
         const bestMove = await getBestMove(fen, depth);
-        const from = bestMove.slice(0, 2) as SquareType;
-        const to = bestMove.slice(2, 4) as SquareType;
+        const from = squareToIndices(bestMove.slice(0, 2));
+        const to = squareToIndices(bestMove.slice(2, 4));
 
         if (!cancelled) onAiMove(from, to);
       } catch (err) {

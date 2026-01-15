@@ -1,10 +1,10 @@
-import { Cell, Side, Square as SquareType, squareToIndices } from "@ghost-chess-king/shared";
+import { Cell, Position, Side } from "@ghost-chess-king/shared";
 
 interface SquareProps {
-  position: SquareType;
+  position: Position;
   cell: Cell;
   state: "selected" | "moved" | "kingInChecked" | "none";
-  onSquareClick: (position: SquareType, color: Side | undefined) => void;
+  onSquareClick: (position: Position, color: Side | undefined) => void;
 }
 
 const PIECE_IMAGES = {
@@ -42,7 +42,7 @@ const SQUARE_STYLES = {
 } as const;
 
 function Square({ position, cell, state, onSquareClick }: SquareProps) {
-  const { row, col } = squareToIndices(position);
+  const { row, col } = position;
   const isLight = (row + col) % 2 === 0;
   const bgColor = isLight ? "bg-amber-50" : "bg-amber-800";
 

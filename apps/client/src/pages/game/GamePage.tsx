@@ -23,7 +23,7 @@ function GamePage() {
 
   useAi({
     fen: gameState?.fen ?? "",
-    currentTurn: gameState?.turn ?? "white",
+    currentTurn: gameState?.currentTurn ?? "white",
     aiSide: getOppositeSide(mySide),
     depth: 20,
     onAiMove: handleMove,
@@ -36,16 +36,16 @@ function GamePage() {
 
   return (
     <div className="flex w-full flex-col items-center">
-      <div>현재 턴: {gameState.turn === "white" ? "백" : "흑"}</div>
+      <div>현재 턴: {gameState.currentTurn === "white" ? "백" : "흑"}</div>
       <div>내 진영: {mySide === "white" ? "백" : "흑"}</div>
-      <div>상태: {gameState.status.state}</div>
+      <div>상태: {gameState.matchResult}</div>
       {gameResult && isOpen && (
         <GameResultModal gameResult={gameResultViewModel as GameResultViewModel} onClose={() => setIsOpen(false)} />
       )}
       <div className="grid aspect-square w-full max-w-[640px] min-w-[160px] grid-cols-8 grid-rows-8">
         {boardViewModel.flat().map((square) => (
           <Square
-            key={square.position}
+            key={square.id}
             position={square.position}
             cell={square.cell}
             state={square.state}
@@ -54,11 +54,11 @@ function GamePage() {
         ))}
       </div>
       <TimerDisplay
-        key={`${gameState.timeState.whiteTime}-${gameState.timeState.blackTime}`}
-        whiteTime={gameState.timeState.whiteTime}
-        blackTime={gameState.timeState.blackTime}
-        currentTurn={gameState.turn}
-        isGameActive={gameState.status.state === "normal" || gameState.status.state === "check"}
+        key={`${gameState.timeRemaining.whiteTime}-${gameState.timeRemaining.blackTime}`}
+        whiteTime={gameState.timeRemaining.whiteTime}
+        blackTime={gameState.timeRemaining.blackTime}
+        currentTurn={gameState.currentTurn}
+        isGameActive={gameState.matchResult === "PLAYING" || gameState.matchResult === "CHECK"}
       />
     </div>
   );

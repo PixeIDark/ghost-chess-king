@@ -7,7 +7,8 @@ import type {
   GameState,
   ServerToClientEvents,
   Side,
-  Square as SquareType,
+  Position,
+  ValidMovesData,
 } from "@ghost-chess-king/shared";
 
 interface UseChessGameParams {
@@ -20,8 +21,8 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
   const navigate = useNavigate();
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [mySide, setMySide] = useState<Side>("white");
-  const [fromSquare, setFromSquare] = useState<SquareType | null>(null);
-  const [validMoves, setValidMoves] = useState<SquareType[]>([]);
+  const [fromSquare, setFromSquare] = useState<Position | null>(null);
+  const [validMoves, setValidMoves] = useState<Position[]>([]);
   const [gameResult, setGameResult] = useState<GameOverData | null>(null);
 
   useEffect(() => {
@@ -45,10 +46,15 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
       navigate("/");
     };
 
+    const handleValidMoves = (data: ValidMovesData) => {
+      setValidMoves(data.moves || []);
+    };
+
     socket.on("game-state", handleGameState);
     socket.on("game-restored", handleGameRestored);
     socket.on("game-over", handleGameOver);
     socket.on("game-not-found", handleGameNotFound);
+    socket.on("valid-moves", handleValidMoves);
     socket.emit("rejoin-game", { roomId });
 
     return () => {
@@ -56,33 +62,26 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
       socket.off("game-restored", handleGameRestored);
       socket.off("game-over", handleGameOver);
       socket.off("game-not-found", handleGameNotFound);
+      socket.off("valid-moves", handleValidMoves);
     };
   }, [socket, isRegistered, roomId, navigate]);
 
-  const handleMove = (from: SquareType, to: SquareType) => {
+  const handleMove = (from: Position, to: Position) => {
     if (!roomId) return;
     socket.emit("move", { roomId, from, to });
   };
 
-  const handleSquareClick = (square: SquareType, selectedColor: Side | undefined) => {
-    if (!roomId || gameState?.turn !== mySide || gameResult) return;
+  const handleSquareClick = (square: Position, selectedColor: Side | undefined) => {
+    if (!roomId || gameState?.currentTurn !== mySide || gameResult) return;
     if (!fromSquare && selectedColor !== mySide) return;
 
-    if (!fromSquare) {
+    if (!fromSquare || selectedColor === mySide) {
       setFromSquare(square);
       socket.emit("get-valid-moves", { roomId, from: square });
-      socket.once("valid-moves", (data) => setValidMoves(data.moves || []));
       return;
     }
 
-    if (selectedColor === mySide) {
-      setFromSquare(square);
-      socket.emit("get-valid-moves", { roomId, from: square });
-      socket.once("valid-moves", (data) => setValidMoves(data.moves || []));
-      return;
-    }
-
-    if (!validMoves.includes(square)) {
+    if (!validMoves.some((move) => move.row === square.row && move.col === square.col)) {
       setFromSquare(null);
       setValidMoves([]);
       return;
