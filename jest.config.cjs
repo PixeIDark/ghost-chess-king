@@ -8,6 +8,8 @@ module.exports = {
       {
         useESM: true,
         tsconfig: {
+          target: "ES2023",
+          lib: ["ES2023"],
           module: "ESNext",
           moduleResolution: "node",
           esModuleInterop: true,
