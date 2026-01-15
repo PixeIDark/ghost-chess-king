@@ -1,8 +1,9 @@
 import { GameState, MatchResultType } from "../game";
-import { Move, PieceName, Position, Side } from "../chess";
+import { Move, PieceName, Position, PromotionPieceName, Side } from "../chess";
 import { IChessBoard } from "./ChessBoard.inteface";
 import { IChessRuler } from "./ChessRuler.interface";
 import { IChessTimer } from "./ChessTimer.interface";
+import { EventManager } from "../../utils/EventManager";
 
 export type ChessEventMap = {
   gameStarted: { initialState: GameState };
@@ -17,15 +18,14 @@ export type ChessEventMap = {
   promotionRequired: {
     position: Position;
     color: Side;
-    options: PieceName[];
+    options: PromotionPieceName[];
   };
   timeUpdate: { whiteTime: number; blackTime: number };
   timeout: { loser: Side };
 };
 
-export type ChessEventKey = keyof ChessEventMap;
-
 export interface IChess {
+  readonly eventManager: EventManager<ChessEventMap>;
   readonly board: IChessBoard;
   readonly ruler: IChessRuler;
   readonly timer: IChessTimer;
@@ -42,6 +42,4 @@ export interface IChess {
   getValidMoves(position: Position): Position[];
   isGameOver(): boolean;
   getFen(): string;
-  on<K extends ChessEventKey>(event: K, listener: (data: ChessEventMap[K]) => void): void;
-  off<K extends ChessEventKey>(event: K, listener: (data: ChessEventMap[K]) => void): void;
 }
