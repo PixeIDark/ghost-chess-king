@@ -4,6 +4,9 @@ import { GameMode, GameRoom, Side, Position } from "@ghost-chess-king/shared";
 import { StandardRuler } from "@/model/chessRuler";
 import { Chess } from "@/model/chess";
 
+const STANDARD_INITIAL_TIME = 60 * 1000;
+const STANDARD_INCREMENT_TIME = 1000;
+
 export class GameService {
   private rooms: Map<string, GameRoom> = new Map();
   private odIdToSocketId: Map<string, string> = new Map();
@@ -26,7 +29,7 @@ export class GameService {
 
   createRoom(roomId: string, whitePlayerOdId: string, blackPlayerOdId: string, mode: GameMode): GameRoom {
     const ruler = new StandardRuler();
-    const timer = new ChessTimer(1000, 10000);
+    const timer = new ChessTimer(STANDARD_INITIAL_TIME, STANDARD_INCREMENT_TIME);
     const chess = new Chess(ruler, timer);
 
     chess.eventManager.on("gameStarted", (data) => this.io.to(roomId).emit("game-state", data.initialState));
