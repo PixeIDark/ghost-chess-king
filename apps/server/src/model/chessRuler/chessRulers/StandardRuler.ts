@@ -4,7 +4,7 @@ import {
   getOppositeSide,
   IChessBoard,
   IPiece,
-  Move,
+  LastMove,
   Position,
   PromotionPieceName,
   Side,
@@ -27,6 +27,44 @@ export class StandardRuler extends ChessRuler {
     ];
   }
 
+  public getValidMoves(board: IChessBoard, piece: IPiece, lastMove?: LastMove): Position[] {
+    const potentialPaths = piece.getPotentialPaths(board.rows, board.cols);
+    const validPositions: Position[] = [];
+
+    potentialPaths.forEach((path) => {
+      for (let i = 0; i < path.length; i++) {
+        const pos = path[i];
+        const targetPiece = board.getPiece(pos);
+
+        if (targetPiece?.color === piece.color) break;
+
+        if (piece.type === "pawn") {
+          const isForward = pos.col === piece.position.col;
+          const isDiagonal = pos.col !== piece.position.col;
+
+          if (isForward && targetPiece !== null) break;
+          if (isDiagonal && targetPiece === null) break;
+        }
+
+        if (!this.wouldExposeKing(board, piece.position, pos)) validPositions.push(pos);
+
+        if (targetPiece) break;
+      }
+    });
+
+    if (piece.type === "king") {
+      const castlingMoves = this.getCastlingMoves(board, piece);
+      validPositions.push(...castlingMoves);
+    }
+
+    if (piece.type === "pawn") {
+      const enPassantMoves = this.getEnPassantMoves(board, piece, lastMove);
+      validPositions.push(...enPassantMoves);
+    }
+
+    return validPositions;
+  }
+
   public canCastling(board: IChessBoard, color: Side, side: "kingside" | "queenside"): boolean {
     const kingPos = board.findKing(color);
     if (!kingPos) return false;
@@ -41,7 +79,7 @@ export class StandardRuler extends ChessRuler {
     return rook !== null && rook.type === "rook" && rook.color === color && !rook.hasMoved;
   }
 
-  public getEnPassantTarget(lastMove?: Move): Position | null {
+  public getEnPassantTarget(lastMove: LastMove): Position | null {
     if (!lastMove) return null;
 
     if (lastMove.pieceType !== "pawn") return null;
@@ -116,7 +154,7 @@ export class StandardRuler extends ChessRuler {
     return true;
   }
 
-  public getEnPassantMoves(board: IChessBoard, pawn: IPiece, lastMove?: Move): Position[] {
+  public getEnPassantMoves(board: IChessBoard, pawn: IPiece, lastMove: LastMove): Position[] {
     const result: Position[] = [];
 
     if (pawn.type !== "pawn" || !lastMove) return result;

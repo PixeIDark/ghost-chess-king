@@ -11,6 +11,7 @@ import {
 
 export abstract class ChessRuler implements IChessRuler {
   public abstract createBoard(): BoardEntity;
+  public abstract getValidMoves(board: IChessBoard, piece: IPiece, lastMove?: Move): Position[];
   public abstract canCastling(board: IChessBoard, color: Side, side: "kingside" | "queenside"): boolean;
   public abstract getEnPassantTarget(lastMove?: Move): Position | null;
   public abstract getCastlingMoves(board: IChessBoard, king: IPiece): Position[];
@@ -20,33 +21,6 @@ export abstract class ChessRuler implements IChessRuler {
   public abstract needsPromotion(board: IChessBoard, position: Position): boolean;
   public abstract getPromotionOptions(): PromotionPieceName[];
   public abstract executePromotion(board: IChessBoard, position: Position, promoteTo: PromotionPieceName): IPiece;
-
-  // TODO: 추후에 getValidMoves의 최종 배열에 필터 걸어야 할수도 있음 isSpecialRuler 메서드로. 체스 규칙이 다양하기 때문
-  public getValidMoves(board: IChessBoard, piece: IPiece, lastMove?: Move): Position[] {
-    const potentialPaths = piece.getPotentialPaths(board.rows, board.cols);
-    const validPositions: Position[] = [];
-
-    potentialPaths.forEach((path) => {
-      for (const pos of path) {
-        const targetPiece = board.getPiece(pos);
-        if (targetPiece?.color === piece.color) break;
-        if (!this.wouldExposeKing(board, piece.position, pos)) validPositions.push(pos);
-        if (targetPiece) break;
-      }
-    });
-
-    if (piece.type === "king") {
-      const castlingMoves = this.getCastlingMoves(board, piece);
-      validPositions.push(...castlingMoves);
-    }
-
-    if (piece.type === "pawn") {
-      const enPassantMoves = this.getEnPassantMoves(board, piece, lastMove);
-      validPositions.push(...enPassantMoves);
-    }
-
-    return validPositions;
-  }
 
   public wouldExposeKing(board: IChessBoard, from: Position, to: Position): boolean {
     const piece = board.getPiece(from);
