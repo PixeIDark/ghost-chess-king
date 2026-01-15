@@ -1,5 +1,5 @@
 import type { SquareState, BoardViewModel } from "@/types/viewModel";
-import { Cell, indicesToSquare, Square } from "@ghost-chess-king/shared";
+import { BoardDTO, Position, isSamePosition } from "@ghost-chess-king/shared";
 
 const getSquareState = (isValidMove: boolean, isSelected: boolean, isKingInCheck: boolean): SquareState => {
   if (isSelected) return "selected";
@@ -10,17 +10,18 @@ const getSquareState = (isValidMove: boolean, isSelected: boolean, isKingInCheck
 };
 
 export const createBoardViewModel = (
-  board: (Cell | null)[][],
-  validMoves: Square[],
-  fromSquare: Square | null
+  board: BoardDTO,
+  validMoves: Position[],
+  fromSquare: Position | null
 ): BoardViewModel => {
   return board.map((row, rowIndex) => {
     return row.map((cell, colIndex) => {
-      const position = indicesToSquare(rowIndex, colIndex);
-      const isValidMove = validMoves.includes(position);
-      const isSelected = fromSquare === position;
+      const position: Position = { row: rowIndex, col: colIndex };
+      const isValidMove = validMoves.some((move) => isSamePosition(move, position));
+      const isSelected = fromSquare ? isSamePosition(fromSquare, position) : false;
 
       return {
+        id: `${rowIndex}-${colIndex}`,
         position,
         cell,
         state: getSquareState(isValidMove, isSelected, false),
