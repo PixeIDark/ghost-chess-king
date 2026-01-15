@@ -1,15 +1,15 @@
-import type { Side, Square } from "../types/chess.ts";
+import { Position, Side } from "../types";
 
-export const squareToIndices = (square: Square) => {
+export const squareToIndices = (square: string): Position => {
   const row = 8 - Number(square[1]);
   const col = square.charCodeAt(0) - "a".charCodeAt(0);
   return { row, col };
 };
 
-export const indicesToSquare = (row: number, col: number): Square => {
+export const indicesToSquare = (row: number, col: number): string => {
   const rank = String(8 - row);
   const file = String.fromCharCode(97 + col);
-  return `${file}${rank}` as Square;
+  return `${file}${rank}`;
 };
 
 export const getOppositeSide = (side: Side) => {
