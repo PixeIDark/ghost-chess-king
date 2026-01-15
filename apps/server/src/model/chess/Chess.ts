@@ -1,6 +1,5 @@
 import {
   BoardEntity,
-  ChessEventKey,
   ChessEventMap,
   GameState,
   getOppositeSide,
@@ -16,18 +15,20 @@ import {
   Side,
 } from "@ghost-chess-king/shared";
 import { ChessBoard } from "@/model/chessBoard";
+import { EventManager } from "@ghost-chess-king/shared/src/utils/EventManager";
 
 export class Chess implements IChess {
-  public readonly board: IChessBoard;
+  public readonly eventManager: EventManager<ChessEventMap>;
   public readonly ruler: IChessRuler;
   public readonly timer: IChessTimer;
+  public board: IChessBoard;
   public currentTurn: Side;
   public moveHistory: Move[];
   public matchResult: MatchResultType;
   private boardHistory: BoardEntity[];
-  private listeners: Map<ChessEventKey, Set<(data: ChessEventMap[ChessEventKey]) => void>>;
 
   constructor(ruler: IChessRuler, timer: IChessTimer) {
+    this.eventManager = new EventManager();
     this.ruler = ruler;
     this.timer = timer;
     this.board = new ChessBoard(ruler.createBoard());
@@ -35,17 +36,20 @@ export class Chess implements IChess {
     this.moveHistory = [];
     this.matchResult = "PLAYING";
     this.boardHistory = [];
-    this.listeners = new Map();
-    this.timer.on("timeUpdate", (data) => this.emit("timeUpdate", data));
+    this.timer.on("timeUpdate", (data) => this.eventManager.emit("timeUpdate", data));
     this.timer.on("timeout", (data) => {
       this.matchResult = "TIMEOUT";
-      this.emit("gameOver", { result: "TIMEOUT", winner: getOppositeSide(data.loser), gameState: this.getGameState() });
+      this.eventManager.emit("gameOver", {
+        result: "TIMEOUT",
+        winner: getOppositeSide(data.loser),
+        gameState: this.getGameState(),
+      });
     });
   }
 
   public startGame(): void {
     this.timer.start("white");
-    this.emit("gameStarted", { initialState: this.getGameState() });
+    this.eventManager.emit("gameStarted", { initialState: this.getGameState() });
   }
 
   public resetGame(): void {
@@ -62,12 +66,12 @@ export class Chess implements IChess {
     if (this.isGameOver()) return false;
     const piece = this.board.getPiece(from);
     if (!piece || piece.color !== this.currentTurn) return false;
-    const validMoves = this.ruler.getValidMoves(this.board, piece);
+    const validMoves = this.ruler.getValidMoves(this.board, piece, this.moveHistory.at(-1));
     if (!validMoves.some((pos) => isSamePosition(pos, to))) return false;
 
     const willNeedPromotion = piece.type === "pawn" && this.ruler.needsPromotion(this.board, to);
     if (willNeedPromotion && !promoteTo) {
-      this.emit("promotionRequired", {
+      this.eventManager.emit("promotionRequired", {
         position: to,
         color: piece.color,
         options: this.ruler.getPromotionOptions(),
@@ -109,21 +113,28 @@ export class Chess implements IChess {
 
     this.timer.switchTurn(getOppositeSide(this.currentTurn));
     this.currentTurn = getOppositeSide(this.currentTurn);
-    this.emit("turnChanged", { currentTurn: this.currentTurn, gameState: this.getGameState() });
-    this.emit("moveExecuted", { move: this.moveHistory[this.moveHistory.length - 1], gameState: this.getGameState() });
+    this.eventManager.emit("turnChanged", { currentTurn: this.currentTurn, gameState: this.getGameState() });
+    this.eventManager.emit("moveExecuted", {
+      move: this.moveHistory[this.moveHistory.length - 1],
+      gameState: this.getGameState(),
+    });
 
     const opponent = getOppositeSide(this.currentTurn);
     if (this.ruler.isCheckmate(this.board, opponent)) {
       this.matchResult = "CHECKMATE";
       this.timer.stop();
-      this.emit("gameOver", { result: "CHECKMATE", winner: this.currentTurn, gameState: this.getGameState() });
+      this.eventManager.emit("gameOver", {
+        result: "CHECKMATE",
+        winner: this.currentTurn,
+        gameState: this.getGameState(),
+      });
     } else if (this.ruler.isStalemate(this.board, opponent)) {
       this.matchResult = "STALEMATE";
       this.timer.stop();
-      this.emit("gameOver", { result: "STALEMATE", gameState: this.getGameState() });
+      this.eventManager.emit("gameOver", { result: "STALEMATE", gameState: this.getGameState() });
     } else if (this.ruler.isInCheck(this.board, opponent)) {
       this.matchResult = "CHECK";
-      this.emit("check", { color: opponent, gameState: this.getGameState() });
+      this.eventManager.emit("check", { color: opponent, gameState: this.getGameState() });
     } else {
       this.matchResult = "PLAYING";
     }
@@ -144,13 +155,17 @@ export class Chess implements IChess {
   public resign(color: Side): void {
     this.matchResult = "RESIGNATION";
     this.timer.stop();
-    this.emit("gameOver", { result: "RESIGNATION", winner: getOppositeSide(color), gameState: this.getGameState() });
+    this.eventManager.emit("gameOver", {
+      result: "RESIGNATION",
+      winner: getOppositeSide(color),
+      gameState: this.getGameState(),
+    });
   }
 
   public acceptDraw(): void {
     this.matchResult = "DRAW_AGREEMENT";
     this.timer.stop();
-    this.emit("gameOver", { result: "DRAW_AGREEMENT", gameState: this.getGameState() });
+    this.eventManager.emit("gameOver", { result: "DRAW_AGREEMENT", gameState: this.getGameState() });
   }
 
   public getGameState(): GameState {
@@ -169,7 +184,7 @@ export class Chess implements IChess {
   public getValidMoves(position: Position): Position[] {
     const piece = this.board.getPiece(position);
     if (!piece || piece.color !== this.currentTurn) return [];
-    return this.ruler.getValidMoves(this.board, piece);
+    return this.ruler.getValidMoves(this.board, piece, this.moveHistory.at(-1));
   }
 
   public isGameOver(): boolean {
@@ -195,18 +210,5 @@ export class Chess implements IChess {
     }
     const fullMove = Math.floor(this.moveHistory.length / 2) + 1;
     return `${boardPart} ${turn} ${castling || "-"} ${enPassant} ${halfMove} ${fullMove}`;
-  }
-
-  public on<K extends ChessEventKey>(event: K, listener: (data: ChessEventMap[K]) => void): void {
-    if (!this.listeners.has(event)) this.listeners.set(event, new Set());
-    this.listeners.get(event)!.add(listener as (data: ChessEventMap[ChessEventKey]) => void);
-  }
-
-  public off<K extends ChessEventKey>(event: K, listener: (data: ChessEventMap[K]) => void): void {
-    this.listeners.get(event)?.delete(listener as (data: ChessEventMap[ChessEventKey]) => void);
-  }
-
-  private emit<K extends ChessEventKey>(event: K, data: ChessEventMap[K]): void {
-    this.listeners.get(event)?.forEach((listener) => listener(data));
   }
 }
