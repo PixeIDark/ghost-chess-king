@@ -9,6 +9,7 @@ import type {
   Side,
   Position,
   ValidMovesData,
+  PromotionPieceName,
 } from "@ghost-chess-king/shared";
 
 interface UseChessGameParams {
@@ -55,6 +56,7 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
     socket.on("game-over", handleGameOver);
     socket.on("game-not-found", handleGameNotFound);
     socket.on("valid-moves", handleValidMoves);
+    socket.on("promotion-required", () => console.log("ff"));
     socket.emit("rejoin-game", { roomId });
 
     return () => {
@@ -63,33 +65,36 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
       socket.off("game-over", handleGameOver);
       socket.off("game-not-found", handleGameNotFound);
       socket.off("valid-moves", handleValidMoves);
+      socket.off("promotion-required", () => console.log("ff"));
     };
   }, [socket, isRegistered, roomId, navigate]);
 
-  const handleMove = (from: Position, to: Position) => {
-    if (!roomId) return;
+  const handleMove = (from: Position, to: Position, promotionType: PromotionPieceName | null) => {
     socket.emit("move", { roomId, from, to });
+    if (promotionType) socket.emit("select-promotion", { roomId, position: to, piece: promotionType });
   };
 
   const handleSquareClick = (square: Position, selectedColor: Side | undefined) => {
     if (!roomId || gameState?.currentTurn !== mySide || gameResult) return;
     if (!fromSquare && selectedColor !== mySide) return;
 
-    if (!fromSquare || selectedColor === mySide) {
-      setFromSquare(square);
-      socket.emit("get-valid-moves", { roomId, from: square });
-      return;
-    }
+    const isValidMove = fromSquare && validMoves.some((m) => m.row === square.row && m.col === square.col);
 
-    if (!validMoves.some((move) => move.row === square.row && move.col === square.col)) {
+    if (isValidMove) {
+      socket.emit("move", { roomId, from: fromSquare, to: square });
       setFromSquare(null);
       setValidMoves([]);
       return;
     }
 
-    socket.emit("move", { roomId, from: fromSquare, to: square });
-    setFromSquare(null);
-    setValidMoves([]);
+    if (selectedColor === mySide) {
+      setFromSquare(square);
+      socket.emit("get-valid-moves", { roomId, from: square });
+      return;
+    } else {
+      setFromSquare(null);
+      setValidMoves([]);
+    }
   };
 
   return {

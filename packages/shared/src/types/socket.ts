@@ -33,6 +33,7 @@ export interface ClientToServerEvents {
   "reconnect-game": () => void;
 
   "get-valid-moves": (data: GetValidMovesData) => void;
+  "select-promotion": (data: SelectPromotionData) => void;
   move: (data: MoveData) => void;
   resign: (data: ResignData) => void;
   "leave-game": (data: LeaveGameData) => void;
@@ -95,6 +96,12 @@ export interface GameErrorData {
 export interface GetValidMovesData {
   roomId: string;
   from: Position;
+}
+
+export interface SelectPromotionData {
+  roomId: string;
+  position: Position;
+  piece: PromotionPieceName;
 }
 
 export interface MoveData {

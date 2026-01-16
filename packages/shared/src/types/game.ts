@@ -2,7 +2,6 @@ import { BoardDTO, Move, Side } from "./chess";
 import { IPieceData } from "./models";
 
 export type GameMode = "ai" | "pvp";
-export type RoomStatus = "WAITING" | "PLAYING" | "FINISHED";
 
 export type MatchResultType =
   | "PLAYING"

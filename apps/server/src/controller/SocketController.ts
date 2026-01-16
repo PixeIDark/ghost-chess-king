@@ -7,6 +7,7 @@ import {
   ResignData,
   LeaveGameData,
   RejoinGameData,
+  SelectPromotionData,
 } from "@ghost-chess-king/shared";
 import { AppServer, ServerSocket } from "@/types/socket";
 import { IGameService } from "@ghost-chess-king/shared/src/types/services/GameService.interface";
@@ -36,6 +37,7 @@ export class SocketController {
     socket.on("resign", (data) => this.handleResign(socket, data));
     socket.on("leave-game", (data) => this.handleLeaveGame(socket, data));
     socket.on("disconnect", () => this.handleDisconnect(socket));
+    socket.on("select-promotion", (data) => this.handleSelectPromotion(socket, data));
   }
 
   private handleRegister(socket: ServerSocket, { odId }: RegisterData) {
@@ -236,5 +238,12 @@ export class SocketController {
       },
       5 * 60 * 1000
     );
+  }
+
+  private handleSelectPromotion(socket: ServerSocket, { roomId, position, piece }: SelectPromotionData) {
+    const user = this.lobbyService.getUserBySocketId(socket.id);
+    if (!user) return;
+
+    this.gameService.executePromotion(roomId, user.odId, position, piece);
   }
 }

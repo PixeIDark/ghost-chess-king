@@ -1,6 +1,6 @@
 import { GameRoom } from "../room";
-import { Position, Side } from "../chess";
-import { GameMode } from "../game";
+import { Position, PromotionPieceName, Side } from "../chess";
+import { GameMode, GameState } from "../game";
 
 export interface IGameService {
   updateSocketId(odId: string, socketId: string): void;
@@ -13,5 +13,6 @@ export interface IGameService {
   getRoomByOdId(odId: string): GameRoom | undefined;
   getRoomByRoomId(roomId: string): GameRoom | undefined;
   sendGameState(roomId: string, socketId: string): void;
-  getGameStateForRestore(roomId: string, odId: string): { yourSide: Side; gameState: any } | null;
+  getGameStateForRestore(roomId: string, odId: string): { yourSide: Side; gameState: GameState } | null;
+  executePromotion(roomId: string, odId: string, position: Position, piece: PromotionPieceName): void;
 }

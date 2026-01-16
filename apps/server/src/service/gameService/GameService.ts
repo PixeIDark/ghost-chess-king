@@ -1,13 +1,15 @@
 import { ChessTimer } from "@/model/chessTimer";
 import { AppServer } from "@/types/socket";
-import { GameMode, GameRoom, Side, Position } from "@ghost-chess-king/shared";
+import { GameMode, GameRoom, Side, Position, GameResult, PromotionPieceName } from "@ghost-chess-king/shared";
 import { StandardRuler } from "@/model/chessRuler";
+import { StandardBoard } from "@/model/chessBoard";
 import { Chess } from "@/model/chess";
+import { IGameService } from "@ghost-chess-king/shared/src/types/services/GameService.interface";
 
 const STANDARD_INITIAL_TIME = 60 * 1000;
 const STANDARD_INCREMENT_TIME = 1000;
 
-export class GameService {
+export class GameService implements IGameService {
   private rooms: Map<string, GameRoom> = new Map();
   private odIdToSocketId: Map<string, string> = new Map();
 
@@ -30,28 +32,19 @@ export class GameService {
   createRoom(roomId: string, whitePlayerOdId: string, blackPlayerOdId: string, mode: GameMode): GameRoom {
     const ruler = new StandardRuler();
     const timer = new ChessTimer(STANDARD_INITIAL_TIME, STANDARD_INCREMENT_TIME);
-    const chess = new Chess(ruler, timer);
+    const board = new StandardBoard();
+    const chess = new Chess(ruler, timer, board);
 
-    chess.eventManager.on("gameStarted", (data) => this.io.to(roomId).emit("game-state", data.initialState));
-    chess.eventManager.on("moveExecuted", (data) => this.io.to(roomId).emit("game-state", data.gameState));
-    chess.eventManager.on("turnChanged", (data) => this.io.to(roomId).emit("game-state", data.gameState));
-    chess.eventManager.on("check", (data) => this.io.to(roomId).emit("game-state", data.gameState));
-    chess.eventManager.on("promotionRequired", (data) => this.io.to(roomId).emit("promotion-required", data));
-    chess.eventManager.on("timeUpdate", (data) => this.io.to(roomId).emit("time-update", data));
-    chess.eventManager.on("gameOver", (data) => {
+    timer.on("timeUpdate", (data) => {
+      this.io.to(roomId).emit("time-update", data);
+    });
+
+    timer.on("timeout", (data) => {
       const room = this.rooms.get(roomId);
       if (!room) return;
 
-      room.status = "FINISHED";
-      room.winner = data.winner || "draw";
-      room.winReason = data.result;
-
-      this.io.to(roomId).emit("game-over", {
-        winner: room.winner,
-        reason: room.winReason,
-      });
-
-      this.rooms.delete(roomId);
+      const result = chess.timeout(data.loser);
+      this.handleGameOver(roomId, room, result);
     });
 
     const room: GameRoom = {
@@ -66,6 +59,7 @@ export class GameService {
 
     this.rooms.set(roomId, room);
     chess.startGame();
+    this.io.to(roomId).emit("game-state", chess.getGameState());
 
     return room;
   }
@@ -77,7 +71,43 @@ export class GameService {
     const playerSide = this.getPlayerSide(room, odId);
     if (room.mode === "pvp" && playerSide !== room.chess.currentTurn) return false;
 
-    return room.chess.executeMove(from, to);
+    const result = room.chess.executeMove(from, to);
+
+    if (result.needsPromotion && result.position && result.promotionOptions) {
+      const socketId = this.odIdToSocketId.get(odId);
+      if (socketId && playerSide) {
+        this.io.to(socketId).emit("promotion-required", {
+          position: result.position,
+          color: playerSide,
+          options: result.promotionOptions,
+        });
+      }
+      return false;
+    }
+
+    if (!result.success) return false;
+
+    this.io.to(roomId).emit("game-state", room.chess.getGameState());
+
+    const gameResult = room.chess.getGameResult();
+    if (gameResult) {
+      this.handleGameOver(roomId, room, gameResult);
+    }
+
+    return true;
+  }
+
+  private handleGameOver(roomId: string, room: GameRoom, result: GameResult): void {
+    room.status = "FINISHED";
+    room.winner = result.winner === "DRAW" ? "draw" : (result.winner ?? "draw");
+    room.winReason = result.status;
+
+    this.io.to(roomId).emit("game-over", {
+      winner: room.winner,
+      reason: room.winReason,
+    });
+
+    this.rooms.delete(roomId);
   }
 
   resign(roomId: string, odId: string): void {
@@ -87,7 +117,8 @@ export class GameService {
     const playerSide = this.getPlayerSide(room, odId);
     if (!playerSide) return;
 
-    room.chess.resign(playerSide);
+    const result = room.chess.resign(playerSide);
+    this.handleGameOver(roomId, room, result);
   }
 
   getValidMoves(roomId: string, odId: string, from: Position): Position[] | null {
@@ -106,7 +137,10 @@ export class GameService {
 
     if (room.status === "PLAYING") {
       const playerSide = this.getPlayerSide(room, odId);
-      if (playerSide) room.chess.resign(playerSide);
+      if (playerSide) {
+        const result = room.chess.resign(playerSide);
+        this.handleGameOver(roomId, room, result);
+      }
     }
   }
 
@@ -136,5 +170,19 @@ export class GameService {
     if (!yourSide) return null;
 
     return { yourSide, gameState: room.chess.getGameState() };
+  }
+
+  executePromotion(roomId: string, odId: string, position: Position, piece: PromotionPieceName): void {
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+
+    const playerSide = this.getPlayerSide(room, odId);
+    if (!playerSide) return;
+
+    room.chess.executePromotion(position, piece);
+    this.io.to(roomId).emit("game-state", room.chess.getGameState());
+
+    const gameResult = room.chess.getGameResult();
+    if (gameResult) this.handleGameOver(roomId, room, gameResult);
   }
 }
