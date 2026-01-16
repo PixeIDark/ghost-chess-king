@@ -9,8 +9,8 @@ export class ChessTimer implements IChessTimer {
   private listeners: Map<TimerEventKey, Set<unknown>>;
 
   constructor(
-    private readonly incrementTime: number,
-    initialTime: number
+    initialTime: number,
+    private readonly incrementTime: number
   ) {
     this.whiteTime = initialTime;
     this.blackTime = initialTime;
