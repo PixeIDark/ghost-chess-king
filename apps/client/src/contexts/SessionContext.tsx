@@ -3,6 +3,7 @@ import { createContext, type ReactNode, useContext, useEffect, useState } from "
 import { io } from "socket.io-client";
 import { loadLocalStorage, RegisteredData, saveLocalStorage } from "@ghost-chess-king/shared";
 import { ClientSocket } from "@/types/socket.ts";
+import { config } from "@/config.ts";
 
 interface SocketContextValue {
   socket: ClientSocket;
@@ -26,7 +27,7 @@ const getOrCreateOdId = (): string => {
 };
 
 export function SocketProvider({ children }: { children: ReactNode }) {
-  const [socket] = useState<ClientSocket>(() => io("https://ghost-chess-king-server.onrender.com/"));
+  const [socket] = useState<ClientSocket>(() => io(config.apiUrl));
   const [odId] = useState(getOrCreateOdId);
   const [nickname, setNickname] = useState<string | null>(null);
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
