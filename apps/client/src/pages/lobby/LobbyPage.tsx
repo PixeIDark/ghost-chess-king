@@ -1,11 +1,12 @@
 import { useNavigate } from "react-router";
-import { useSocket } from "@/contexts/SessionContext";
+import { useServerStatus, useSocket } from "@/contexts/SessionContext";
 import { links } from "@/route/routes.constant";
 import { GameErrorData, GameStartData } from "@ghost-chess-king/shared";
 
 function LobbyPage() {
   const socket = useSocket();
   const navigate = useNavigate();
+  const { isConnected, isRegistered } = useServerStatus();
 
   const handleGameStart = () => {
     socket.once("game-start", (data: GameStartData) => navigate(links.ai(data.roomId)));
@@ -19,7 +20,12 @@ function LobbyPage() {
 
   return (
     <div>
-      <button onClick={handleGameStart} type="button">
+      <button
+        disabled={!isRegistered || !isConnected}
+        className="cursor-alias text-green-400 disabled:cursor-text disabled:text-black"
+        onClick={handleGameStart}
+        type="button"
+      >
         AI Game Start
       </button>
     </div>

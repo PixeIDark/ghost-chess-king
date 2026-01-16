@@ -11,6 +11,7 @@ interface SocketContextValue {
   nickname: string | null;
   currentRoomId: string | null;
   isRegistered: boolean;
+  isConnected: boolean; // 추가
 }
 
 const SessionContext = createContext<SocketContextValue | null>(null);
@@ -32,10 +33,17 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const [nickname, setNickname] = useState<string | null>(null);
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
   const [isRegistered, setIsRegistered] = useState(false);
+  const [isConnected, setIsConnected] = useState(socket.connected);
 
   useEffect(() => {
     const handleConnect = () => {
+      setIsConnected(true);
       socket.emit("register", { odId });
+    };
+
+    const handleDisconnect = () => {
+      setIsConnected(false);
+      setIsRegistered(false);
     };
 
     const handleRegistered = (data: RegisteredData) => {
@@ -45,22 +53,34 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     };
 
     socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
     socket.on("registered", handleRegistered);
 
     if (socket.connected) socket.emit("register", { odId });
 
     return () => {
       socket.off("connect", handleConnect);
+      socket.off("disconnect", handleDisconnect);
       socket.off("registered", handleRegistered);
     };
   }, [socket, odId]);
 
   return (
-    <SessionContext.Provider value={{ socket, odId, nickname, currentRoomId, isRegistered }}>
+    <SessionContext.Provider value={{ socket, odId, nickname, currentRoomId, isRegistered, isConnected }}>
       {children}
     </SessionContext.Provider>
   );
 }
+
+export const useServerStatus = () => {
+  const context = useContext(SessionContext);
+  if (!context) throw new Error("useServerStatus must be used within SocketProvider");
+
+  return {
+    isConnected: context.isConnected,
+    isRegistered: context.isRegistered,
+  };
+};
 
 export const useSocket = () => {
   const context = useContext(SessionContext);
