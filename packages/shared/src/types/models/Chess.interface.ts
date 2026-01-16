@@ -1,31 +1,19 @@
-import { GameState, MatchResultType } from "../game";
-import { Move, PieceName, Position, PromotionPieceName, Side } from "../chess";
+import { GameState, MatchResultType, GameResult } from "../game";
+import { Move, Position, PromotionPieceName, Side } from "../chess";
 import { IChessBoard } from "./ChessBoard.inteface";
 import { IChessRuler } from "./ChessRuler.interface";
 import { IChessTimer } from "./ChessTimer.interface";
-import { EventManager } from "../../utils/EventManager";
 
-export type ChessEventMap = {
-  gameStarted: { initialState: GameState };
-  turnChanged: { currentTurn: Side; gameState: GameState };
-  moveExecuted: { move: Move; gameState: GameState };
-  check: { color: Side; gameState: GameState };
-  gameOver: {
-    result: MatchResultType;
-    winner?: Side;
-    gameState: GameState;
-  };
-  promotionRequired: {
-    position: Position;
-    color: Side;
-    options: PromotionPieceName[];
-  };
-  timeUpdate: { whiteTime: number; blackTime: number };
-  timeout: { loser: Side };
-};
+export interface MoveResult {
+  success: boolean;
+  specialRule: string | null;
+  needsPromotion: boolean;
+  promotionOptions?: PromotionPieceName[];
+  position?: Position;
+  move?: Move;
+}
 
 export interface IChess {
-  readonly eventManager: EventManager<ChessEventMap>;
   readonly board: IChessBoard;
   readonly ruler: IChessRuler;
   readonly timer: IChessTimer;
@@ -34,12 +22,15 @@ export interface IChess {
   readonly matchResult: MatchResultType;
   startGame(): void;
   resetGame(): void;
-  executeMove(from: Position, to: Position, promoteTo?: PieceName): boolean;
+  executeMove(from: Position, to: Position, promoteTo?: PromotionPieceName): MoveResult;
   undoMove(): boolean;
-  resign(color: Side): void;
-  acceptDraw(): void;
+  resign(color: Side): GameResult;
+  acceptDraw(): GameResult;
+  timeout(loser: Side): GameResult;
   getGameState(): GameState;
+  getGameResult(): GameResult | null;
   getValidMoves(position: Position): Position[];
   isGameOver(): boolean;
   getFen(): string;
+  executePromotion(position: Position, piece: PromotionPieceName): void;
 }

@@ -1,9 +1,6 @@
 import {
-  BoardEntity,
-  ChessEventMap,
   GameState,
   getOppositeSide,
-  IChess,
   IChessBoard,
   IChessRuler,
   IChessTimer,
@@ -13,48 +10,37 @@ import {
   Position,
   PromotionPieceName,
   Side,
+  GameResult,
+  IChess,
+  MoveResult,
 } from "@ghost-chess-king/shared";
-import { ChessBoard } from "@/model/chessBoard";
-import { EventManager } from "@ghost-chess-king/shared/src/utils/EventManager";
 
 export class Chess implements IChess {
-  public readonly eventManager: EventManager<ChessEventMap>;
   public readonly ruler: IChessRuler;
   public readonly timer: IChessTimer;
   public board: IChessBoard;
   public currentTurn: Side;
   public moveHistory: Move[];
   public matchResult: MatchResultType;
-  private boardHistory: BoardEntity[];
+  private boardHistory: IChessBoard[];
 
-  constructor(ruler: IChessRuler, timer: IChessTimer) {
-    this.eventManager = new EventManager();
+  constructor(ruler: IChessRuler, timer: IChessTimer, board: IChessBoard) {
     this.ruler = ruler;
     this.timer = timer;
-    this.board = new ChessBoard(ruler.createBoard());
+    this.board = board;
     this.currentTurn = "white";
     this.moveHistory = [];
     this.matchResult = "PLAYING";
     this.boardHistory = [];
-    this.timer.on("timeUpdate", (data) => this.eventManager.emit("timeUpdate", data));
-    this.timer.on("timeout", (data) => {
-      this.matchResult = "TIMEOUT";
-      this.eventManager.emit("gameOver", {
-        result: "TIMEOUT",
-        winner: getOppositeSide(data.loser),
-        gameState: this.getGameState(),
-      });
-    });
   }
 
   public startGame(): void {
     this.timer.start("white");
-    this.eventManager.emit("gameStarted", { initialState: this.getGameState() });
   }
 
   public resetGame(): void {
-    const newBoard = new ChessBoard(this.ruler.createBoard());
-    Object.defineProperty(this, "board", { value: newBoard, writable: false });
+    this.board = this.board.clone();
+    this.board.clear();
     this.currentTurn = "white";
     this.moveHistory = [];
     this.matchResult = "PLAYING";
@@ -62,43 +48,32 @@ export class Chess implements IChess {
     this.timer.stop();
   }
 
-  public executeMove(from: Position, to: Position, promoteTo?: PromotionPieceName): boolean {
-    if (this.isGameOver()) return false;
+  public executeMove(from: Position, to: Position, promoteTo?: PromotionPieceName): MoveResult {
+    if (this.isGameOver()) {
+      return { success: false, specialRule: null, needsPromotion: false };
+    }
+
     const piece = this.board.getPiece(from);
-    if (!piece || piece.color !== this.currentTurn) return false;
-    const validMoves = this.ruler.getValidMoves(this.board, piece, this.moveHistory.at(-1));
-    if (!validMoves.some((pos) => isSamePosition(pos, to))) return false;
-
-    const willNeedPromotion = piece.type === "pawn" && this.ruler.needsPromotion(this.board, to);
-    if (willNeedPromotion && !promoteTo) {
-      this.eventManager.emit("promotionRequired", {
-        position: to,
-        color: piece.color,
-        options: this.ruler.getPromotionOptions(),
-      });
-      return false;
+    if (!piece || piece.color !== this.currentTurn) {
+      return { success: false, specialRule: null, needsPromotion: false };
     }
 
-    this.boardHistory.push(this.board.clone().boardEntity);
+    const validMoves = this.ruler.getValidMoves(this.board, piece, this.moveHistory);
+    if (!validMoves.some((pos) => isSamePosition(pos, to))) {
+      return { success: false, specialRule: null, needsPromotion: false };
+    }
+
+    this.boardHistory.push(this.board.clone());
+
     const capturedPiece = this.board.getPiece(to);
-    const isCastle = this.ruler.getCastlingMoves(this.board, piece).some((pos) => isSamePosition(pos, to));
-    const isEnPassant = this.ruler
-      .getEnPassantMoves(this.board, piece, this.moveHistory.at(-1))
-      .some((pos) => isSamePosition(pos, to));
+    const specialRule = this.ruler.getSpecialRule(this.board, from, to, this.moveHistory);
 
-    this.board.movePiece(from, to);
-
-    if (isCastle) {
-      const row = from.row;
-      const isKingside = to.col > from.col;
-      if (isKingside) this.board.movePiece({ row, col: this.board.cols - 1 }, { row, col: to.col - 1 });
-      else this.board.movePiece({ row, col: 0 }, { row, col: to.col + 1 });
+    if (specialRule) {
+      this.board.applySpecialRule(specialRule, from, to);
+    } else {
+      this.board.movePiece(from, to);
     }
-
-    if (isEnPassant) this.board.removePiece({ row: piece.color === "white" ? to.row + 1 : to.row - 1, col: to.col });
-    if (willNeedPromotion && promoteTo) this.ruler.executePromotion(this.board, to, promoteTo);
-
-    this.moveHistory.push({
+    const move: Move = {
       pieceId: piece.id,
       pieceType: piece.type,
       from,
@@ -106,66 +81,91 @@ export class Chess implements IChess {
       color: piece.color,
       capturedPieceId: capturedPiece?.id.toString(),
       promotion: promoteTo,
-      isEnPassant,
-      isCastle,
+      isEnPassant: specialRule === "en-passant",
+      isCastle: specialRule === "castling-kingside" || specialRule === "castling-queenside",
       timestamp: Date.now(),
-    });
+    };
+
+    this.moveHistory.push(move);
+    this.updateMatchResult();
+
+    const willNeedPromotion = this.ruler.needsPromotion(this.board, to);
+    if (willNeedPromotion && !promoteTo) {
+      return {
+        success: false,
+        specialRule: null,
+        needsPromotion: true,
+        promotionOptions: this.ruler.getPromotionOptions(),
+        position: to,
+      };
+    }
 
     this.timer.switchTurn(getOppositeSide(this.currentTurn));
     this.currentTurn = getOppositeSide(this.currentTurn);
-    this.eventManager.emit("turnChanged", { currentTurn: this.currentTurn, gameState: this.getGameState() });
-    this.eventManager.emit("moveExecuted", {
-      move: this.moveHistory[this.moveHistory.length - 1],
-      gameState: this.getGameState(),
-    });
 
-    const opponent = getOppositeSide(this.currentTurn);
-    if (this.ruler.isCheckmate(this.board, opponent)) {
+    return { success: true, specialRule, needsPromotion: false, move };
+  }
+
+  private updateMatchResult(): void {
+    const currentPlayer = this.currentTurn;
+
+    if (this.ruler.isCheckmate(this.board, currentPlayer)) {
       this.matchResult = "CHECKMATE";
       this.timer.stop();
-      this.eventManager.emit("gameOver", {
-        result: "CHECKMATE",
-        winner: this.currentTurn,
-        gameState: this.getGameState(),
-      });
-    } else if (this.ruler.isStalemate(this.board, opponent)) {
+    } else if (this.ruler.isStalemate(this.board, currentPlayer)) {
       this.matchResult = "STALEMATE";
       this.timer.stop();
-      this.eventManager.emit("gameOver", { result: "STALEMATE", gameState: this.getGameState() });
-    } else if (this.ruler.isInCheck(this.board, opponent)) {
+    } else if (this.ruler.isInCheck(this.board, currentPlayer)) {
       this.matchResult = "CHECK";
-      this.eventManager.emit("check", { color: opponent, gameState: this.getGameState() });
     } else {
       this.matchResult = "PLAYING";
     }
-    return true;
+  }
+
+  public getGameResult(): GameResult | null {
+    switch (this.matchResult) {
+      case "CHECKMATE":
+        return { status: this.matchResult, winner: getOppositeSide(this.currentTurn) };
+      case "STALEMATE":
+        return { status: this.matchResult, winner: "DRAW" };
+      case "TIMEOUT":
+        return { status: this.matchResult, winner: getOppositeSide(this.currentTurn) };
+      case "RESIGNATION":
+        return { status: this.matchResult, winner: getOppositeSide(this.currentTurn) };
+      case "DRAW_AGREEMENT":
+        return { status: this.matchResult, winner: "DRAW" };
+      default:
+        return null;
+    }
   }
 
   public undoMove(): boolean {
     const previousBoard = this.boardHistory.pop();
     if (!previousBoard) return false;
-    const newBoard = new ChessBoard(previousBoard);
-    Object.defineProperty(this, "board", { value: newBoard, writable: false });
+
+    this.board = previousBoard;
     this.moveHistory.pop();
     this.currentTurn = getOppositeSide(this.currentTurn);
     this.matchResult = "PLAYING";
     return true;
   }
 
-  public resign(color: Side): void {
+  public resign(color: Side): GameResult {
     this.matchResult = "RESIGNATION";
     this.timer.stop();
-    this.eventManager.emit("gameOver", {
-      result: "RESIGNATION",
-      winner: getOppositeSide(color),
-      gameState: this.getGameState(),
-    });
+    return { status: "RESIGNATION", winner: getOppositeSide(color) };
   }
 
-  public acceptDraw(): void {
+  public acceptDraw(): GameResult {
     this.matchResult = "DRAW_AGREEMENT";
     this.timer.stop();
-    this.eventManager.emit("gameOver", { result: "DRAW_AGREEMENT", gameState: this.getGameState() });
+    return { status: "DRAW_AGREEMENT", winner: "DRAW" };
+  }
+
+  public timeout(loser: Side): GameResult {
+    this.matchResult = "TIMEOUT";
+    this.timer.stop();
+    return { status: "TIMEOUT", winner: getOppositeSide(loser) };
   }
 
   public getGameState(): GameState {
@@ -184,7 +184,7 @@ export class Chess implements IChess {
   public getValidMoves(position: Position): Position[] {
     const piece = this.board.getPiece(position);
     if (!piece || piece.color !== this.currentTurn) return [];
-    return this.ruler.getValidMoves(this.board, piece, this.moveHistory.at(-1));
+    return this.ruler.getValidMoves(this.board, piece, this.moveHistory);
   }
 
   public isGameOver(): boolean {
@@ -194,13 +194,9 @@ export class Chess implements IChess {
   public getFen(): string {
     const boardPart = this.board.toBoardString();
     const turn = this.currentTurn === "white" ? "w" : "b";
-    let castling = "";
-    if (this.ruler.canCastling(this.board, "white", "kingside")) castling += "K";
-    if (this.ruler.canCastling(this.board, "white", "queenside")) castling += "Q";
-    if (this.ruler.canCastling(this.board, "black", "kingside")) castling += "k";
-    if (this.ruler.canCastling(this.board, "black", "queenside")) castling += "q";
-    const target = this.ruler.getEnPassantTarget(this.moveHistory.at(-1));
-    const enPassant = target ? `${String.fromCharCode(97 + target.col)}${8 - target.row}` : "-";
+    const castling = "-";
+    const enPassant = "-";
+
     let halfMove = this.moveHistory.length;
     for (let i = this.moveHistory.length - 1; i >= 0; i--) {
       if (this.moveHistory[i].pieceType === "pawn" || this.moveHistory[i].capturedPieceId) {
@@ -209,6 +205,16 @@ export class Chess implements IChess {
       }
     }
     const fullMove = Math.floor(this.moveHistory.length / 2) + 1;
-    return `${boardPart} ${turn} ${castling || "-"} ${enPassant} ${halfMove} ${fullMove}`;
+
+    return `${boardPart} ${turn} ${castling} ${enPassant} ${halfMove} ${fullMove}`;
+  }
+
+  public executePromotion(position: Position, piece: PromotionPieceName): void {
+    this.board.promotePiece(position, piece);
+
+    this.timer.switchTurn(getOppositeSide(this.currentTurn));
+    this.currentTurn = getOppositeSide(this.currentTurn);
+
+    this.updateMatchResult();
   }
 }
