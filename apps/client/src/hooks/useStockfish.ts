@@ -11,9 +11,7 @@ export const useStockfish = () => {
   }>({});
 
   useEffect(() => {
-    const engine = new Worker(new URL("/stockfish/stockfish-17.1-single-a496a04.js", import.meta.url), {
-      type: "module",
-    });
+    const engine = new Worker("/stockfish/stockfish-17.1-single-a496a04.js");
     engineRef.current = engine;
 
     engine.onmessage = (event: MessageEvent) => {
