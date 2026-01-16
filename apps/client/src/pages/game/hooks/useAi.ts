@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useStockfish } from "@/hooks/useStockfish";
-import { delay } from "@/utils/helper";
 import { squareToIndices } from "@ghost-chess-king/shared";
 import type { Position } from "@ghost-chess-king/shared";
 
@@ -22,7 +21,6 @@ export const useAi = ({ fen, currentTurn, aiSide, depth = 15, onAiMove }: UseAiP
 
     (async () => {
       try {
-        await delay(1000);
         const bestMove = await getBestMove(fen, depth);
         const from = squareToIndices(bestMove.slice(0, 2));
         const to = squareToIndices(bestMove.slice(2, 4));

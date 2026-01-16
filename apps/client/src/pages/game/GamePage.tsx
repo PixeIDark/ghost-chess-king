@@ -25,7 +25,7 @@ function GamePage() {
     fen: gameState?.fen ?? "",
     currentTurn: gameState?.currentTurn ?? "white",
     aiSide: getOppositeSide(mySide),
-    depth: 20,
+    depth: 15,
     onAiMove: handleMove,
   });
 
