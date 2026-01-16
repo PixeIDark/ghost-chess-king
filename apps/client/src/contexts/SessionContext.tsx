@@ -11,7 +11,7 @@ interface SocketContextValue {
   nickname: string | null;
   currentRoomId: string | null;
   isRegistered: boolean;
-  isConnected: boolean; // 추가
+  isConnected: boolean;
 }
 
 const SessionContext = createContext<SocketContextValue | null>(null);
