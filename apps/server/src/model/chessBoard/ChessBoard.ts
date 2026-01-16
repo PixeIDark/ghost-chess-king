@@ -6,17 +6,18 @@ import {
   isSamePosition,
   PieceName,
   Position,
+  PromotionPieceName,
   Side,
 } from "@ghost-chess-king/shared";
+import { PieceFactory } from "@/model/piece";
 
-export class ChessBoard implements IChessBoard {
-  public readonly rows: number;
-  public readonly cols: number;
+export abstract class ChessBoard implements IChessBoard {
+  public abstract readonly rows: number;
+  public abstract readonly cols: number;
+  public abstract readonly boardEntity: BoardEntity;
 
-  constructor(public readonly boardEntity: BoardEntity) {
-    this.rows = boardEntity.length;
-    this.cols = boardEntity[0].length;
-  }
+  public abstract applySpecialRule(type: string, from: Position, to: Position): void;
+  public abstract clone(): IChessBoard;
 
   public getPiece(position: Position): IPiece | null {
     return this.boardEntity[position.row][position.col];
@@ -37,11 +38,6 @@ export class ChessBoard implements IChessBoard {
     const piece = this.boardEntity[position.row][position.col];
     this.boardEntity[position.row][position.col] = null;
     return piece;
-  }
-
-  public clone(): IChessBoard {
-    const clonedEntity: BoardEntity = this.boardEntity.map((row) => row.map((piece) => (piece ? piece.clone() : null)));
-    return new ChessBoard(clonedEntity);
   }
 
   public findKing(color: Side): Position | undefined {
@@ -112,6 +108,14 @@ export class ChessBoard implements IChessBoard {
     }
 
     return rows.join("/");
+  }
+
+  public promotePiece(position: Position, pieceType: PromotionPieceName): void {
+    const pawn = this.getPiece(position);
+    if (!pawn || pawn.type !== "pawn") return;
+
+    const promoted = PieceFactory.createPromotion(pawn, pieceType);
+    this.setPiece(position, promoted);
   }
 
   private pieceToFenChar(piece: IPiece): string {

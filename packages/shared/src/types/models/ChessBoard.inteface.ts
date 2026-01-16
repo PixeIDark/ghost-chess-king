@@ -1,4 +1,4 @@
-import { BoardDTO, BoardEntity, Position, Side } from "../chess";
+import { BoardDTO, BoardEntity, Position, PromotionPieceName, Side } from "../chess";
 import { IPiece } from "./Piece.interface";
 
 export interface IChessBoard {
@@ -9,6 +9,8 @@ export interface IChessBoard {
   setPiece(position: Position, piece: IPiece | null): void;
   movePiece(from: Position, to: Position): void;
   removePiece(position: Position): IPiece | null;
+  applySpecialRule(type: string, from: Position, to: Position): void;
+  promotePiece(position: Position, pieceType: PromotionPieceName): void;
   clone(): IChessBoard;
   findKing(color: Side): Position | undefined;
   getAllPieces(color: Side): IPiece[];
