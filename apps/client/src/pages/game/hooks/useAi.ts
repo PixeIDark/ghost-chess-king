@@ -36,5 +36,5 @@ export const useAi = ({ fen, currentTurn, aiSide, depth = 15, onAiMove }: UseAiP
     return () => {
       cancelled = true;
     };
-  }, [getBestMove, onAiMove, fen, currentTurn, aiSide, isReady, depth]);
+  }, [fen, currentTurn, aiSide, isReady, depth]);
 };
