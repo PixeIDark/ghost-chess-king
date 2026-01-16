@@ -1,26 +1,30 @@
-import {
-  BoardEntity,
-  IChessBoard,
-  IChessRuler,
-  IPiece,
-  Move,
-  Position,
-  PromotionPieceName,
-  Side,
-} from "@ghost-chess-king/shared";
+import { IChessBoard, IChessRuler, IPiece, Move, Position, PromotionPieceName, Side } from "@ghost-chess-king/shared";
 
 export abstract class ChessRuler implements IChessRuler {
-  public abstract createBoard(): BoardEntity;
-  public abstract getValidMoves(board: IChessBoard, piece: IPiece, lastMove?: Move): Position[];
-  public abstract canCastling(board: IChessBoard, color: Side, side: "kingside" | "queenside"): boolean;
-  public abstract getEnPassantTarget(lastMove?: Move): Position | null;
-  public abstract getCastlingMoves(board: IChessBoard, king: IPiece): Position[];
-  public abstract getEnPassantMoves(board: IChessBoard, pawn: IPiece, lastMove?: Move): Position[];
-  public abstract isCheckmate(board: IChessBoard, color: Side): boolean;
-  public abstract isStalemate(board: IChessBoard, color: Side): boolean;
-  public abstract needsPromotion(board: IChessBoard, position: Position): boolean;
-  public abstract getPromotionOptions(): PromotionPieceName[];
-  public abstract executePromotion(board: IChessBoard, position: Position, promoteTo: PromotionPieceName): IPiece;
+  public abstract getValidMoves(board: IChessBoard, piece: IPiece, moveHistory: Move[]): Position[];
+  public abstract getSpecialRule(board: IChessBoard, from: Position, to: Position, moveHistory: Move[]): string | null;
+
+  public isCheckmate(board: IChessBoard, color: Side): boolean {
+    if (!this.isInCheck(board, color)) return false;
+    return !this.hasAnyLegalMove(board, color);
+  }
+
+  public isStalemate(board: IChessBoard, color: Side): boolean {
+    if (this.isInCheck(board, color)) return false;
+    return !this.hasAnyLegalMove(board, color);
+  }
+
+  public needsPromotion(board: IChessBoard, position: Position): boolean {
+    const piece = board.getPiece(position);
+    if (!piece || piece.type !== "pawn") return false;
+
+    const promotionRow = piece.color === "white" ? 0 : board.rows - 1;
+    return position.row === promotionRow;
+  }
+
+  public getPromotionOptions(): PromotionPieceName[] {
+    return ["queen", "rook", "bishop", "knight"];
+  }
 
   public wouldExposeKing(board: IChessBoard, from: Position, to: Position): boolean {
     const piece = board.getPiece(from);
@@ -50,7 +54,7 @@ export abstract class ChessRuler implements IChessRuler {
     const pieces = board.getAllPieces(color);
 
     for (const piece of pieces) {
-      const validMoves = this.getValidMoves(board, piece);
+      const validMoves = this.getValidMoves(board, piece, []);
       if (validMoves.length > 0) return true;
     }
 

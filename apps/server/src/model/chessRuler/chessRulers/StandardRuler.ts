@@ -1,33 +1,8 @@
 import { ChessRuler } from "@/model/chessRuler";
-import {
-  BoardEntity,
-  getOppositeSide,
-  IChessBoard,
-  IPiece,
-  LastMove,
-  Position,
-  PromotionPieceName,
-  Side,
-} from "@ghost-chess-king/shared";
-import { Bishop, King, Knight, Pawn, Queen, Rook } from "@/model/piece";
+import { getOppositeSide, IChessBoard, IPiece, Move, Position, Side } from "@ghost-chess-king/shared";
 
 export class StandardRuler extends ChessRuler {
-  public createBoard(): BoardEntity {
-    const pieces = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook];
-
-    return [
-      pieces.map((P, i) => new P(200 + i, "black", { row: 0, col: i })),
-      [...Array(8)].map((_, i) => new Pawn(208 + i, "black", { row: 1, col: i })),
-      Array(8).fill(null),
-      Array(8).fill(null),
-      Array(8).fill(null),
-      Array(8).fill(null),
-      [...Array(8)].map((_, i) => new Pawn(108 + i, "white", { row: 6, col: i })),
-      pieces.map((P, i) => new P(100 + i, "white", { row: 7, col: i })),
-    ];
-  }
-
-  public getValidMoves(board: IChessBoard, piece: IPiece, lastMove?: LastMove): Position[] {
+  public getValidMoves(board: IChessBoard, piece: IPiece, moveHistory: Move[]): Position[] {
     const potentialPaths = piece.getPotentialPaths(board.rows, board.cols);
     const validPositions: Position[] = [];
 
@@ -52,20 +27,71 @@ export class StandardRuler extends ChessRuler {
       }
     });
 
-    if (piece.type === "king") {
-      const castlingMoves = this.getCastlingMoves(board, piece);
-      validPositions.push(...castlingMoves);
-    }
-
-    if (piece.type === "pawn") {
-      const enPassantMoves = this.getEnPassantMoves(board, piece, lastMove);
-      validPositions.push(...enPassantMoves);
-    }
+    validPositions.push(...this.getCastlingMoves(board, piece));
+    validPositions.push(...this.getEnPassantMoves(board, piece, moveHistory));
 
     return validPositions;
   }
 
-  public canCastling(board: IChessBoard, color: Side, side: "kingside" | "queenside"): boolean {
+  public getSpecialRule(board: IChessBoard, from: Position, to: Position, moveHistory: Move[]): string | null {
+    const piece = board.getPiece(from);
+    if (!piece) return null;
+
+    if (piece.type === "king" || piece.type === "rook") {
+      const castlingMoves = this.getCastlingMoves(board, piece);
+      if (castlingMoves.some((m) => m.row === to.row && m.col === to.col)) {
+        const isKingside = piece.type === "king" ? to.col > from.col : from.col === board.cols - 1;
+        return isKingside ? "castling-kingside" : "castling-queenside";
+      }
+    }
+
+    if (piece.type === "pawn") {
+      const enPassantMoves = this.getEnPassantMoves(board, piece, moveHistory);
+      if (enPassantMoves.some((m) => m.row === to.row && m.col === to.col)) return "en-passant";
+    }
+
+    return null;
+  }
+
+  private getCastlingMoves(board: IChessBoard, piece: IPiece): Position[] {
+    const result: Position[] = [];
+    if (!piece || piece.hasMoved) return result;
+
+    const kingPos = board.findKing(piece.color);
+    if (!kingPos) return result;
+
+    const king = board.getPiece(kingPos);
+    if (!king || king.hasMoved) return result;
+
+    const enemyColor: Side = getOppositeSide(piece.color);
+    if (board.isPositionUnderAttack(kingPos, enemyColor)) return result;
+
+    const row = kingPos.row;
+
+    if (piece.type === "king" || (piece.type === "rook" && piece.position.col === board.cols - 1)) {
+      if (
+        this.canCastling(board, piece.color, "kingside") &&
+        this.isCastlingPathClear(board, king, { row, col: board.cols - 1 }, enemyColor)
+      ) {
+        if (piece.type === "king") result.push({ row, col: board.cols - 1 });
+        else result.push({ row, col: kingPos.col });
+      }
+    }
+
+    if (piece.type === "king" || (piece.type === "rook" && piece.position.col === 0)) {
+      if (
+        this.canCastling(board, piece.color, "queenside") &&
+        this.isCastlingPathClear(board, king, { row, col: 0 }, enemyColor)
+      ) {
+        if (piece.type === "king") result.push({ row, col: 0 });
+        else result.push({ row, col: kingPos.col });
+      }
+    }
+
+    return result;
+  }
+
+  private canCastling(board: IChessBoard, color: Side, side: "kingside" | "queenside"): boolean {
     const kingPos = board.findKing(color);
     if (!kingPos) return false;
 
@@ -77,60 +103,6 @@ export class StandardRuler extends ChessRuler {
     const rook = board.getPiece({ row, col: rookCol });
 
     return rook !== null && rook.type === "rook" && rook.color === color && !rook.hasMoved;
-  }
-
-  public getEnPassantTarget(lastMove: LastMove): Position | null {
-    if (!lastMove) return null;
-
-    if (lastMove.pieceType !== "pawn") return null;
-
-    const rowDiff = Math.abs(lastMove.from.row - lastMove.to.row);
-    if (rowDiff !== 2) return null;
-
-    return {
-      row: (lastMove.from.row + lastMove.to.row) / 2,
-      col: lastMove.to.col,
-    };
-  }
-
-  public getCastlingMoves(board: IChessBoard, piece: IPiece): Position[] {
-    const result: Position[] = [];
-
-    if (!piece || piece.hasMoved) return result;
-
-    const kingPos = board.findKing(piece.color);
-    if (!kingPos) return result;
-
-    const king = board.getPiece(kingPos);
-    if (!king || king.hasMoved) return result;
-
-    const enemyColor: Side = getOppositeSide(piece.color);
-
-    if (board.isPositionUnderAttack(kingPos, enemyColor)) return result;
-
-    const row = kingPos.row;
-
-    if (piece.type === "king" || (piece.type === "rook" && piece.position.col === board.cols - 1)) {
-      if (
-        this.canCastling(board, piece.color, "kingside") &&
-        this.isCastlingPathClear(board, king, { row, col: board.cols - 1 }, enemyColor)
-      ) {
-        if (piece.type === "king") result.push({ row, col: kingPos.col + 2 });
-        else result.push({ row, col: kingPos.col + 1 });
-      }
-    }
-
-    if (piece.type === "king" || (piece.type === "rook" && piece.position.col === 0)) {
-      if (
-        this.canCastling(board, piece.color, "queenside") &&
-        this.isCastlingPathClear(board, king, { row, col: 0 }, enemyColor)
-      ) {
-        if (piece.type === "king") result.push({ row, col: kingPos.col - 2 });
-        else result.push({ row, col: kingPos.col - 1 });
-      }
-    }
-
-    return result;
   }
 
   private isCastlingPathClear(board: IChessBoard, king: IPiece, rookPos: Position, enemyColor: Side): boolean {
@@ -154,10 +126,12 @@ export class StandardRuler extends ChessRuler {
     return true;
   }
 
-  public getEnPassantMoves(board: IChessBoard, pawn: IPiece, lastMove: LastMove): Position[] {
+  private getEnPassantMoves(board: IChessBoard, pawn: IPiece, moveHistory: Move[]): Position[] {
     const result: Position[] = [];
+    if (pawn.type !== "pawn" || moveHistory.length === 0) return result;
 
-    if (pawn.type !== "pawn" || !lastMove) return result;
+    const lastMove = moveHistory.at(-1);
+    if (!lastMove) return result;
 
     const target = this.getEnPassantTarget(lastMove);
     if (!target) return result;
@@ -172,47 +146,15 @@ export class StandardRuler extends ChessRuler {
     return result;
   }
 
-  public isCheckmate(board: IChessBoard, color: Side): boolean {
-    if (!this.isInCheck(board, color)) return false;
-    return !this.hasAnyLegalMove(board, color);
-  }
+  private getEnPassantTarget(lastMove: Move): Position | null {
+    if (lastMove.pieceType !== "pawn") return null;
 
-  public isStalemate(board: IChessBoard, color: Side): boolean {
-    if (this.isInCheck(board, color)) return false;
-    return !this.hasAnyLegalMove(board, color);
-  }
+    const rowDiff = Math.abs(lastMove.from.row - lastMove.to.row);
+    if (rowDiff !== 2) return null;
 
-  public needsPromotion(board: IChessBoard, position: Position): boolean {
-    const piece = board.getPiece(position);
-    if (!piece || piece.type !== "pawn") return false;
-
-    const promotionRow = piece.color === "white" ? 0 : board.rows - 1;
-    return position.row === promotionRow;
-  }
-
-  public getPromotionOptions(): PromotionPieceName[] {
-    return ["queen", "rook", "bishop", "knight"];
-  }
-
-  public executePromotion(board: IChessBoard, position: Position, promoteTo: PromotionPieceName): IPiece {
-    const pawn = board.getPiece(position);
-    if (!pawn) throw new Error("No piece at promotion position");
-
-    if (pawn.type !== "pawn") throw new Error("Only pawns can be promoted");
-
-    const pieceClassMap = {
-      queen: Queen,
-      rook: Rook,
-      bishop: Bishop,
-      knight: Knight,
+    return {
+      row: (lastMove.from.row + lastMove.to.row) / 2,
+      col: lastMove.to.col,
     };
-
-    const PieceClass = pieceClassMap[promoteTo];
-    if (!PieceClass) throw new Error(`Invalid promotion piece: ${promoteTo}`);
-
-    const promotedPiece = new PieceClass(pawn.id, pawn.color, { ...position }, true);
-    board.setPiece(position, promotedPiece);
-
-    return promotedPiece;
   }
 }
