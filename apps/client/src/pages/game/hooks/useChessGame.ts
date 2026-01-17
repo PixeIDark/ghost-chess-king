@@ -10,6 +10,7 @@ import type {
   Position,
   ValidMovesData,
   PromotionPieceName,
+  PromotionRequiredData,
 } from "@ghost-chess-king/shared";
 
 interface UseChessGameParams {
@@ -25,6 +26,8 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
   const [fromSquare, setFromSquare] = useState<Position | null>(null);
   const [validMoves, setValidMoves] = useState<Position[]>([]);
   const [gameResult, setGameResult] = useState<GameOverData | null>(null);
+  const [isPromotionRequired, setIsPromotionRequired] = useState<boolean>(false);
+  const [promotionRequiredData, setPromotionRequiredData] = useState<PromotionRequiredData | null>(null);
 
   useEffect(() => {
     if (!isRegistered) return;
@@ -51,12 +54,17 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
       setValidMoves(data.moves || []);
     };
 
+    const handlePromotionRequired = (data: PromotionRequiredData) => {
+      setPromotionRequiredData(data);
+      setIsPromotionRequired(true);
+    };
+
     socket.on("game-state", handleGameState);
     socket.on("game-restored", handleGameRestored);
     socket.on("game-over", handleGameOver);
     socket.on("game-not-found", handleGameNotFound);
     socket.on("valid-moves", handleValidMoves);
-    socket.on("promotion-required", () => console.log("ff"));
+    socket.on("promotion-required", handlePromotionRequired);
     socket.emit("rejoin-game", { roomId });
 
     return () => {
@@ -65,11 +73,11 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
       socket.off("game-over", handleGameOver);
       socket.off("game-not-found", handleGameNotFound);
       socket.off("valid-moves", handleValidMoves);
-      socket.off("promotion-required", () => console.log("ff"));
+      socket.off("promotion-required", handlePromotionRequired);
     };
   }, [socket, isRegistered, roomId, navigate]);
 
-  const handleMove = (from: Position, to: Position, promotionType: PromotionPieceName | null) => {
+  const handleMove = (from: Position, to: Position, promotionType?: PromotionPieceName | null) => {
     socket.emit("move", { roomId, from, to });
     if (promotionType) socket.emit("select-promotion", { roomId, position: to, piece: promotionType });
   };
@@ -97,6 +105,12 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
     }
   };
 
+  const handleSelectPromotion = (selectedPiece: PromotionPieceName) => {
+    if (!promotionRequiredData) return;
+    socket.emit("select-promotion", { roomId, position: promotionRequiredData.position, piece: selectedPiece });
+    setIsPromotionRequired(false);
+  };
+
   return {
     gameState,
     mySide,
@@ -104,7 +118,9 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
     gameResult,
     validMoves,
     fromSquare,
+    isPromotionRequired,
     handleSquareClick,
     handleMove,
+    handleSelectPromotion,
   };
 };

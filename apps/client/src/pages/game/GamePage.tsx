@@ -9,13 +9,24 @@ import { createBoardViewModel } from "@/viewModel/board";
 import GameResultModal from "@/pages/game/components/GameResultModal";
 import Square from "@/pages/game/components/Square";
 import { TimerDisplay } from "@/pages/game/components/TimerDisplay";
+import PromotionModal from "@/pages/game/components/PromotionModal.tsx";
 
 function GamePage() {
   const { roomId } = useParams() as { roomId: string };
   const socket = useSocket();
   const { isRegistered } = useUserInfo();
   const [isOpen, setIsOpen] = useState(true);
-  const { gameState, mySide, gameResult, validMoves, fromSquare, handleSquareClick, handleMove } = useChessGame({
+  const {
+    gameState,
+    mySide,
+    gameResult,
+    validMoves,
+    fromSquare,
+    isPromotionRequired,
+    handleSquareClick,
+    handleMove,
+    handleSelectPromotion,
+  } = useChessGame({
     socket,
     roomId,
     isRegistered,
@@ -60,6 +71,7 @@ function GamePage() {
         currentTurn={gameState.currentTurn}
         isGameActive={gameState.matchResult === "PLAYING" || gameState.matchResult === "CHECK"}
       />
+      <PromotionModal onSelectPromotion={handleSelectPromotion} isOpen={isPromotionRequired} color={mySide} />
     </div>
   );
 }

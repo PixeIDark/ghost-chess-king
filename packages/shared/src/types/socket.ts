@@ -82,6 +82,7 @@ export interface GameOverData {
   winner: Side | "draw";
   reason: MatchResultType;
 }
+
 export interface PromotionRequiredData {
   position: Position;
   color: Side;

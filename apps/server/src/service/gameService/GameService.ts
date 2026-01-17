@@ -76,6 +76,7 @@ export class GameService implements IGameService {
     if (result.needsPromotion && result.position && result.promotionOptions) {
       const socketId = this.odIdToSocketId.get(odId);
       if (socketId && playerSide) {
+        this.io.to(roomId).emit("game-state", room.chess.getGameState());
         this.io.to(socketId).emit("promotion-required", {
           position: result.position,
           color: playerSide,

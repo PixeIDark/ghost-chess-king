@@ -68,11 +68,9 @@ export class Chess implements IChess {
     const capturedPiece = this.board.getPiece(to);
     const specialRule = this.ruler.getSpecialRule(this.board, from, to, this.moveHistory);
 
-    if (specialRule) {
-      this.board.applySpecialRule(specialRule, from, to);
-    } else {
-      this.board.movePiece(from, to);
-    }
+    if (specialRule) this.board.applySpecialRule(specialRule, from, to);
+    else this.board.movePiece(from, to);
+
     const move: Move = {
       pieceId: piece.id,
       pieceType: piece.type,
