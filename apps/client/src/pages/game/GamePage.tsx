@@ -26,6 +26,7 @@ function GamePage() {
     handleSquareClick,
     handleMove,
     handleSelectPromotion,
+    handleLeaveGame,
   } = useChessGame({
     socket,
     roomId,
@@ -47,6 +48,9 @@ function GamePage() {
 
   return (
     <div className="flex w-full flex-col items-center">
+      <button type="button" onClick={handleLeaveGame} className="h-6 w-10">
+        leave
+      </button>
       <div>현재 턴: {gameState.currentTurn === "white" ? "백" : "흑"}</div>
       <div>내 진영: {mySide === "white" ? "백" : "흑"}</div>
       <div>상태: {gameState.matchResult}</div>

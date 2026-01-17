@@ -111,6 +111,10 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
     setIsPromotionRequired(false);
   };
 
+  const handleLeaveGame = () => {
+    socket.emit("leave-game", { roomId });
+  };
+
   return {
     gameState,
     mySide,
@@ -122,5 +126,6 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
     handleSquareClick,
     handleMove,
     handleSelectPromotion,
+    handleLeaveGame,
   };
 };
