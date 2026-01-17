@@ -71,15 +71,18 @@ export class GameService implements IGameService {
     const playerSide = this.getPlayerSide(room, odId);
     if (room.mode === "pvp" && playerSide !== room.chess.currentTurn) return false;
 
+    const movingSide = room.chess.currentTurn;
     const result = room.chess.executeMove(from, to);
 
     if (result.needsPromotion && result.position && result.promotionOptions) {
-      const socketId = this.odIdToSocketId.get(odId);
-      if (socketId && playerSide) {
+      const promotingOdId = movingSide === "white" ? room.whitePlayer : room.blackPlayer;
+      const socketId = this.odIdToSocketId.get(promotingOdId);
+
+      if (socketId) {
         this.io.to(roomId).emit("game-state", room.chess.getGameState());
         this.io.to(socketId).emit("promotion-required", {
           position: result.position,
-          color: playerSide,
+          color: movingSide,
           options: result.promotionOptions,
         });
       }
@@ -91,9 +94,7 @@ export class GameService implements IGameService {
     this.io.to(roomId).emit("game-state", room.chess.getGameState());
 
     const gameResult = room.chess.getGameResult();
-    if (gameResult) {
-      this.handleGameOver(roomId, room, gameResult);
-    }
+    if (gameResult) this.handleGameOver(roomId, room, gameResult);
 
     return true;
   }
