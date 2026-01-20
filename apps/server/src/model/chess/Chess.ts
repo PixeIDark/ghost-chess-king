@@ -107,10 +107,10 @@ export class Chess implements IChess {
   private updateMatchResult(): void {
     const currentPlayer = this.currentTurn;
 
-    if (this.ruler.isCheckmate(this.board, currentPlayer)) {
+    if (this.ruler.isCheckmate(this.board, currentPlayer, this.moveHistory)) {
       this.matchResult = "CHECKMATE";
       this.timer.stop();
-    } else if (this.ruler.isStalemate(this.board, currentPlayer)) {
+    } else if (this.ruler.isStalemate(this.board, currentPlayer, this.moveHistory)) {
       this.matchResult = "STALEMATE";
       this.timer.stop();
     } else if (this.ruler.isInCheck(this.board, currentPlayer)) {

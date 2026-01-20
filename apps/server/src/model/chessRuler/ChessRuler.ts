@@ -4,14 +4,14 @@ export abstract class ChessRuler implements IChessRuler {
   public abstract getValidMoves(board: IChessBoard, piece: IPiece, moveHistory: Move[]): Position[];
   public abstract getSpecialRule(board: IChessBoard, from: Position, to: Position, moveHistory: Move[]): string | null;
 
-  public isCheckmate(board: IChessBoard, color: Side): boolean {
+  public isCheckmate(board: IChessBoard, color: Side, moveHistory: Move[]): boolean {
     if (!this.isInCheck(board, color)) return false;
-    return !this.hasAnyLegalMove(board, color);
+    return !this.hasAnyLegalMove(board, color, moveHistory);
   }
 
-  public isStalemate(board: IChessBoard, color: Side): boolean {
+  public isStalemate(board: IChessBoard, color: Side, moveHistory: Move[]): boolean {
     if (this.isInCheck(board, color)) return false;
-    return !this.hasAnyLegalMove(board, color);
+    return !this.hasAnyLegalMove(board, color, moveHistory);
   }
 
   public needsPromotion(board: IChessBoard, position: Position): boolean {
@@ -50,11 +50,11 @@ export abstract class ChessRuler implements IChessRuler {
     return this.isInCheck(clonedBoard, piece.color);
   }
 
-  protected hasAnyLegalMove(board: IChessBoard, color: Side): boolean {
+  protected hasAnyLegalMove(board: IChessBoard, color: Side, moveHistory: Move[]): boolean {
     const pieces = board.getAllPieces(color);
 
     for (const piece of pieces) {
-      const validMoves = this.getValidMoves(board, piece, []);
+      const validMoves = this.getValidMoves(board, piece, moveHistory);
       if (validMoves.length > 0) return true;
     }
 
