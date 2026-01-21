@@ -16,7 +16,7 @@ function GameResultModal({ gameResult, onClose }: GameResultProps) {
           type="button"
           className="w-full rounded-xl border border-gray-200 bg-gray-100 py-2 text-gray-700 transition hover:bg-gray-200 active:scale-[0.98]"
         >
-          닫기
+          Close
         </button>
       </div>
     </div>
