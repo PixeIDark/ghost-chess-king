@@ -79,13 +79,13 @@ export class Chess implements IChess {
       color: piece.color,
       capturedPieceId: capturedPiece?.id.toString(),
       promotion: promoteTo,
+      // TODO: 객체 형식의 프로퍼티 spectialRules를 만들고 거기서 이제 enum으로 정의된스페셜 룰을 할당하고 객체 리터럴로 값을 참조해보자
       isEnPassant: specialRule === "en-passant",
       isCastle: specialRule === "castling-kingside" || specialRule === "castling-queenside",
       timestamp: Date.now(),
     };
 
     this.moveHistory.push(move);
-    this.updateMatchResult();
 
     const willNeedPromotion = this.ruler.needsPromotion(this.board, to);
     if (willNeedPromotion && !promoteTo) {
@@ -98,6 +98,7 @@ export class Chess implements IChess {
       };
     }
 
+    this.updateMatchResult();
     this.timer.switchTurn(getOppositeSide(this.currentTurn));
     this.currentTurn = getOppositeSide(this.currentTurn);
 
@@ -105,15 +106,15 @@ export class Chess implements IChess {
   }
 
   private updateMatchResult(): void {
-    const currentPlayer = this.currentTurn;
+    const opponent = getOppositeSide(this.currentTurn);
 
-    if (this.ruler.isCheckmate(this.board, currentPlayer, this.moveHistory)) {
+    if (this.ruler.isCheckmate(this.board, opponent, this.moveHistory)) {
       this.matchResult = "CHECKMATE";
       this.timer.stop();
-    } else if (this.ruler.isStalemate(this.board, currentPlayer, this.moveHistory)) {
+    } else if (this.ruler.isStalemate(this.board, opponent, this.moveHistory)) {
       this.matchResult = "STALEMATE";
       this.timer.stop();
-    } else if (this.ruler.isInCheck(this.board, currentPlayer)) {
+    } else if (this.ruler.isInCheck(this.board, opponent)) {
       this.matchResult = "CHECK";
     } else {
       this.matchResult = "PLAYING";
@@ -189,11 +190,19 @@ export class Chess implements IChess {
     return this.matchResult !== "PLAYING" && this.matchResult !== "CHECK";
   }
 
+  public executePromotion(position: Position, piece: PromotionPieceName): void {
+    this.board.promotePiece(position, piece);
+    this.updateMatchResult();
+
+    this.timer.switchTurn(getOppositeSide(this.currentTurn));
+    this.currentTurn = getOppositeSide(this.currentTurn);
+  }
+
   public getFen(): string {
     const boardPart = this.board.toBoardString();
     const turn = this.currentTurn === "white" ? "w" : "b";
-    const castling = "-";
-    const enPassant = "-";
+    const castling = this.getCastlingRights();
+    const enPassant = this.getEnPassantTarget();
 
     let halfMove = this.moveHistory.length;
     for (let i = this.moveHistory.length - 1; i >= 0; i--) {
@@ -207,12 +216,46 @@ export class Chess implements IChess {
     return `${boardPart} ${turn} ${castling} ${enPassant} ${halfMove} ${fullMove}`;
   }
 
-  public executePromotion(position: Position, piece: PromotionPieceName): void {
-    this.board.promotePiece(position, piece);
+  private getEnPassantTarget(): string {
+    if (this.moveHistory.length === 0) return "-";
 
-    this.timer.switchTurn(getOppositeSide(this.currentTurn));
-    this.currentTurn = getOppositeSide(this.currentTurn);
+    const lastMove = this.moveHistory[this.moveHistory.length - 1];
 
-    this.updateMatchResult();
+    if (lastMove.pieceType !== "pawn") return "-";
+
+    const rowDiff = Math.abs(lastMove.to.row - lastMove.from.row);
+    if (rowDiff !== 2) return "-";
+
+    const targetRow = (lastMove.from.row + lastMove.to.row) / 2;
+    const targetCol = lastMove.to.col;
+
+    const file = String.fromCharCode(97 + targetCol);
+    const rank = 8 - targetRow;
+
+    return `${file}${rank}`;
+  }
+
+  private getCastlingRights(): string {
+    let rights = "";
+
+    if (this.canCastle("white", "kingside")) rights += "K";
+    if (this.canCastle("white", "queenside")) rights += "Q";
+    if (this.canCastle("black", "kingside")) rights += "k";
+    if (this.canCastle("black", "queenside")) rights += "q";
+
+    return rights || "-";
+  }
+
+  private canCastle(color: Side, side: "kingside" | "queenside"): boolean {
+    const row = color === "white" ? 7 : 0;
+    const kingCol = 4;
+    const rookCol = side === "kingside" ? 7 : 0;
+
+    const king = this.board.getPiece({ row, col: kingCol });
+    if (!king || king.type !== "king" || king.color !== color || king.hasMoved) return false;
+
+    const rook = this.board.getPiece({ row, col: rookCol });
+
+    return !(!rook || rook.type !== "rook" || rook.color !== color || rook.hasMoved);
   }
 }
