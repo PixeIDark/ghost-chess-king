@@ -1,4 +1,4 @@
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useSocket, useUserInfo } from "@/contexts/SessionContext";
 import { useChessGame } from "@/pages/game/hooks/useChessGame";
 import { useState } from "react";
@@ -10,8 +10,11 @@ import GameResultModal from "@/pages/game/components/GameResultModal";
 import Square from "@/pages/game/components/Square";
 import { TimerDisplay } from "@/pages/game/components/TimerDisplay";
 import PromotionModal from "@/pages/game/components/PromotionModal.tsx";
+import { links } from "@/route/routes.constant.ts";
 
+// TODO: 에러바인딩, 디자인부터 해보자. 디자인은 GamePage 복붙한 컴포넌트 만들어서 돌려쓰거나, 얘 그대로 쓰자
 function GamePage() {
+  const navigate = useNavigate();
   const { roomId } = useParams() as { roomId: string };
   const socket = useSocket();
   const { isRegistered } = useUserInfo();
@@ -47,17 +50,44 @@ function GamePage() {
   const boardViewModel = createBoardViewModel(gameState.board, validMoves, fromSquare);
 
   return (
-    <div className="flex w-full flex-col items-center">
-      <button type="button" onClick={handleLeaveGame} className="h-6 w-10">
-        leave
-      </button>
-      <div>현재 턴: {gameState.currentTurn === "white" ? "백" : "흑"}</div>
-      <div>내 진영: {mySide === "white" ? "백" : "흑"}</div>
-      <div>상태: {gameState.matchResult}</div>
+    <div className="flex min-h-screen w-full flex-col items-center bg-gradient-to-b from-neutral-100 to-neutral-200 px-4 py-6">
+      <header className="mb-6 flex w-full max-w-[640px] items-center justify-between">
+        <button
+          type="button"
+          onClick={handleLeaveGame}
+          className="rounded-lg bg-neutral-800 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-neutral-700 active:scale-95"
+        >
+          나가기
+        </button>
+        <div className="flex items-center gap-3">
+          <span
+            className={`rounded-full px-3 py-1 text-sm font-medium ${mySide === "white" ? "bg-white text-neutral-800 shadow-sm" : "bg-neutral-800 text-white"}`}
+          >
+            내 진영: {mySide === "white" ? "백" : "흑"}
+          </span>
+        </div>
+      </header>
+      <div className="mb-4 flex items-center gap-2">
+        <span
+          className={`inline-flex h-3 w-3 rounded-full ${gameState.currentTurn === "white" ? "bg-white shadow-inner ring-1 ring-neutral-300" : "bg-neutral-800"}`}
+        />
+        <span className="text-sm font-medium text-neutral-600">
+          현재 턴: {gameState.currentTurn === "white" ? "백" : "흑"}
+        </span>
+        <span className="ml-2 rounded bg-neutral-200 px-2 py-0.5 text-xs font-medium text-neutral-500">
+          {gameState.matchResult}
+        </span>
+      </div>
       {gameResult && isOpen && (
-        <GameResultModal gameResult={gameResultViewModel as GameResultViewModel} onClose={() => setIsOpen(false)} />
+        <GameResultModal
+          gameResult={gameResultViewModel as GameResultViewModel}
+          onClose={() => {
+            setIsOpen(false);
+            navigate(links.lobby());
+          }}
+        />
       )}
-      <div className="grid aspect-square w-full max-w-[640px] min-w-[160px] grid-cols-8 grid-rows-8">
+      <div className="grid aspect-square w-full max-w-[640px] min-w-[160px] grid-cols-8 grid-rows-8 overflow-hidden rounded-xl shadow-lg ring-1 ring-neutral-300">
         {boardViewModel.flat().map((square) => (
           <Square
             key={square.id}
