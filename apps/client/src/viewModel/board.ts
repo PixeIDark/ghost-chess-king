@@ -1,5 +1,5 @@
 import type { SquareState, BoardViewModel } from "@/types/viewModel";
-import { BoardDTO, Position, isSamePosition, Move } from "@ghost-chess-king/shared";
+import { BoardDTO, Position, isSamePosition } from "@ghost-chess-king/shared";
 
 const getSquareState = (
   isValidMove: boolean,
