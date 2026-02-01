@@ -12,7 +12,6 @@ export class StandardBoard extends ChessBoard {
     this.boardEntity = this.createInitialBoard();
   }
 
-  // TODO: 승격 테스트를 위해 초기 상태를 이렇게함. 추후 유저 프로모션 구현완료 시 교체예정
   private createInitialBoard(): BoardEntity {
     const board: BoardEntity = Array.from({ length: 8 }, () => Array(8).fill(null));
 

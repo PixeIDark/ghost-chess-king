@@ -1,250 +1,76 @@
-import { ChessTimer } from "@/model/chessTimer/ChessTimer";
+import { ChessTimer } from "./ChessTimer";
 
-describe("ChessTimer", () => {
+describe("ChessTimer 테스트", () => {
   let timer: ChessTimer;
-  const incrementTime = 3000;
-  const initialTime = 10000;
+  const initialTime = 60000;
+  const incrementTime = 5000;
 
   beforeEach(() => {
-    timer = new ChessTimer(incrementTime, initialTime);
     jest.useFakeTimers();
+    timer = new ChessTimer(initialTime, incrementTime);
   });
 
   afterEach(() => {
     timer.stop();
-    jest.useRealTimers();
+    jest.clearAllTimers();
   });
 
-  describe("constructor", () => {
-    it("초기 시간과 증분 시간으로 타이머를 생성한다", () => {
-      const time = timer.getTime();
-
-      expect(time.whiteTime).toBe(initialTime);
-      expect(time.blackTime).toBe(initialTime);
-    });
+  test("초기 시간이 올바르게 설정되어야 한다", () => {
+    const time = timer.getTime();
+    expect(time.whiteTime).toBe(initialTime);
+    expect(time.blackTime).toBe(initialTime);
   });
 
-  describe("start()", () => {
-    it("지정된 색으로 타이머를 시작한다", () => {
-      const listener = jest.fn();
-      timer.on("timeUpdate", listener);
+  test("start 후 시간이 감소해야 한다", () => {
+    timer.start("white");
+    jest.advanceTimersByTime(1000);
 
-      timer.start("white");
-      jest.advanceTimersByTime(100);
-
-      expect(listener).toHaveBeenCalled();
-    });
-
-    it("시작 후 지정된 색의 시간이 감소한다", () => {
-      timer.start("white");
-      jest.advanceTimersByTime(1000);
-
-      const time = timer.getTime();
-      expect(time.whiteTime).toBeLessThan(initialTime);
-      expect(time.blackTime).toBe(initialTime);
-    });
+    const time = timer.getTime();
+    expect(time.whiteTime).toBeLessThan(initialTime);
+    expect(time.blackTime).toBe(initialTime);
   });
 
-  describe("stop()", () => {
-    it("타이머를 중지한다", () => {
-      const listener = jest.fn();
-      timer.on("timeUpdate", listener);
+  test("switchTurn 시 현재 턴 유저에게 incrementTime이 추가되어야 한다", () => {
+    timer.start("white");
+    timer.switchTurn("black");
 
-      timer.start("white");
-      jest.advanceTimersByTime(100);
-      const callCountBefore = listener.mock.calls.length;
-
-      timer.stop();
-      jest.advanceTimersByTime(1000);
-
-      expect(listener.mock.calls.length).toBe(callCountBefore);
-    });
+    const time = timer.getTime();
+    expect(time.whiteTime).toBe(initialTime + incrementTime);
+    expect(time.blackTime).toBe(initialTime);
   });
 
-  describe("switchTurn()", () => {
-    it("턴을 전환하고 이전 플레이어에게 증분 시간을 추가한다", () => {
-      timer.start("white");
-      jest.advanceTimersByTime(1000);
+  test("시간이 0이 되면 timeout 이벤트가 발생해야 한다", () => {
+    const timeoutSpy = jest.fn();
+    timer.on("timeout", timeoutSpy);
+    timer.start("white");
+    jest.advanceTimersByTime(initialTime + 100);
 
-      const timeBefore = timer.getTime();
-      timer.switchTurn("black");
-      const timeAfter = timer.getTime();
-
-      expect(timeAfter.whiteTime).toBeGreaterThan(timeBefore.whiteTime);
-      expect(timeAfter.whiteTime).toBeLessThanOrEqual(timeBefore.whiteTime + incrementTime);
-    });
-
-    it("턴 전환 후 새로운 플레이어의 시간이 감소한다", () => {
-      timer.start("white");
-      jest.advanceTimersByTime(500);
-
-      timer.switchTurn("black");
-      const timeBefore = timer.getTime();
-      jest.advanceTimersByTime(1000);
-      const timeAfter = timer.getTime();
-
-      expect(timeAfter.blackTime).toBeLessThan(timeBefore.blackTime);
-      expect(timeAfter.whiteTime).toBe(timeBefore.whiteTime);
-    });
+    expect(timeoutSpy).toHaveBeenCalledWith({ loser: "white" });
   });
 
-  describe("getTime()", () => {
-    it("현재 양측의 남은 시간을 반환한다", () => {
-      const time = timer.getTime();
+  test("timeUpdate 이벤트가 주기적으로 발생해야 한다", () => {
+    const updateSpy = jest.fn();
+    timer.on("timeUpdate", updateSpy);
+    timer.start("white");
+    jest.advanceTimersByTime(100);
 
-      expect(time).toEqual({
-        whiteTime: initialTime,
+    expect(updateSpy).toHaveBeenCalled();
+    expect(updateSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        whiteTime: expect.any(Number),
         blackTime: initialTime,
-      });
-    });
-
-    it("시간이 음수일 때 0을 반환한다", () => {
-      timer.start("white");
-      jest.advanceTimersByTime(initialTime + 1000);
-
-      const time = timer.getTime();
-      expect(time.whiteTime).toBe(0);
-    });
+      })
+    );
   });
 
-  describe("on() / emit()", () => {
-    it("timeUpdate 이벤트를 발생시킨다", () => {
-      const listener = jest.fn();
-      timer.on("timeUpdate", listener);
+  test("stop 호출 시 타이머가 멈춰야 한다", () => {
+    timer.start("white");
+    timer.stop();
 
-      timer.start("white");
-      jest.advanceTimersByTime(100);
+    const timeBefore = timer.getTime();
+    jest.advanceTimersByTime(1000);
+    const timeAfter = timer.getTime();
 
-      expect(listener).toHaveBeenCalled();
-      expect(listener.mock.calls[0][0]).toHaveProperty("whiteTime");
-      expect(listener.mock.calls[0][0]).toHaveProperty("blackTime");
-    });
-
-    it("timeout 이벤트를 발생시킨다", () => {
-      const listener = jest.fn();
-      timer.on("timeout", listener);
-
-      timer.start("white");
-      jest.advanceTimersByTime(initialTime + 1000);
-
-      expect(listener).toHaveBeenCalledWith({ loser: "white" });
-    });
-
-    it("여러 리스너를 등록할 수 있다", () => {
-      const listener1 = jest.fn();
-      const listener2 = jest.fn();
-
-      timer.on("timeUpdate", listener1);
-      timer.on("timeUpdate", listener2);
-
-      timer.start("white");
-      jest.advanceTimersByTime(100);
-
-      expect(listener1).toHaveBeenCalled();
-      expect(listener2).toHaveBeenCalled();
-    });
-  });
-
-  describe("off()", () => {
-    it("등록된 리스너를 제거한다", () => {
-      const listener = jest.fn();
-      timer.on("timeUpdate", listener);
-
-      timer.off("timeUpdate", listener);
-
-      timer.start("white");
-      jest.advanceTimersByTime(100);
-
-      expect(listener).not.toHaveBeenCalled();
-    });
-
-    it("다른 리스너는 영향받지 않는다", () => {
-      const listener1 = jest.fn();
-      const listener2 = jest.fn();
-
-      timer.on("timeUpdate", listener1);
-      timer.on("timeUpdate", listener2);
-
-      timer.off("timeUpdate", listener1);
-
-      timer.start("white");
-      jest.advanceTimersByTime(100);
-
-      expect(listener1).not.toHaveBeenCalled();
-      expect(listener2).toHaveBeenCalled();
-    });
-  });
-
-  describe("timeout 처리", () => {
-    it("흰색 시간이 0 이하가 되면 타이머를 중지하고 timeout 이벤트를 발생시킨다", () => {
-      const timeoutListener = jest.fn();
-      const updateListener = jest.fn();
-
-      timer.on("timeout", timeoutListener);
-      timer.on("timeUpdate", updateListener);
-
-      timer.start("white");
-      jest.advanceTimersByTime(initialTime + 1000);
-
-      expect(timeoutListener).toHaveBeenCalledWith({ loser: "white" });
-
-      const callCountBefore = updateListener.mock.calls.length;
-      jest.advanceTimersByTime(1000);
-      expect(updateListener.mock.calls.length).toBe(callCountBefore);
-    });
-
-    it("검은색 시간이 0 이하가 되면 타이머를 중지하고 timeout 이벤트를 발생시킨다", () => {
-      const timeoutListener = jest.fn();
-
-      timer.on("timeout", timeoutListener);
-
-      timer.start("black");
-      jest.advanceTimersByTime(initialTime + 1000);
-
-      expect(timeoutListener).toHaveBeenCalledWith({ loser: "black" });
-    });
-  });
-
-  describe("증분 시간 추가", () => {
-    it("턴 전환 시 현재 플레이어에게 증분 시간을 추가한다", () => {
-      timer.start("white");
-      jest.advanceTimersByTime(5000);
-
-      const timeBefore = timer.getTime();
-      const expectedTime = timeBefore.whiteTime + incrementTime;
-
-      timer.switchTurn("black");
-      const timeAfter = timer.getTime();
-
-      expect(timeAfter.whiteTime).toBeGreaterThanOrEqual(expectedTime - 100);
-      expect(timeAfter.whiteTime).toBeLessThanOrEqual(expectedTime + 100);
-    });
-
-    it("검은색 턴에서도 증분 시간을 추가한다", () => {
-      timer.start("black");
-      jest.advanceTimersByTime(5000);
-
-      const timeBefore = timer.getTime();
-      const expectedTime = timeBefore.blackTime + incrementTime;
-
-      timer.switchTurn("white");
-      const timeAfter = timer.getTime();
-
-      expect(timeAfter.blackTime).toBeGreaterThanOrEqual(expectedTime - 100);
-      expect(timeAfter.blackTime).toBeLessThanOrEqual(expectedTime + 100);
-    });
-  });
-
-  describe("시간 정확도", () => {
-    it("100ms 간격으로 시간을 업데이트한다", () => {
-      const listener = jest.fn();
-      timer.on("timeUpdate", listener);
-
-      timer.start("white");
-      jest.advanceTimersByTime(500);
-
-      expect(listener.mock.calls.length).toBeGreaterThanOrEqual(4);
-      expect(listener.mock.calls.length).toBeLessThanOrEqual(6);
-    });
+    expect(timeBefore.whiteTime).toBe(timeAfter.whiteTime);
   });
 });

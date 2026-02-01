@@ -79,7 +79,6 @@ export class Chess implements IChess {
       color: piece.color,
       capturedPieceId: capturedPiece?.id.toString(),
       promotion: promoteTo,
-      // TODO: 객체 형식의 프로퍼티 spectialRules를 만들고 거기서 이제 enum으로 정의된스페셜 룰을 할당하고 객체 리터럴로 값을 참조해보자
       isEnPassant: specialRule === "en-passant",
       isCastle: specialRule === "castling-kingside" || specialRule === "castling-queenside",
       timestamp: Date.now(),
