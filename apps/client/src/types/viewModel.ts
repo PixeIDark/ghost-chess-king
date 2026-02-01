@@ -1,6 +1,6 @@
 import { Cell, Position } from "@ghost-chess-king/shared";
 
-export type SquareState = "selected" | "moved" | "kingInChecked" | "none";
+export type SquareState = "selected" | "moved" | "kingInChecked" | "latest" | "none";
 
 export interface SquareViewModel {
   id: string;
