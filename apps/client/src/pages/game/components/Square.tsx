@@ -1,9 +1,10 @@
 import { Cell, Position, Side } from "@ghost-chess-king/shared";
+import { SquareState } from "@/types/viewModel.ts";
 
 interface SquareProps {
   position: Position;
   cell: Cell;
-  state: "selected" | "moved" | "kingInChecked" | "none";
+  state: SquareState;
   onSquareClick: (position: Position, color: Side | undefined) => void;
 }
 
@@ -38,8 +39,9 @@ const SQUARE_STYLES = {
   selected: "ring-4 ring-inset ring-blue-400",
   moved: "ring-4 ring-inset ring-green-400",
   kingInChecked: "ring-4 ring-inset ring-red-500",
+  latest: "ring-4 ring-inset ring-yellow-400",
   none: "",
-} as const;
+} as const satisfies Record<SquareState, string>;
 
 function Square({ position, cell, state, onSquareClick }: SquareProps) {
   const { row, col } = position;

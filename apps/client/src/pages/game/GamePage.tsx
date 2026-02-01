@@ -12,8 +12,6 @@ import { TimerDisplay } from "@/pages/game/components/TimerDisplay";
 import PromotionModal from "@/pages/game/components/PromotionModal.tsx";
 import { links } from "@/route/routes.constant.ts";
 
-// TODO: 체크 당하면 빨간색 보더, 마지막으로 움직인 기물은 전 위치와 현재위치 주황색 보더
-// 1. gameState 프로퍼티인 isCheck 대신에 checkPosition을 반환할까?
 function GamePage() {
   const navigate = useNavigate();
   const { roomId } = useParams() as { roomId: string };
@@ -47,10 +45,16 @@ function GamePage() {
 
   if (!gameState) return <div>게임 로딩 중...</div>;
 
-  console.log(gameState);
-
   const gameResultViewModel = gameResult ? createGameResultViewModel(gameResult, mySide) : null;
-  const boardViewModel = createBoardViewModel(gameState.board, validMoves, fromSquare, gameState.checkPosition);
+  const lastMove = gameState.moveHistory.at(-1);
+  const lastMoveSquares = lastMove ? [lastMove.from, lastMove.to] : [];
+  const boardViewModel = createBoardViewModel(
+    gameState.board,
+    validMoves,
+    fromSquare,
+    gameState.checkPosition,
+    lastMoveSquares
+  );
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-gradient-to-b from-neutral-100 to-neutral-200 px-4 py-6">
