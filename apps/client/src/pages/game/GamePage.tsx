@@ -90,6 +90,7 @@ function GamePage() {
           gameResult={gameResultViewModel as GameResultViewModel}
           onClose={() => {
             setIsOpen(false);
+            handleLeaveGame();
             navigate(links.lobby());
           }}
         />
