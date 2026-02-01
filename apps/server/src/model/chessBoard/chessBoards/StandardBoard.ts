@@ -1,4 +1,4 @@
-import { BoardEntity, Position } from "@ghost-chess-king/shared";
+import { BoardEntity, Position, Side } from "@ghost-chess-king/shared";
 import { PieceFactory } from "@/model/piece";
 import { ChessBoard } from "@/model/chessBoard";
 
@@ -15,20 +15,27 @@ export class StandardBoard extends ChessBoard {
   private createInitialBoard(): BoardEntity {
     const board: BoardEntity = Array.from({ length: 8 }, () => Array(8).fill(null));
 
-    board[0][0] = PieceFactory.create("rook", "black", { row: 0, col: 0 });
-    board[0][4] = PieceFactory.create("king", "black", { row: 0, col: 4 });
-    board[0][7] = PieceFactory.create("rook", "black", { row: 0, col: 7 });
-    for (let i = 0; i < 8; i++) {
-      board[1][i] = PieceFactory.create("pawn", "black", { row: 1, col: i });
-    }
-    board[1][2] = PieceFactory.create("pawn", "white", { row: 1, col: 2 });
-    for (let i = 0; i < 8; i++) {
-      board[6][i] = PieceFactory.create("pawn", "white", { row: 6, col: i });
-    }
-    board[6][2] = PieceFactory.create("pawn", "black", { row: 6, col: 2 });
-    board[7][0] = PieceFactory.create("rook", "white", { row: 7, col: 0 });
-    board[7][4] = PieceFactory.create("king", "white", { row: 7, col: 4 });
-    board[7][7] = PieceFactory.create("rook", "white", { row: 7, col: 7 });
+    const createRow = (row: number, color: Side) => {
+      board[row][0] = PieceFactory.create("rook", color, { row, col: 0 });
+      board[row][1] = PieceFactory.create("knight", color, { row, col: 1 });
+      board[row][2] = PieceFactory.create("bishop", color, { row, col: 2 });
+      board[row][3] = PieceFactory.create("queen", color, { row, col: 3 });
+      board[row][4] = PieceFactory.create("king", color, { row, col: 4 });
+      board[row][5] = PieceFactory.create("bishop", color, { row, col: 5 });
+      board[row][6] = PieceFactory.create("knight", color, { row, col: 6 });
+      board[row][7] = PieceFactory.create("rook", color, { row, col: 7 });
+    };
+
+    const pawnRow = (row: number, color: Side) => {
+      for (let col = 0; col < 8; col++) {
+        board[row][col] = PieceFactory.create("pawn", color, { row, col });
+      }
+    };
+
+    createRow(0, "black");
+    pawnRow(1, "black");
+    pawnRow(6, "white");
+    createRow(7, "white");
 
     return board;
   }
