@@ -12,7 +12,7 @@ export interface IChessBoard {
   applySpecialRule(type: string, from: Position, to: Position): void;
   promotePiece(position: Position, pieceType: PromotionPieceName): void;
   clone(): IChessBoard;
-  findKing(color: Side): Position | undefined;
+  findKing(color: Side): Position | null;
   getAllPieces(color: Side): IPiece[];
   getAttackedPositions(color: Side): Position[];
   isPositionUnderAttack(position: Position, byColor: Side): boolean;

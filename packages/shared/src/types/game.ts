@@ -1,4 +1,4 @@
-import { BoardDTO, Move, Side } from "./chess";
+import { BoardDTO, Move, Position, Side } from "./chess";
 import { IPieceData } from "./models";
 
 export type GameMode = "ai" | "pvp";
@@ -17,7 +17,7 @@ export type MatchResultType =
 export interface GameState {
   readonly currentTurn: Side;
   readonly matchResult: MatchResultType;
-  readonly isCheck: boolean;
+  readonly checkPosition: Position | null;
   readonly board: BoardDTO;
   readonly moveHistory: readonly Move[];
   readonly capturedPieces: { white: IPieceData[]; black: IPieceData[] };
