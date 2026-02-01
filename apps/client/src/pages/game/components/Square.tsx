@@ -37,7 +37,7 @@ const PIECE_IMAGES = {
 const SQUARE_STYLES = {
   selected: "ring-4 ring-inset ring-blue-400",
   moved: "ring-4 ring-inset ring-green-400",
-  kingInChecked: "ring-4 ring-inset ring-red-400",
+  kingInChecked: "ring-4 ring-inset ring-red-500",
   none: "",
 } as const;
 

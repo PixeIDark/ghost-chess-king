@@ -170,7 +170,7 @@ export class Chess implements IChess {
     return {
       currentTurn: this.currentTurn,
       matchResult: this.matchResult,
-      isCheck: this.ruler.isInCheck(this.board, this.currentTurn),
+      checkPosition: this.ruler.isInCheck(this.board, this.currentTurn) ? this.board.findKing(this.currentTurn) : null,
       board: this.board.toDto(),
       moveHistory: [...this.moveHistory],
       capturedPieces: { white: [], black: [] },

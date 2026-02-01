@@ -12,19 +12,21 @@ const getSquareState = (isValidMove: boolean, isSelected: boolean, isKingInCheck
 export const createBoardViewModel = (
   board: BoardDTO,
   validMoves: Position[],
-  fromSquare: Position | null
+  fromSquare: Position | null,
+  checkPostion: Position | null
 ): BoardViewModel => {
   return board.map((row, rowIndex) => {
     return row.map((cell, colIndex) => {
       const position: Position = { row: rowIndex, col: colIndex };
       const isValidMove = validMoves.some((move) => isSamePosition(move, position));
       const isSelected = fromSquare ? isSamePosition(fromSquare, position) : false;
+      const isKingInCheck = checkPostion ? isSamePosition(position, checkPostion) : false;
 
       return {
         id: `${rowIndex}-${colIndex}`,
         position,
         cell,
-        state: getSquareState(isValidMove, isSelected, false),
+        state: getSquareState(isValidMove, isSelected, isKingInCheck),
       };
     });
   });
