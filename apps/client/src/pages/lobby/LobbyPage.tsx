@@ -6,7 +6,7 @@ import { LobbyGameStart } from "@/pages/lobby/components/LobbyGameStart";
 // 로비에서 채팅 치고, 게임페이지 갓다가 뒤로오면 채팅창 초기화됨. 서버에서 보관해야할듯
 function LobbyPage() {
   return (
-    <div className="flex h-full gap-4 p-4">
+    <div className="flex h-full min-h-0 gap-4 p-4">
       <LobbyUserList />
       <div className="flex w-96 flex-1 flex-col gap-4">
         <LobbyGameStart />

@@ -9,7 +9,7 @@ function LobbyChat() {
   const messagesEndRef = useAutoScroll(messages);
 
   return (
-    <div className="flex flex-1 flex-col rounded-lg border border-gray-700 bg-gray-800">
+    <div className="flex h-full min-h-0 flex-1 flex-col rounded-lg border border-gray-700 bg-gray-800">
       <div className="flex-1 overflow-y-auto p-4">
         {messages.length === 0 ? (
           <p className="text-center text-gray-500">메시지가 없습니다</p>
@@ -17,11 +17,13 @@ function LobbyChat() {
           <ul className="space-y-2">
             {messages.map((msg, index) => (
               <li key={`${msg.odId}-${msg.timestamp}-${index}`} className="flex items-start gap-1">
-                <h3 className="flex shrink-0 items-center gap-1">
-                  <span className="text-xs text-gray-500">[{formatKoreanTime(msg.timestamp)}]</span>
-                  <span className="font-semibold text-blue-400">{msg.nickname}:</span>
-                </h3>
-                <span className="break-all text-gray-300">{msg.message}</span>
+                <div className="text-sm">
+                  <span className="mr-1 inline-block text-xs whitespace-nowrap text-gray-500">
+                    [{formatKoreanTime(msg.timestamp)}]
+                  </span>
+                  <span className="mr-1 inline font-semibold whitespace-nowrap text-blue-400">{msg.nickname}:</span>
+                  <span className="inline break-all text-gray-300">{msg.message}</span>
+                </div>
               </li>
             ))}
             <div ref={messagesEndRef} />
