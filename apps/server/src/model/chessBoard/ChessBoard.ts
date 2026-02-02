@@ -40,9 +40,9 @@ export abstract class ChessBoard implements IChessBoard {
     return piece;
   }
 
-  public findKing(color: Side): Position | undefined {
+  public findKing(color: Side): Position | null {
     const king = this.boardEntity.flat().find((piece) => piece?.color === color && piece.type === "king");
-    return king?.position;
+    return king?.position ?? null;
   }
 
   public getAllPieces(color: Side): IPiece[] {

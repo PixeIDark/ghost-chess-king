@@ -1,18 +1,18 @@
 import {
+  GameResult,
   GameState,
   getOppositeSide,
+  IChess,
   IChessBoard,
   IChessRuler,
   IChessTimer,
   isSamePosition,
   MatchResultType,
   Move,
+  MoveResult,
   Position,
   PromotionPieceName,
   Side,
-  GameResult,
-  IChess,
-  MoveResult,
 } from "@ghost-chess-king/shared";
 
 export class Chess implements IChess {
