@@ -1,4 +1,11 @@
-import { ChatMessage, User, UserInfo } from "@ghost-chess-king/shared";
+import {
+  ChatMessage,
+  NICKNAME_PREFIXES,
+  NICKNAME_PROVINCES,
+  NICKNAME_TITLES,
+  User,
+  UserInfo,
+} from "@ghost-chess-king/shared";
 import { AppServer } from "@/types/socket";
 
 export class LobbyService {
@@ -92,11 +99,12 @@ export class LobbyService {
   }
 
   private generateNickname(): string {
-    const adjectives = ["빠른", "영리한", "대담한", "강한", "똑똑한", "용감한"];
-    const animals = ["독수리", "호랑이", "사자", "여우", "늑대", "곰"];
-    const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-    const animal = animals[Math.floor(Math.random() * animals.length)];
-    const num = Math.floor(Math.random() * 1000);
-    return `${adj}${animal}${num}`;
+    const province = NICKNAME_PROVINCES[Math.floor(Math.random() * NICKNAME_PROVINCES.length)];
+    const prefix = NICKNAME_PREFIXES[Math.floor(Math.random() * NICKNAME_PREFIXES.length)];
+    const title = NICKNAME_TITLES[Math.floor(Math.random() * NICKNAME_TITLES.length)];
+    const nickname = `${province} ${prefix}${title}`;
+
+    if (Array.from(this.users.values()).some((user) => user.nickname === nickname)) return this.generateNickname();
+    else return `${province} ${prefix}${title}`;
   }
 }
