@@ -38,11 +38,11 @@ function LobbyPage() {
         </ul>
       </div>
 
-      <div className="flex flex-1 flex-col gap-4">
+      <div className="flex w-96 flex-1 flex-col gap-4">
         <div className="rounded-lg border border-gray-700 bg-gray-800 p-4">
           <button
             disabled={!isRegistered || !isConnected}
-            className="rounded bg-green-600 px-4 py-2 text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-600"
+            className="cursor-alias rounded bg-green-600 px-4 py-2 text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-600"
             onClick={handleGameStart}
             type="button"
           >
@@ -57,9 +57,12 @@ function LobbyPage() {
             ) : (
               <ul className="space-y-2">
                 {messages.map((msg, index) => (
-                  <li key={`${msg.odId}-${msg.timestamp}-${index}`} className="text-gray-300">
-                    <span className="text-xs text-gray-500">[{formatKoreanTime(msg.timestamp)}]</span>{" "}
-                    <span className="font-semibold text-blue-400">{msg.nickname}</span>: {msg.message}
+                  <li key={`${msg.odId}-${msg.timestamp}-${index}`} className="flex items-start gap-1">
+                    <h3 className="flex shrink-0 items-center gap-1">
+                      <span className="text-xs text-gray-500">[{formatKoreanTime(msg.timestamp)}]</span>
+                      <span className="font-semibold text-blue-400">{msg.nickname}:</span>
+                    </h3>
+                    <span className="break-all text-gray-300">{msg.message}</span>
                   </li>
                 ))}
                 <div ref={messagesEndRef} />
@@ -80,7 +83,7 @@ function LobbyPage() {
             <button
               onClick={sendMessage}
               disabled={!isRegistered || !isConnected || !inputMessage.trim()}
-              className="rounded bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-600"
+              className="cursor-alias rounded bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-600"
               type="button"
             >
               전송
