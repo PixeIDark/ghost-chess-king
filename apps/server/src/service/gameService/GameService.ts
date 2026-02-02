@@ -1,6 +1,6 @@
 import { ChessTimer } from "@/model/chessTimer";
 import { AppServer } from "@/types/socket";
-import { GameMode, GameRoom, Side, Position, GameResult, PromotionPieceName } from "@ghost-chess-king/shared";
+import { GameMode, GameResult, GameRoom, Position, PromotionPieceName, Side } from "@ghost-chess-king/shared";
 import { StandardRuler } from "@/model/chessRuler";
 import { StandardBoard } from "@/model/chessBoard";
 import { Chess } from "@/model/chess";
@@ -35,15 +35,13 @@ export class GameService implements IGameService {
     const board = new StandardBoard();
     const chess = new Chess(ruler, timer, board);
 
-    timer.on("timeUpdate", (data) => {
+    chess.on("timeUpdate", (data) => {
       this.io.to(roomId).emit("time-update", data);
     });
 
-    timer.on("timeout", (data) => {
+    chess.on("gameOver", (result) => {
       const room = this.rooms.get(roomId);
       if (!room) return;
-
-      const result = chess.timeout(data.loser);
       this.handleGameOver(roomId, room, result);
     });
 

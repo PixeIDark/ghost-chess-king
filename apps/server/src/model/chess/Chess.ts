@@ -13,9 +13,19 @@ import {
   Position,
   PromotionPieceName,
   Side,
+  TimerEventMap,
 } from "@ghost-chess-king/shared";
+import { EventManager } from "@ghost-chess-king/shared/src/utils/EventManager";
 
-export class Chess implements IChess {
+export type ChessEventMap = {
+  timeUpdate: TimerEventMap["timeUpdate"];
+  timeout: TimerEventMap["timeout"];
+  gameOver: GameResult;
+  check: { position: Position };
+  moveExecuted: { move: Move; state: GameState };
+};
+
+export class Chess extends EventManager<ChessEventMap> implements IChess {
   public readonly ruler: IChessRuler;
   public readonly timer: IChessTimer;
   public board: IChessBoard;
@@ -23,8 +33,11 @@ export class Chess implements IChess {
   public moveHistory: Move[];
   public matchResult: MatchResultType;
   private boardHistory: IChessBoard[];
+  private handleTimeUpdate: (data: TimerEventMap["timeUpdate"]) => void;
+  private handleTimeout: (data: TimerEventMap["timeout"]) => void;
 
   constructor(ruler: IChessRuler, timer: IChessTimer, board: IChessBoard) {
+    super();
     this.ruler = ruler;
     this.timer = timer;
     this.board = board;
@@ -32,6 +45,22 @@ export class Chess implements IChess {
     this.moveHistory = [];
     this.matchResult = "PLAYING";
     this.boardHistory = [];
+
+    this.handleTimeUpdate = (data) => {
+      this.emit("timeUpdate", data);
+    };
+
+    this.handleTimeout = (data) => {
+      const result = this.timeout(data.loser);
+      this.emit("gameOver", result);
+    };
+
+    this.setupTimerEvents();
+  }
+
+  private setupTimerEvents(): void {
+    this.timer.on("timeUpdate", this.handleTimeUpdate);
+    this.timer.on("timeout", this.handleTimeout);
   }
 
   public startGame(): void {
@@ -101,6 +130,18 @@ export class Chess implements IChess {
     this.timer.switchTurn(getOppositeSide(this.currentTurn));
     this.currentTurn = getOppositeSide(this.currentTurn);
 
+    this.emit("moveExecuted", { move, state: this.getGameState() });
+
+    if (this.matchResult === "CHECK") {
+      const checkPos = this.board.findKing(this.currentTurn);
+      if (checkPos) this.emit("check", { position: checkPos });
+    }
+
+    if (this.isGameOver()) {
+      const gameResult = this.getGameResult();
+      if (gameResult) this.emit("gameOver", gameResult);
+    }
+
     return { success: true, specialRule, needsPromotion: false, move };
   }
 
@@ -151,13 +192,17 @@ export class Chess implements IChess {
   public resign(color: Side): GameResult {
     this.matchResult = "RESIGNATION";
     this.timer.stop();
-    return { status: "RESIGNATION", winner: getOppositeSide(color) };
+    const result: GameResult = { status: "RESIGNATION", winner: getOppositeSide(color) };
+    this.emit("gameOver", result);
+    return result;
   }
 
   public acceptDraw(): GameResult {
     this.matchResult = "DRAW_AGREEMENT";
     this.timer.stop();
-    return { status: "DRAW_AGREEMENT", winner: "DRAW" };
+    const result: GameResult = { status: "DRAW_AGREEMENT", winner: "DRAW" };
+    this.emit("gameOver", result);
+    return result;
   }
 
   public timeout(loser: Side): GameResult {
@@ -195,6 +240,20 @@ export class Chess implements IChess {
 
     this.timer.switchTurn(getOppositeSide(this.currentTurn));
     this.currentTurn = getOppositeSide(this.currentTurn);
+
+    this.emit("moveExecuted", { move: this.moveHistory[this.moveHistory.length - 1], state: this.getGameState() });
+
+    if (this.isGameOver()) {
+      const gameResult = this.getGameResult();
+      if (gameResult) this.emit("gameOver", gameResult);
+    }
+  }
+
+  public destroy(): void {
+    this.timer.off("timeUpdate", this.handleTimeUpdate);
+    this.timer.off("timeout", this.handleTimeout);
+    this.timer.stop();
+    this.clear();
   }
 
   public getFen(): string {
