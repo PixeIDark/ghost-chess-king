@@ -1,12 +1,12 @@
 import { v4 as uuidv4 } from "uuid";
 import { LobbyService } from "@/service/LobbyService";
 import {
-  RegisterData,
   GetValidMovesData,
-  MoveData,
-  ResignData,
   LeaveGameData,
+  MoveData,
+  RegisterData,
   RejoinGameData,
+  ResignData,
   SelectPromotionData,
 } from "@ghost-chess-king/shared";
 import { AppServer, ServerSocket } from "@/types/socket";
@@ -225,19 +225,18 @@ export class SocketController {
     const user = this.lobbyService.getUserBySocketId(socket.id);
     if (!user) return;
 
-    setTimeout(
-      () => {
-        const currentUser = this.lobbyService.getUser(user.odId);
-        if (currentUser && currentUser.socketId === socket.id) {
-          if (currentUser.currentRoomId) {
-            this.gameService.leaveRoom(currentUser.currentRoomId, user.odId);
-          }
-          this.lobbyService.removeUser(user.odId);
-          this.gameService.removeSocketId(user.odId);
+    const DISCONNECT_TIMEOUT = process.env.NODE_ENV === "development" ? 5000 : 5 * 60 * 1000;
+
+    setTimeout(() => {
+      const currentUser = this.lobbyService.getUser(user.odId);
+      if (currentUser && currentUser.socketId === socket.id) {
+        if (currentUser.currentRoomId) {
+          this.gameService.leaveRoom(currentUser.currentRoomId, user.odId);
         }
-      },
-      5 * 60 * 1000
-    );
+        this.lobbyService.removeUser(user.odId);
+        this.gameService.removeSocketId(user.odId);
+      }
+    }, DISCONNECT_TIMEOUT);
   }
 
   private handleSelectPromotion(socket: ServerSocket, { roomId, position, piece }: SelectPromotionData) {
