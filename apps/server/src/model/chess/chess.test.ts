@@ -1,5 +1,5 @@
 import { Chess } from "./Chess";
-import { IChessBoard, IChessRuler, IChessTimer, IPiece, Position, Move } from "@ghost-chess-king/shared";
+import { IChessBoard, IChessRuler, IChessTimer, IPiece, Move, Position } from "@ghost-chess-king/shared";
 
 describe("Chess 클래스 테스트", () => {
   let chess: Chess;
@@ -23,6 +23,8 @@ describe("Chess 클래스 테스트", () => {
       stop: jest.fn(),
       switchTurn: jest.fn(),
       getTime: jest.fn().mockReturnValue({ whiteTime: 60000, blackTime: 60000 }),
+      on: jest.fn(),
+      off: jest.fn(),
     } as unknown as jest.Mocked<IChessTimer>;
 
     mockBoard = {
@@ -32,10 +34,20 @@ describe("Chess 클래스 테스트", () => {
       clone: jest.fn(),
       clear: jest.fn(),
       toDto: jest.fn(),
+      findKing: jest.fn(),
       toBoardString: jest.fn().mockReturnValue("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"),
     } as unknown as jest.Mocked<IChessBoard>;
 
     chess = new Chess(mockRuler, mockTimer, mockBoard);
+  });
+
+  afterEach(() => {
+    chess.destroy();
+  });
+
+  test("생성자에서 타이머 이벤트를 구독해야 한다", () => {
+    expect(mockTimer.on).toHaveBeenCalledWith("timeUpdate", expect.any(Function));
+    expect(mockTimer.on).toHaveBeenCalledWith("timeout", expect.any(Function));
   });
 
   test("startGame 호출 시 타이머가 시작되어야 한다", () => {
@@ -74,6 +86,24 @@ describe("Chess 클래스 테스트", () => {
       expect(chess.currentTurn).toBe("black");
     });
 
+    test("성공적인 이동 시 moveExecuted 이벤트가 발생해야 한다", () => {
+      mockBoard.getPiece.mockReturnValue(mockPiece);
+      mockRuler.getValidMoves.mockReturnValue([to]);
+      mockBoard.clone.mockReturnValue(mockBoard);
+
+      const moveExecutedHandler = jest.fn();
+      chess.on("moveExecuted", moveExecutedHandler);
+
+      chess.executeMove(from, to);
+
+      expect(moveExecutedHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          move: expect.objectContaining({ from, to }),
+          state: expect.any(Object),
+        })
+      );
+    });
+
     test("승격이 필요한 경우 success가 false이고 needsPromotion이 true여야 한다", () => {
       mockBoard.getPiece.mockReturnValue(mockPiece);
       mockRuler.getValidMoves.mockReturnValue([to]);
@@ -84,6 +114,21 @@ describe("Chess 클래스 테스트", () => {
 
       expect(result.success).toBe(false);
       expect(result.needsPromotion).toBe(true);
+    });
+
+    test("체크 상태일 때 check 이벤트가 발생해야 한다", () => {
+      mockBoard.getPiece.mockReturnValue(mockPiece);
+      mockRuler.getValidMoves.mockReturnValue([to]);
+      mockRuler.isInCheck.mockReturnValue(true);
+      mockBoard.clone.mockReturnValue(mockBoard);
+      mockBoard.findKing.mockReturnValue({ row: 0, col: 4 });
+
+      const checkHandler = jest.fn();
+      chess.on("check", checkHandler);
+
+      chess.executeMove(from, to);
+
+      expect(checkHandler).toHaveBeenCalledWith({ position: { row: 0, col: 4 } });
     });
   });
 
@@ -99,6 +144,20 @@ describe("Chess 클래스 테스트", () => {
       expect(chess.matchResult).toBe("CHECKMATE");
       expect(chess.isGameOver()).toBe(true);
       expect(chess.getGameResult()).toEqual({ status: "CHECKMATE", winner: "white" });
+    });
+
+    test("체크메이트 시 gameOver 이벤트가 발생해야 한다", () => {
+      mockBoard.getPiece.mockReturnValue({ id: 1, type: "queen", color: "white" } as IPiece);
+      mockRuler.getValidMoves.mockReturnValue([{ row: 0, col: 0 }]);
+      mockRuler.isCheckmate.mockReturnValue(true);
+      mockBoard.clone.mockReturnValue(mockBoard);
+
+      const gameOverHandler = jest.fn();
+      chess.on("gameOver", gameOverHandler);
+
+      chess.executeMove({ row: 1, col: 0 }, { row: 0, col: 0 });
+
+      expect(gameOverHandler).toHaveBeenCalledWith({ status: "CHECKMATE", winner: "white" });
     });
 
     test("undoMove 호출 시 이전 보드 상태로 복구되어야 한다", () => {
@@ -140,10 +199,53 @@ describe("Chess 클래스 테스트", () => {
     });
   });
 
-  test("resign 호출 시 상대방이 승리해야 한다", () => {
-    const result = chess.resign("white");
-    expect(result.winner).toBe("black");
-    expect(chess.matchResult).toBe("RESIGNATION");
-    expect(mockTimer.stop).toHaveBeenCalled();
+  describe("resign 테스트", () => {
+    test("resign 호출 시 상대방이 승리해야 한다", () => {
+      const result = chess.resign("white");
+      expect(result.winner).toBe("black");
+      expect(chess.matchResult).toBe("RESIGNATION");
+      expect(mockTimer.stop).toHaveBeenCalled();
+    });
+
+    test("resign 호출 시 gameOver 이벤트가 발생해야 한다", () => {
+      const gameOverHandler = jest.fn();
+      chess.on("gameOver", gameOverHandler);
+
+      chess.resign("white");
+
+      expect(gameOverHandler).toHaveBeenCalledWith({ status: "RESIGNATION", winner: "black" });
+    });
+  });
+
+  describe("타이머 이벤트 전달 테스트", () => {
+    test("타이머 timeUpdate 이벤트가 chess timeUpdate로 전달되어야 한다", () => {
+      const timeUpdateHandler = jest.fn();
+      chess.on("timeUpdate", timeUpdateHandler);
+
+      const timeUpdateCallback = mockTimer.on.mock.calls.find((call) => call[0] === "timeUpdate")?.[1];
+      timeUpdateCallback?.({ whiteTime: 50000, blackTime: 60000 });
+
+      expect(timeUpdateHandler).toHaveBeenCalledWith({ whiteTime: 50000, blackTime: 60000 });
+    });
+
+    test("타이머 timeout 이벤트 시 gameOver 이벤트가 발생해야 한다", () => {
+      const gameOverHandler = jest.fn();
+      chess.on("gameOver", gameOverHandler);
+
+      const timeoutCallback = mockTimer.on.mock.calls.find((call) => call[0] === "timeout")?.[1];
+      timeoutCallback?.({ loser: "white" });
+
+      expect(gameOverHandler).toHaveBeenCalledWith({ status: "TIMEOUT", winner: "black" });
+    });
+  });
+
+  describe("destroy 테스트", () => {
+    test("destroy 호출 시 타이머 이벤트 구독이 해제되어야 한다", () => {
+      chess.destroy();
+
+      expect(mockTimer.off).toHaveBeenCalledWith("timeUpdate", expect.any(Function));
+      expect(mockTimer.off).toHaveBeenCalledWith("timeout", expect.any(Function));
+      expect(mockTimer.stop).toHaveBeenCalled();
+    });
   });
 });
