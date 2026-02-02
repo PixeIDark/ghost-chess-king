@@ -6,7 +6,7 @@ import ServerStatus from "@/layouts/ServerStatus.tsx";
 function App() {
   return (
     <SocketProvider>
-      <div className="flex flex-col items-center">
+      <div className="flex h-screen flex-col items-center">
         <ServerStatus />
         <RouterProvider router={router}></RouterProvider>
       </div>
