@@ -1,4 +1,4 @@
-import { useSocket } from "@/contexts/SessionContext";
+import { useSocket } from "@/contexts/SessionContext.tsx";
 import { ChatMessage } from "@ghost-chess-king/shared";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 
