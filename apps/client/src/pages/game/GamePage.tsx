@@ -57,7 +57,7 @@ function GamePage() {
   );
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center bg-gradient-to-b from-neutral-100 to-neutral-200 px-4 py-6">
+    <div className="flex h-full w-full flex-col items-center bg-gradient-to-b from-neutral-100 to-neutral-200 px-4 py-6">
       <header className="mb-6 flex w-full max-w-[640px] items-center justify-between">
         <button
           type="button"
