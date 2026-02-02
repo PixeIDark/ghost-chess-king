@@ -19,5 +19,5 @@
       "@ghost-chess-king/shared": ["../../packages/shared/src/index.ts"]
     }
   },
-  "include": ["src", "vite.config.ts", "../../packages/shared/src"]
+  "include": ["src", "vite.config.ts"],
 }
