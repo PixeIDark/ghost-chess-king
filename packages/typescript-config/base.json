@@ -22,5 +22,6 @@
         "../../packages/shared/src/index.ts"
       ]
     }
-  }
+  },
+  "exclude": ["**/*.test.ts", "**/*.spec.ts"]
 }
