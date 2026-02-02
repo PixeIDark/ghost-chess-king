@@ -10,7 +10,7 @@ import GameResultModal from "@/pages/game/components/GameResultModal";
 import Square from "@/pages/game/components/Square";
 import { TimerDisplay } from "@/pages/game/components/TimerDisplay";
 import PromotionModal from "@/pages/game/components/PromotionModal.tsx";
-import { links } from "@/route/routes.constant.ts";
+import { routes } from "@/route/path.ts";
 
 function GamePage() {
   const navigate = useNavigate();
@@ -91,7 +91,7 @@ function GamePage() {
           onClose={() => {
             setIsOpen(false);
             handleLeaveGame();
-            navigate(links.lobby());
+            navigate(routes.lobby());
           }}
         />
       )}

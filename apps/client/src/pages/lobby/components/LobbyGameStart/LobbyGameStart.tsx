@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import { useServerStatus, useSocket } from "@/contexts/SessionContext.tsx";
 import { GameErrorData, GameStartData } from "@ghost-chess-king/shared";
-import { links } from "@/route/routes.constant.ts";
+import { routes } from "@/route/path.ts";
 
 function LobbyGameStart() {
   const socket = useSocket();
@@ -9,9 +9,9 @@ function LobbyGameStart() {
   const { isConnected, isRegistered } = useServerStatus();
 
   const handleGameStart = () => {
-    socket.once("game-start", (data: GameStartData) => navigate(links.ai(data.roomId)));
+    socket.once("game-start", (data: GameStartData) => navigate(routes.ai(data.roomId)));
     socket.once("error", (data: GameErrorData) => {
-      if (data.roomId) navigate(links.ai(data.roomId));
+      if (data.roomId) navigate(routes.ai(data.roomId));
       else console.error("Duplicated game error");
     });
 

@@ -3,7 +3,7 @@ export const ROUTES = {
   AI: "/ai/:roomId",
 } as const;
 
-export const links = {
+export const routes = {
   lobby: () => "/",
   ai: (roomId: string) => `/ai/${roomId}`,
 } as const;

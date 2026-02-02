@@ -2,6 +2,7 @@ import { LobbyUserList } from "@/pages/lobby/components/LobbyUserList";
 import { LobbyChat } from "@/pages/lobby/components/LobbyChat";
 import { LobbyGameStart } from "@/pages/lobby/components/LobbyGameStart";
 
+// TODO: 게임 시작 버튼 클릭 시 진행중인 게임잇으면 이어하기와 새로하기 만들어보자
 function LobbyPage() {
   return (
     <div className="flex h-full gap-4 p-4">
