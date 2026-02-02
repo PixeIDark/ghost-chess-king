@@ -1,6 +1,6 @@
 import { UserInfo } from "./lobby";
 import { GameMode, GameState, MatchResultType } from "./game";
-import { Side, Position, PromotionPieceName } from "./chess";
+import { Position, PromotionPieceName, Side } from "./chess";
 
 export interface ServerToClientEvents {
   registered: (data: RegisteredData) => void;
@@ -26,6 +26,7 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   register: (data: RegisterData) => void;
   lobbyMessage: (message: string) => void;
+  "request-user-list": () => void;
 
   "challenge-player": (targetOdId: string) => void;
   "start-ai-game": () => void;

@@ -38,6 +38,7 @@ export class SocketController {
     socket.on("leave-game", (data) => this.handleLeaveGame(socket, data));
     socket.on("disconnect", () => this.handleDisconnect(socket));
     socket.on("select-promotion", (data) => this.handleSelectPromotion(socket, data));
+    socket.on("request-user-list", () => this.handleRequestUserList(socket));
   }
 
   private handleRegister(socket: ServerSocket, { odId }: RegisterData) {
@@ -244,5 +245,9 @@ export class SocketController {
     if (!user) return;
 
     this.gameService.executePromotion(roomId, user.odId, position, piece);
+  }
+
+  private handleRequestUserList(socket: ServerSocket) {
+    socket.emit("userList", this.lobbyService.getUserList());
   }
 }
