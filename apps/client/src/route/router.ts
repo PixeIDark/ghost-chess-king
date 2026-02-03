@@ -13,7 +13,7 @@ export const router = createBrowserRouter([
         Component: LobbyPage,
       },
       {
-        path: ROUTES.AI,
+        path: ROUTES.GAME,
         Component: GamePage,
       },
     ],

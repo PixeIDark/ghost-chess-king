@@ -1,9 +1,11 @@
+import { GameMode } from "@ghost-chess-king/shared";
+
 export const ROUTES = {
   LOBBY: "/",
-  AI: "/ai/:roomId",
+  GAME: "/:gameMode/:roomId",
 } as const;
 
 export const routes = {
   lobby: () => "/",
-  ai: (roomId: string) => `/ai/${roomId}`,
+  game: (gameMode: GameMode, roomId: string) => `/${gameMode}/${roomId}`,
 } as const;

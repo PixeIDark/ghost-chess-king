@@ -1,20 +1,10 @@
-import { useNavigate } from "react-router";
 import { useServerStatus, useSocket } from "@/contexts/SessionContext.tsx";
-import { GameErrorData, GameStartData } from "@ghost-chess-king/shared";
-import { routes } from "@/route/path.ts";
 
 function LobbyGameStart() {
   const socket = useSocket();
-  const navigate = useNavigate();
   const { isConnected, isRegistered } = useServerStatus();
 
-  const handleGameStart = () => {
-    socket.once("game-start", (data: GameStartData) => navigate(routes.ai(data.roomId)));
-    socket.once("error", (data: GameErrorData) => {
-      if (data.roomId) navigate(routes.ai(data.roomId));
-      else console.error("Duplicated game error");
-    });
-
+  const handleAiGameStart = () => {
     socket.emit("start-ai-game");
   };
 
@@ -23,7 +13,7 @@ function LobbyGameStart() {
       <button
         disabled={!isRegistered || !isConnected}
         className="cursor-alias rounded bg-green-600 px-4 py-2 text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-600"
-        onClick={handleGameStart}
+        onClick={handleAiGameStart}
         type="button"
       >
         AI 게임 시작
