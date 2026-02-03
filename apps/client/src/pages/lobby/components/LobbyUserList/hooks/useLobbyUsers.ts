@@ -17,5 +17,5 @@ export function useLobbyUsers() {
     };
   }, [socket]);
 
-  return users;
+  return { users };
 }
