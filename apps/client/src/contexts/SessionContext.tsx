@@ -1,9 +1,11 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
-import { loadLocalStorage, RegisteredData, saveLocalStorage } from "@ghost-chess-king/shared";
+import { GameStartData, loadLocalStorage, RegisteredData, saveLocalStorage } from "@ghost-chess-king/shared";
 import { ClientSocket } from "@/types/socket.ts";
 import { config } from "@/config.ts";
+import { useNavigate } from "react-router";
+import { routes } from "@/route/path.ts";
 
 interface SocketContextValue {
   socket: ClientSocket;
@@ -30,6 +32,7 @@ const getOrCreateOdId = (): string => {
 export function SocketProvider({ children }: { children: ReactNode }) {
   const [socket] = useState<ClientSocket>(() => io(config.apiUrl));
   const [odId] = useState(getOrCreateOdId);
+  const navigate = useNavigate();
   const [nickname, setNickname] = useState<string | null>(null);
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
   const [isRegistered, setIsRegistered] = useState(false);
@@ -52,9 +55,16 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       setIsRegistered(true);
     };
 
+    const handleGameStart = (data: GameStartData) => {
+      navigate(routes.game(data.mode, data.roomId), {
+        state: { key: Date.now() }, // TODO: 상태를 초기화 함으로써 상대가 게임 종료 모달이 떠잇어도 새로운 보드판으로 이동하게 하기위함
+      });
+    };
+
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
     socket.on("registered", handleRegistered);
+    socket.on("game-start", handleGameStart);
 
     if (socket.connected) socket.emit("register", { odId });
 
@@ -62,8 +72,9 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       socket.off("connect", handleConnect);
       socket.off("disconnect", handleDisconnect);
       socket.off("registered", handleRegistered);
+      socket.off("game-start", handleGameStart);
     };
-  }, [socket, odId]);
+  }, [socket, odId, navigate]);
 
   return (
     <SessionContext.Provider value={{ socket, odId, nickname, currentRoomId, isRegistered, isConnected }}>
