@@ -8,6 +8,7 @@ interface UseAiParams {
   aiSide: "white" | "black";
   depth: number;
   onAiMove: (from: Position, to: Position, promotionType?: PromotionPieceName | null) => void;
+  enabled: boolean;
 }
 
 const promotionTypes = {
@@ -30,11 +31,11 @@ const convertCastlingMove = (from: Position, to: Position, cols: number): Positi
   else return { row: to.row, col: 0 };
 };
 
-export const useAi = ({ fen, currentTurn, aiSide, depth = 15, onAiMove }: UseAiParams) => {
+export const useAi = ({ fen, currentTurn, aiSide, depth = 15, onAiMove, enabled }: UseAiParams) => {
   const { isReady, getBestMove } = useStockfish();
 
   useEffect(() => {
-    if (!isReady || currentTurn !== aiSide || !fen) return;
+    if (!isReady || currentTurn !== aiSide || !fen || !enabled) return;
 
     let cancelled = false;
 
@@ -63,5 +64,5 @@ export const useAi = ({ fen, currentTurn, aiSide, depth = 15, onAiMove }: UseAiP
     return () => {
       cancelled = true;
     };
-  }, [fen, currentTurn, aiSide, isReady, depth]);
+  }, [fen, currentTurn, aiSide, isReady, depth, enabled]);
 };

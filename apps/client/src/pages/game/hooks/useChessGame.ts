@@ -1,25 +1,31 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { type Socket } from "socket.io-client";
-import type {
+import {
   ClientToServerEvents,
+  GameMode,
   GameOverData,
   GameState,
-  ServerToClientEvents,
-  Side,
+  getOppositeSide,
   Position,
-  ValidMovesData,
   PromotionPieceName,
   PromotionRequiredData,
+  ServerToClientEvents,
+  Side,
+  ValidMovesData,
 } from "@ghost-chess-king/shared";
+import { useAi } from "@/pages/game/hooks/useAi.ts";
+import { routes } from "@/route/path.ts";
 
 interface UseChessGameParams {
   socket: Socket<ServerToClientEvents, ClientToServerEvents>;
   roomId: string;
+  gameMode: GameMode;
   isRegistered: boolean;
+  refreshKey: number;
 }
 
-export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParams) => {
+export const useChessGame = ({ socket, roomId, gameMode, isRegistered, refreshKey }: UseChessGameParams) => {
   const navigate = useNavigate();
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [mySide, setMySide] = useState<Side>("white");
@@ -44,10 +50,11 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
 
     const handleGameOver = (data: GameOverData) => {
       setGameResult(data);
+      socket.emit("leave-game", { roomId });
     };
 
     const handleGameNotFound = () => {
-      navigate("/");
+      navigate(routes.lobby());
     };
 
     const handleValidMoves = (data: ValidMovesData) => {
@@ -75,7 +82,7 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
       socket.off("valid-moves", handleValidMoves);
       socket.off("promotion-required", handlePromotionRequired);
     };
-  }, [socket, isRegistered, roomId, navigate]);
+  }, [socket, isRegistered, roomId, navigate, refreshKey]);
 
   const handleMove = (from: Position, to: Position, promotionType?: PromotionPieceName | null) => {
     socket.emit("move", { roomId, from, to });
@@ -115,6 +122,15 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
     socket.emit("leave-game", { roomId });
   };
 
+  useAi({
+    fen: gameState?.fen ?? "",
+    currentTurn: gameState?.currentTurn ?? "white",
+    aiSide: getOppositeSide(mySide),
+    depth: 15,
+    onAiMove: handleMove,
+    enabled: gameMode === "ai",
+  });
+
   return {
     gameState,
     mySide,
@@ -124,7 +140,6 @@ export const useChessGame = ({ socket, roomId, isRegistered }: UseChessGameParam
     fromSquare,
     isPromotionRequired,
     handleSquareClick,
-    handleMove,
     handleSelectPromotion,
     handleLeaveGame,
   };

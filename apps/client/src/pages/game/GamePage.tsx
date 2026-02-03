@@ -1,9 +1,8 @@
-import { useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { useSocket, useUserInfo } from "@/contexts/SessionContext";
 import { useChessGame } from "@/pages/game/hooks/useChessGame";
 import { useState } from "react";
-import { useAi } from "@/pages/game/hooks/useAi";
-import { getOppositeSide } from "@ghost-chess-king/shared";
+import { GameMode } from "@ghost-chess-king/shared";
 import { createGameResultViewModel, GameResultViewModel } from "@/viewModel/gameResult";
 import { createBoardViewModel } from "@/viewModel/board";
 import GameResultModal from "@/pages/game/components/GameResultModal";
@@ -13,8 +12,9 @@ import PromotionModal from "@/pages/game/components/PromotionModal.tsx";
 import { routes } from "@/route/path.ts";
 
 function GamePage() {
+  const location = useLocation();
   const navigate = useNavigate();
-  const { roomId } = useParams() as { roomId: string };
+  const { gameMode, roomId } = useParams() as { gameMode: GameMode; roomId: string };
   const socket = useSocket();
   const { isRegistered } = useUserInfo();
   const [isOpen, setIsOpen] = useState(true);
@@ -26,21 +26,14 @@ function GamePage() {
     fromSquare,
     isPromotionRequired,
     handleSquareClick,
-    handleMove,
     handleSelectPromotion,
     handleLeaveGame,
   } = useChessGame({
     socket,
     roomId,
+    gameMode,
     isRegistered,
-  });
-
-  useAi({
-    fen: gameState?.fen ?? "",
-    currentTurn: gameState?.currentTurn ?? "white",
-    aiSide: getOppositeSide(mySide),
-    depth: 15,
-    onAiMove: handleMove,
+    refreshKey: location.state?.key,
   });
 
   if (!gameState) return <div>게임 로딩 중...</div>;
@@ -90,7 +83,6 @@ function GamePage() {
           gameResult={gameResultViewModel as GameResultViewModel}
           onClose={() => {
             setIsOpen(false);
-            handleLeaveGame();
             navigate(routes.lobby());
           }}
         />
