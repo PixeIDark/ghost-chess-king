@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { LobbyService } from "@/service/LobbyService";
+import { LobbyService } from "@/service/lobbyService/LobbyService";
 import {
   GetValidMovesData,
   LeaveGameData,
@@ -27,7 +27,7 @@ export class SocketController {
 
   private setupEventListeners(socket: ServerSocket) {
     socket.on("register", (data) => this.handleRegister(socket, data));
-    socket.on("lobbyMessage", (message) => this.handleLobbyMessage(socket, message));
+    socket.on("save-lobby-message", (message) => this.handleSaveLobbyMessage(socket, message));
     socket.on("challenge-player", (targetOdId) => this.handleChallenge(socket, targetOdId));
     socket.on("start-ai-game", () => this.handleStartAiGame(socket));
     socket.on("reconnect-game", () => this.handleReconnect(socket));
@@ -41,7 +41,7 @@ export class SocketController {
     socket.on("request-user-list", () => this.handleRequestUserList(socket));
   }
 
-  private handleRegister(socket: ServerSocket, { odId }: RegisterData) {
+  private async handleRegister(socket: ServerSocket, { odId }: RegisterData) {
     const existingUser = this.lobbyService.getUser(odId);
 
     if (existingUser) {
@@ -73,12 +73,15 @@ export class SocketController {
       socket.emit("registered", { odId, nickname: user.nickname, currentRoomId: null });
     }
     socket.emit("userList", this.lobbyService.getUserList());
+    socket.emit("load-lobby-message", await this.lobbyService.loadLobbyMessageHistory());
   }
 
-  private handleLobbyMessage(socket: ServerSocket, message: string) {
+  private async handleSaveLobbyMessage(socket: ServerSocket, message: string) {
     const user = this.lobbyService.getUserBySocketId(socket.id);
     if (!user) return;
-    this.lobbyService.handleChatMessage(user.odId, message);
+
+    await this.lobbyService.saveLobbyMessage(user.odId, message);
+    this.io.emit("load-lobby-message", await this.lobbyService.loadLobbyMessageHistory());
   }
 
   private handleChallenge(socket: ServerSocket, targetOdId: string) {

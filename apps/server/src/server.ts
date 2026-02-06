@@ -2,10 +2,21 @@ import express from "express";
 import * as http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
-import { ClientToServerEvents, ServerToClientEvents } from "@ghost-chess-king/shared";
+import { ChatMessage, ClientToServerEvents, ServerToClientEvents } from "@ghost-chess-king/shared";
 import { SocketController } from "@/controller/SocketController";
 import { GameService } from "@/service/gameService/GameService";
-import { LobbyService } from "@/service/LobbyService";
+import { LobbyService } from "@/service/lobbyService/LobbyService";
+import { createClient } from "redis";
+import { MessageService } from "@/service/chatService/MessageService";
+
+const redis = createClient({
+  url: "rediss://default:AbxcAAIncDJiZjI3NWU2NDAzZDE0MjlkYjUyN2E2Zjk0MjdmOTdhNnAyNDgyMjA@ace-dane-48220.upstash.io:6379",
+});
+
+redis.on("error", function (err) {
+  throw err;
+});
+await redis.connect();
 
 const app = express();
 const server = http.createServer(app);
@@ -20,7 +31,8 @@ app.use(cors());
 app.use(express.json());
 
 const gameService = new GameService(io);
-const lobbyService = new LobbyService(io);
+const lobbyMessageService = new MessageService<ChatMessage>(redis, "lobby", 1000);
+const lobbyService = new LobbyService(io, lobbyMessageService);
 const socketController = new SocketController(io, gameService, lobbyService);
 socketController.init();
 
