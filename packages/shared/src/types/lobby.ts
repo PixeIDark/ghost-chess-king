@@ -2,7 +2,6 @@ export interface User {
   odId: string;
   socketId: string;
   nickname: string;
-  lastMessageTime: number;
   inGame: boolean;
   currentRoomId: string | null;
 }
@@ -18,5 +17,5 @@ export interface ChatMessage {
   odId: string;
   nickname: string;
   message: string;
-  timestamp: number;
+  timestamp: string;
 }

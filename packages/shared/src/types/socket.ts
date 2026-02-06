@@ -1,4 +1,4 @@
-import { UserInfo } from "./lobby";
+import { ChatMessage, UserInfo } from "./lobby";
 import { GameMode, GameState, MatchResultType } from "./game";
 import { Position, PromotionPieceName, Side } from "./chess";
 
@@ -8,7 +8,7 @@ export interface ServerToClientEvents {
   userConnected: (data: { nickname: string; totalUsers: number }) => void;
   userDisconnected: (data: { totalUsers: number }) => void;
   userList: (users: UserInfo[]) => void;
-  lobbyMessage: (data: { nickname: string; message: string; timestamp: number; odId: string }) => void;
+  "load-lobby-message": (chatHistory: ChatMessage[]) => void;
 
   "game-start": (data: GameStartData) => void;
   "game-state": (state: GameState) => void;
@@ -25,7 +25,7 @@ export interface ServerToClientEvents {
 
 export interface ClientToServerEvents {
   register: (data: RegisterData) => void;
-  lobbyMessage: (message: string) => void;
+  "save-lobby-message": (message: string) => void;
   "request-user-list": () => void;
 
   "challenge-player": (targetOdId: string) => void;
