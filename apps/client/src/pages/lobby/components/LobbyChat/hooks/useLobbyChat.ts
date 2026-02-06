@@ -1,23 +1,10 @@
-import { useSocket } from "@/contexts/SessionContext.tsx";
-import { ChatMessage } from "@ghost-chess-king/shared";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { useMessage } from "@/contexts/MessageContext.tsx";
+import { ChangeEvent, useRef, useState } from "react";
 
 export function useLobbyChat() {
-  const socket = useSocket();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const { lobbyMessages, sendLobbyMessage } = useMessage();
   const [inputMessage, setInputMessage] = useState("");
   const lastSentTime = useRef(0);
-
-  useEffect(() => {
-    const handleLobbyMessage = (data: ChatMessage) => {
-      setMessages((prev) => [...prev, data]);
-    };
-
-    socket.on("lobbyMessage", handleLobbyMessage);
-    return () => {
-      socket.off("lobbyMessage", handleLobbyMessage);
-    };
-  }, [socket]);
 
   const sendMessage = () => {
     if (!inputMessage.trim()) return;
@@ -26,7 +13,7 @@ export function useLobbyChat() {
     if (now - lastSentTime.current < 100) return;
 
     lastSentTime.current = now;
-    socket.emit("lobbyMessage", inputMessage);
+    sendLobbyMessage(inputMessage);
     setInputMessage("");
   };
 
@@ -39,5 +26,5 @@ export function useLobbyChat() {
     setInputMessage(e.target.value);
   };
 
-  return { messages, inputMessage, sendMessage, handleKeyDown, handleChangeInputMessage };
+  return { messages: lobbyMessages, inputMessage, sendMessage, handleKeyDown, handleChangeInputMessage };
 }

@@ -19,7 +19,7 @@ function LobbyChat() {
               <li key={`${msg.odId}-${msg.timestamp}-${index}`} className="flex items-start gap-1">
                 <div className="text-sm">
                   <span className="mr-1 inline-block text-xs whitespace-nowrap text-gray-500">
-                    [{formatKoreanTime(msg.timestamp)}]
+                    [{formatKoreanTime(Number(msg.timestamp))}]
                   </span>
                   <span className="mr-1 inline font-semibold whitespace-nowrap text-blue-400">{msg.nickname}:</span>
                   <span className="inline break-all text-gray-300">{msg.message}</span>
