@@ -8,7 +8,9 @@ import { GameService } from "@/service/gameService/GameService";
 import { LobbyService } from "@/service/lobbyService/LobbyService";
 import { createClient } from "redis";
 import { MessageService } from "@/service/chatService/MessageService";
+import { configDotenv } from "dotenv";
 
+configDotenv();
 const redis = createClient({
   url: process.env.REDIS_URL,
 });
