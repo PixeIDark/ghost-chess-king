@@ -5,7 +5,8 @@
   "scripts": {
     "start": "tsx src/server.ts",
     "dev": "tsx watch src/server.ts",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "@ghost-chess-king/shared": "workspace:*",
