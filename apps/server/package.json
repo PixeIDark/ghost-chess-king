@@ -7,7 +7,7 @@
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
     "lint": "eslint .",
-    "test": "jest --passWithNoTests"
+    "test": "jest --passWithNoTests --forceExit --detectOpenHandles"
   },
   "dependencies": {
     "@ghost-chess-king/shared": "workspace:*",
