@@ -1,5 +1,5 @@
 import { ChessRuler } from "./ChessRuler";
-import { IChessBoard, IPiece, Move, Position, Side, PromotionPieceName } from "@ghost-chess-king/shared";
+import { IChessBoard, IPiece, Move, Position, PromotionPieceName, Side } from "@ghost-chess-king/shared";
 
 class MockChessRuler extends ChessRuler {
   public validMovesToReturn: Position[] = [];
@@ -46,7 +46,7 @@ describe("ChessRuler 테스트", () => {
     });
 
     test("왕을 찾을 수 없으면 false를 반환해야 한다", () => {
-      mockBoard.findKing.mockReturnValue(undefined);
+      mockBoard.findKing.mockReturnValue(null);
       expect(ruler.isInCheck(mockBoard, "white")).toBe(false);
     });
   });

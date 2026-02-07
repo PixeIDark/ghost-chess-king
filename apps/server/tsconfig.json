@@ -3,9 +3,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@ghost-chess-king/shared": ["../../packages/shared/src/index.ts"]
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "../../packages/shared/src"]
+  "include": ["src"],
 }
