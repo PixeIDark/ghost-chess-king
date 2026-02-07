@@ -3,7 +3,12 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "out/**"]
+      "inputs": ["src/**", ".env*"],
+      "outputs": ["dist/**", ".next/**", "out/**"],
+      "env": [
+        "VITE_API_URL",
+        "REDIS_URL"
+      ]
     },
     "dev": {
       "cache": false,
@@ -11,6 +16,7 @@
     },
     "test": {
       "dependsOn": ["build"],
+      "inputs": ["src/**", "test/**", ".env*"],
       "outputs": []
     }
   }
