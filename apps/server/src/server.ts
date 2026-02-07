@@ -10,7 +10,7 @@ import { createClient } from "redis";
 import { MessageService } from "@/service/chatService/MessageService";
 
 const redis = createClient({
-  url: "rediss://default:AbxcAAIncDJiZjI3NWU2NDAzZDE0MjlkYjUyN2E2Zjk0MjdmOTdhNnAyNDgyMjA@ace-dane-48220.upstash.io:6379",
+  url: process.env.REDIS_URL,
 });
 
 redis.on("error", function (err) {
