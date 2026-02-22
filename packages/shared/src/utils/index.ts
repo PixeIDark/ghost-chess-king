@@ -4,3 +4,4 @@ export * from "./pipe";
 export * from "./storage";
 export * from "./boardUtils";
 export * from "./formatter";
+export * from "./EventManager";

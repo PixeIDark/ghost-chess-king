@@ -1,4 +1,5 @@
 import {
+  EventManager,
   GameResult,
   GameState,
   getOppositeSide,
@@ -15,7 +16,6 @@ import {
   Side,
   TimerEventMap,
 } from "@ghost-chess-king/shared";
-import { EventManager } from "@ghost-chess-king/shared/src/utils/EventManager";
 
 export type ChessEventMap = {
   timeUpdate: TimerEventMap["timeUpdate"];
